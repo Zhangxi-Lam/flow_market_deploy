@@ -1,0 +1,29 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+{% block title %}
+Page title
+{% endblock %}
+
+
+
+
+{% block content %}
+<style>
+    .order-input {
+        width: 390px;
+        height: 300px;
+        display: block;
+    }
+</style>
+
+<div>
+    <h5>Your Input</h5>
+    <canvas id="OrderGraph" class="order-input"></canvas>
+</div>
+
+{% include "flow_market/draggable_graph_input.html" %}
+
+
+
+{% endblock %}
