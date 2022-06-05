@@ -1,0 +1,160 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata@2.2.3/dist/chartjs-plugin-dragdata.min.js"></script>
+
+<script>
+    class OrderBook {
+        // Class variables
+        static myChart;
+        static floBidsPointsRaw = [];  // {y: 10, slope:-1, isMax: true}
+        static floAsksPointsRaw = [];  // {y: 10, slope:-1, isMax: true}
+
+        get data() {
+            return {
+                datasets: [{
+                    label: 'Bids',
+                    pointRadius: 0,
+                    pointHitRadius: 25,
+                    showLine: true,
+                    backgroundColor: BLUE,
+                    borderColor: BLUE,
+                    data: []
+                },
+                {
+                    label: 'Asks',
+                    pointRadius: 0,
+                    pointHitRadius: 25,
+                    showLine: true,
+                    backgroundColor: RED,
+                    borderColor: RED,
+                    data: []
+                }]
+            }
+        }
+
+        get scales() {
+            return {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Rate'
+                    },
+                    type: 'linear',
+                    min: 0,
+                    suggestedMax: 5,
+                    position: 'bottom',
+                    ticks: {
+                        stepSize: 1,
+                    },
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Price',
+                    },
+                    type: 'linear',
+                    min: 0,
+                    max: YMAX,
+                }
+            }
+        }
+
+        get config() {
+            return {
+                type: 'scatter',
+                data: this.data,
+                options: {
+                    scales: this.scales
+                }
+            };
+        }
+
+        show() {
+            OrderBook.myChart = new Chart(document.getElementById("orderBook"), this.config);
+        }
+
+        addOrder(order, isBid) {
+            if (isBid) {
+                let points = OrderBook.floBidsPointsRaw;
+                points.push(OrderBook.getPoint(order[MAX_PRICE_INDEX].y, OrderBook.getOrderSlope(order), true));
+                points.push(OrderBook.getPoint(order[MIN_PRICE_INDEX].y, OrderBook.getOrderSlope(order), false));
+                points = points.sort((a, b) => {
+                    return a.y - b.y;
+                }).reverse();
+
+                OrderBook.myChart.data.datasets[BIDS_DATASETS_INDEX].data = OrderBook.getFloBidsPoints(points);
+            } else {
+                let points = OrderBook.floAsksPointsRaw;
+                points.push(OrderBook.getPoint(order[MAX_PRICE_INDEX].y, OrderBook.getOrderSlope(order), true));
+                points.push(OrderBook.getPoint(order[MIN_PRICE_INDEX].y, OrderBook.getOrderSlope(order), false));
+                points = points.sort((a, b) => {
+                    return a.y - b.y;
+                });
+
+                OrderBook.myChart.data.datasets[ASKS_DATASETS_INDEX].data = OrderBook.getFloAsksPoints(points);
+            }
+            OrderBook.myChart.update();
+        }
+
+        static getFloBidsPoints(rawPoints) {
+            var result = [];
+            if (rawPoints.length <= 0) {
+                return result;
+            }
+            result.push({ x: 0, y: YMAX });
+            var y = rawPoints[0].y;
+            var inverse = 1 / rawPoints[0].slope;
+            var x = 0;
+            result.push({ x: 0, y: y });
+            for (var i = 1; i < rawPoints.length; i++) {
+                var point = rawPoints[i];
+                x += (point.y - y) * inverse;
+                result.push({ x: x, y: point.y });
+                // Update
+                if (point.isMaxPrice) {
+                    inverse += (1 / point.slope);
+                } else {
+                    inverse -= (1 / point.slope);
+                }
+                y = point.y;
+            }
+            result.push({ x: x, y: 0 });
+            return result;
+        }
+
+        static getFloAsksPoints(rawPoints) {
+            var result = [];
+            if (rawPoints.length <= 0) {
+                return result;
+            }
+            result.push({ x: 0, y: 0 });
+            var y = rawPoints[0].y;
+            var inverse = 1 / rawPoints[0].slope;
+            var x = 0;
+            result.push({ x: 0, y: y });
+            for (var i = 1; i < rawPoints.length; i++) {
+                var point = rawPoints[i];
+                x += (point.y - y) * inverse;
+                result.push({ x: x, y: point.y });
+                // Update
+                if (point.isMaxPrice) {
+                    inverse -= (1 / point.slope);
+                } else {
+                    inverse += (1 / point.slope);
+                }
+                y = point.y;
+            }
+            result.push({ x: x, y: YMAX });
+            return result;
+        }
+
+        static getOrderSlope(order) {
+            const maxPrice = order[MAX_PRICE_INDEX];
+            const minPrice = order[MIN_PRICE_INDEX];
+            return (maxPrice.y - minPrice.y) / (maxPrice.x - minPrice.x);
+        }
+
+        static getPoint(y, slope, isMaxPrice) {
+            return { y: y, slope: slope, isMaxPrice: isMaxPrice };
+        }
+    }
+</script>

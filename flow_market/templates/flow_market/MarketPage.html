@@ -18,7 +18,9 @@ Page title
 </style>
 
 
+{% include "flow_market/constants.html" %}
 {% include "flow_market/order_graph.html" %}
+{% include "flow_market/order_book.html" %}
 <div>
     <h5>Your Input</h5>
     <canvas id="orderGraph"></canvas>
@@ -40,8 +42,13 @@ Page title
 </div>
 
 <script>
-    var graph = new OrderGraph();
-    graph.show();
+    var orderBook = new OrderBook();
+    orderBook.show();
+
+    var orderGraph = new OrderGraph();
+    orderGraph.bindOrderBook(orderBook);
+    orderGraph.show();
+
 </script>
 
 

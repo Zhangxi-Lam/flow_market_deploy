@@ -2,26 +2,16 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata@2.2.3/dist/chartjs-plugin-dragdata.min.js"></script>
 
 <script>
-    const RED = 'rgba(255, 99, 132, 1)';
-    const RED_TRANSPARENT = 'rgba(255, 99, 132, 0.3)';
-    const BLUE = 'rgba(54, 162, 235, 1)';
-    const BLUE_TRANSPARENT = 'rgba(54, 162, 235, 0.3)';
-    const yMax = 20;
-
     class OrderGraph {
         // Constant variables
-        static maxPriceIndex = 1;
-        static minPriceIndex = 2;
-        static bidsIndex = 0;
-        static asksIndex = 1;
         static floDataStartingBids = [
-            { x: 0, y: yMax },
+            { x: 0, y: YMAX },
             { x: 0, y: 1 }, // maxPrice
             { x: 0, y: 0 }, // minPrice
             { x: 0, y: 0 },
         ];
         static floDataStartingAsks = [
-            { x: 0, y: yMax },
+            { x: 0, y: YMAX },
             { x: 0, y: 20 }, // maxPrice
             { x: 0, y: 19 }, // minPrice
             { x: 0, y: 0 },
@@ -31,6 +21,7 @@
         static floDataBids = JSON.parse(JSON.stringify(this.floDataStartingBids));
         static floDataAsks = JSON.parse(JSON.stringify(this.floDataStartingAsks));
         static myChart;
+        static orderBook;
         static isBlueActive = true; // If user can drag blue points
         static isRedActive = true;  // If user can drag red points
         static hasBlue = true;
@@ -85,7 +76,7 @@
                     },
                     type: 'linear',
                     min: 0,
-                    max: yMax,
+                    max: YMAX,
                 }
             }
         }
@@ -98,25 +89,23 @@
                     showTooltip: true,
                     onDragStart: function (e, datasetIndex, index, value) {
                         if (index == 0 || index == 4) { return false; }
-                        if (datasetIndex == OrderGraph.bidsIndex && !OrderGraph.isBlueActive) {
+                        if (datasetIndex == BIDS_DATASETS_INDEX && !OrderGraph.isBlueActive) {
                             return false;
                         }
-                        if (datasetIndex == OrderGraph.asksIndex && !OrderGraph.isRedActive) {
+                        if (datasetIndex == ASKS_DATASETS_INDEX && !OrderGraph.isRedActive) {
                             return false;
                         }
                     },
                     onDrag: function (e, datasetIndex, index, value) {
-                        let maxPriceIndex = OrderGraph.maxPriceIndex;
-                        let minPriceIndex = OrderGraph.minPriceIndex;
                         let bids = OrderGraph.floDataBids;
-                        let bidsMax = bids[maxPriceIndex];
-                        let bidsMin = bids[minPriceIndex];
+                        let bidsMax = bids[MAX_PRICE_INDEX];
+                        let bidsMin = bids[MIN_PRICE_INDEX];
                         let asks = OrderGraph.floDataAsks;
-                        let asksMax = asks[maxPriceIndex];
-                        let asksMin = asks[minPriceIndex];
-                        if (datasetIndex == OrderGraph.bidsIndex) {
+                        let asksMax = asks[MAX_PRICE_INDEX];
+                        let asksMin = asks[MIN_PRICE_INDEX];
+                        if (datasetIndex == BIDS_DATASETS_INDEX) {
                             // Dragging bids
-                            if (index == maxPriceIndex) {
+                            if (index == MAX_PRICE_INDEX) {
                                 // Dragging maxPrice
                                 if (value.x > 0) {
                                     bidsMax.x = 0;
@@ -136,7 +125,7 @@
                             }
                         } else {
                             // Dragging asks
-                            if (index == minPriceIndex) {
+                            if (index == MIN_PRICE_INDEX) {
                                 // Dragging minPrice
                                 if (value.x > 0) {
                                     asksMin.x = 0;
@@ -149,8 +138,8 @@
                                 }
                             } else {
                                 // Dragging maxPrice
-                                if (value.y <= asks[minPriceIndex].y) {
-                                    asks[maxPriceIndex].y = asks[minPriceIndex].y + 1;
+                                if (value.y <= asks[MIN_PRICE_INDEX].y) {
+                                    asks[MAX_PRICE_INDEX].y = asks[MIN_PRICE_INDEX].y + 1;
                                 }
                                 asks[0].x = value.x;
                             }
@@ -173,13 +162,13 @@
                     onHover: (e, chartElement) => {
                         let element = chartElement[0]
                         if (element != null) {
-                            if (element.index != OrderGraph.minPriceIndex && element.index != OrderGraph.maxPriceIndex) {
+                            if (element.index != MIN_PRICE_INDEX && element.index != MAX_PRICE_INDEX) {
                                 return;
                             }
-                            if (element.datasetIndex == OrderGraph.bidsIndex && !OrderGraph.isBlueActive) {
+                            if (element.datasetIndex == BIDS_DATASETS_INDEX && !OrderGraph.isBlueActive) {
                                 return;
                             }
-                            if (element.datasetIndex == OrderGraph.asksIndex && !OrderGraph.isRedActive) {
+                            if (element.datasetIndex == ASKS_DATASETS_INDEX && !OrderGraph.isRedActive) {
                                 return;
                             }
                             document.querySelector("#orderGraph").style.cursor = "grab";
@@ -196,8 +185,11 @@
                 document.getElementById("orderGraph"), this.config);
         }
 
+        bindOrderBook(orderBook) {
+            OrderGraph.orderBook = orderBook;
+        }
         static buyButtonClick() {
-            let datasets = OrderGraph.myChart.data.datasets[OrderGraph.bidsIndex];
+            let datasets = OrderGraph.myChart.data.datasets[BIDS_DATASETS_INDEX];
             let button = document.querySelector("#buyButton");
             if (OrderGraph.isBlueActive) {
                 button.innerText = "Cancel Buy";
@@ -205,6 +197,7 @@
                 datasets["pointRadius"] = [0, 0, 0, 0];
                 datasets["borderColor"] = BLUE;
                 OrderGraph.sortPoints(/*fixBlue=*/true);
+                OrderGraph.orderBook.addOrder(datasets["data"], /*isBid=*/true);
             } else {
                 button.innerText = "Send Buy";
                 OrderGraph.isBlueActive = true;
@@ -221,7 +214,7 @@
             if (!OrderGraph.hasRed) {
                 return;
             }
-            let datasets = OrderGraph.myChart.data.datasets[OrderGraph.asksIndex];
+            let datasets = OrderGraph.myChart.data.datasets[ASKS_DATASETS_INDEX];
             let button = document.querySelector("#sellButton");
             if (OrderGraph.isRedActive) {
                 button.innerText = "Cancel Sell";
@@ -229,6 +222,7 @@
                 datasets["pointRadius"] = [0, 0, 0, 0];
                 datasets["borderColor"] = RED;
                 OrderGraph.sortPoints(/*fixBlue=*/false);
+                OrderGraph.orderBook.addOrder(datasets["data"], /*isBid=*/false);
             } else {
                 button.innerText = "Send Sell";
                 OrderGraph.isRedActive = true;
@@ -261,14 +255,14 @@
 
         static resetPoints(isBlue) {
             if (isBlue) {
-                let datasets = OrderGraph.myChart.data.datasets[OrderGraph.bidsIndex];
+                let datasets = OrderGraph.myChart.data.datasets[BIDS_DATASETS_INDEX];
                 datasets["pointRadius"] = [0, 6, 6, 0];
                 datasets["borderColor"] = BLUE_TRANSPARENT;
                 OrderGraph.floDataBids = JSON.parse(JSON.stringify(OrderGraph.floDataStartingBids));
                 datasets["data"] = OrderGraph.floDataBids;
                 OrderGraph.sortPoints(isBlue);
             } else {
-                let datasets = OrderGraph.myChart.data.datasets[OrderGraph.asksIndex];
+                let datasets = OrderGraph.myChart.data.datasets[ASKS_DATASETS_INDEX];
                 datasets["pointRadius"] = [0, 6, 6, 0];
                 datasets["borderColor"] = RED_TRANSPARENT;
                 OrderGraph.floDataAsks = JSON.parse(JSON.stringify(OrderGraph.floDataStartingAsks));
@@ -290,24 +284,24 @@
         static removePoints(isBlue) {
             if (isBlue) {
                 OrderGraph.hasBlue = false;
-                OrderGraph.myChart.data.datasets[OrderGraph.bidsIndex]["data"] = null;
+                OrderGraph.myChart.data.datasets[BIDS_DATASETS_INDEX]["data"] = null;
             } else {
                 OrderGraph.hasRed = false;
-                OrderGraph.myChart.data.datasets[OrderGraph.asksIndex]["data"] = null;
+                OrderGraph.myChart.data.datasets[ASKS_DATASETS_INDEX]["data"] = null;
             }
 
         }
 
         static sortPoints(fixBlue) {
-            let bidsMax = OrderGraph.floDataBids[OrderGraph.maxPriceIndex];
-            let bidsMin = OrderGraph.floDataBids[OrderGraph.minPriceIndex];
-            let asksMax = OrderGraph.floDataAsks[OrderGraph.maxPriceIndex];
-            let asksMin = OrderGraph.floDataAsks[OrderGraph.minPriceIndex];
+            let bidsMax = OrderGraph.floDataBids[MAX_PRICE_INDEX];
+            let bidsMin = OrderGraph.floDataBids[MIN_PRICE_INDEX];
+            let asksMax = OrderGraph.floDataAsks[MAX_PRICE_INDEX];
+            let asksMin = OrderGraph.floDataAsks[MIN_PRICE_INDEX];
 
             if (asksMin.y <= bidsMax.y) {
                 if (fixBlue) {
                     // Adjust Red
-                    if (bidsMax.y <= yMax - 2) {
+                    if (bidsMax.y <= YMAX - 2) {
                         asksMin.y = bidsMax.y + 1;
                         if (asksMax.y <= asksMin.y) {
                             asksMax.y = asksMin.y + 1;
