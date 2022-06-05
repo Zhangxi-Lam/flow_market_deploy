@@ -1,11 +1,11 @@
 {% extends "global/Page.html" %}
 {% load otree static %}
+{% load staticfiles otree %}
+
 
 {% block title %}
 Page title
 {% endblock %}
-
-
 
 
 {% block content %}
@@ -17,16 +17,33 @@ Page title
     }
 </style>
 
+
+{% include "flow_market/order_graph.html" %}
 <div>
     <h5>Your Input</h5>
-<<<<<<< HEAD
-    <canvas id="OrderGraph" class="order-input"></canvas>
-=======
-    <canvas id="draggableGraphInput" class="order-input"></canvas>
->>>>>>> 2f702c36458fafd4b12a152799ab5cb4c64e5e04
+    <canvas id="orderGraph"></canvas>
+
+    <button id="buyQuantityInc" onclick="OrderGraph.buyQuantityButtonClick(true)">+</button>
+    <input id="buyQuantityInput" type="number" value="10" min="1" max="100" step="5" />
+    <button id="buyQuantityDec" onclick="OrderGraph.buyQuantityButtonClick(false)">-</button>
+    <button type="button" id="buyButton" onclick="OrderGraph.buyButtonClick()">Send Buy</button>
+
+    <button id="sellQuantityInc" onclick="OrderGraph.sellQuantityButtonClick(true)">+</button>
+    <input id="sellQuantityInput" type="number" value="10" min="1" max="100" step="5" />
+    <button id="sellQuantityDec" onclick="OrderGraph.sellQuantityButtonClick(false)">-</button>
+    <button type="button" id="sellButton" onclick="OrderGraph.sellButtonClick()">Send Sell</button>
 </div>
 
-{% include "flow_market/draggable_graph_input.html" %}
+<div>
+    <h5>Market</h5>
+    <canvas id="orderBook"></canvas>
+</div>
+
+<script>
+    var graph = new OrderGraph();
+    graph.show();
+</script>
+
 
 
 
