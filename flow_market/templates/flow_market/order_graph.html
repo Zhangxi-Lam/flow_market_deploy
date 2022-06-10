@@ -197,7 +197,7 @@
                 datasets["pointRadius"] = [0, 0, 0, 0];
                 datasets["borderColor"] = BLUE;
                 OrderGraph.sortPoints(/*fixBlue=*/true);
-                OrderGraph.orderBook.addOrder(datasets["data"], /*isBid=*/true);
+                liveSend(OrderGraph.parseOrder(datasets["data"], 'buy'));
             } else {
                 button.innerText = "Send Buy";
                 OrderGraph.isBlueActive = true;
@@ -205,9 +205,20 @@
                 if (!OrderGraph.hasRed) {
                     OrderGraph.addPoints(/*isBlue=*/false);
                 }
-
             }
             OrderGraph.myChart.update();
+        }
+
+        static parseOrder(data, direction) {
+            return {
+                'message_type': 'add_order',
+                'direction': direction,
+                'max_price_x': data[MAX_PRICE_INDEX].x,
+                'max_price_y': data[MAX_PRICE_INDEX].y,
+                'min_price_x': data[MIN_PRICE_INDEX].x,
+                'min_price_y': data[MIN_PRICE_INDEX].y,
+                'quantity': 0
+            };
         }
 
         static sellButtonClick() {
@@ -222,7 +233,7 @@
                 datasets["pointRadius"] = [0, 0, 0, 0];
                 datasets["borderColor"] = RED;
                 OrderGraph.sortPoints(/*fixBlue=*/false);
-                OrderGraph.orderBook.addOrder(datasets["data"], /*isBid=*/false);
+                liveSend(OrderGraph.parseOrder(datasets["data"], 'sell'));
             } else {
                 button.innerText = "Send Sell";
                 OrderGraph.isRedActive = true;

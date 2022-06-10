@@ -49,6 +49,19 @@ Page title
     orderGraph.bindOrderBook(orderBook);
     orderGraph.show();
 
+    var updateMarketPage = window.setInterval(function () {
+        liveSend({
+            'message_type': 'update'
+        })
+    }, 1000);
+
+    function liveRecv(data) {
+        console.log('received ', data)
+        if (data['message_type'] == 'update') {
+            orderBook.update(data['data'])
+        }
+    }
+
 </script>
 
 
