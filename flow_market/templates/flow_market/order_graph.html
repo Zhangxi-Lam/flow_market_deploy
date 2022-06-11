@@ -7,12 +7,12 @@
         static floDataStartingBids = [
             { x: 0, y: YMAX },
             { x: 0, y: 1 }, // maxPrice
-            { x: 0, y: 0 }, // minPrice
-            { x: 0, y: 0 },
+            { x: 1, y: 0 }, // minPrice
+            { x: 1, y: 0 },
         ];
         static floDataStartingAsks = [
-            { x: 0, y: YMAX },
-            { x: 0, y: 20 }, // maxPrice
+            { x: 1, y: YMAX },
+            { x: 1, y: 20 }, // maxPrice
             { x: 0, y: 19 }, // minPrice
             { x: 0, y: 0 },
         ];
@@ -121,6 +121,9 @@
                                 if (value.y >= bidsMax.y) {
                                     bidsMin.y = bidsMax.y - 1;
                                 }
+                                if (value.x <= 0) {
+                                    value.x = 1;
+                                }
                                 bids[3].x = value.x;
                             }
                         } else {
@@ -140,6 +143,9 @@
                                 // Dragging maxPrice
                                 if (value.y <= asks[MIN_PRICE_INDEX].y) {
                                     asks[MAX_PRICE_INDEX].y = asks[MIN_PRICE_INDEX].y + 1;
+                                }
+                                if (value.x <= 0) {
+                                    value.x = 1;
                                 }
                                 asks[0].x = value.x;
                             }
@@ -185,9 +191,6 @@
                 document.getElementById("orderGraph"), this.config);
         }
 
-        bindOrderBook(orderBook) {
-            OrderGraph.orderBook = orderBook;
-        }
         static buyButtonClick() {
             let datasets = OrderGraph.myChart.data.datasets[BIDS_DATASETS_INDEX];
             let button = document.querySelector("#buyButton");
@@ -197,7 +200,8 @@
                 datasets["pointRadius"] = [0, 0, 0, 0];
                 datasets["borderColor"] = BLUE;
                 OrderGraph.sortPoints(/*fixBlue=*/true);
-                liveSend(OrderGraph.parseOrder(datasets["data"], 'buy'));
+                let quantity = document.querySelector("#buyQuantityInput");
+                liveSend(OrderGraph.parseOrder('buy', datasets["data"], parseInt(quantity.value)));
             } else {
                 button.innerText = "Send Buy";
                 OrderGraph.isBlueActive = true;
@@ -209,7 +213,7 @@
             OrderGraph.myChart.update();
         }
 
-        static parseOrder(data, direction) {
+        static parseOrder(direction, data, quantity) {
             return {
                 'message_type': 'add_order',
                 'direction': direction,
@@ -217,7 +221,7 @@
                 'max_price_y': data[MAX_PRICE_INDEX].y,
                 'min_price_x': data[MIN_PRICE_INDEX].x,
                 'min_price_y': data[MIN_PRICE_INDEX].y,
-                'quantity': 0
+                'quantity': quantity
             };
         }
 
@@ -233,7 +237,8 @@
                 datasets["pointRadius"] = [0, 0, 0, 0];
                 datasets["borderColor"] = RED;
                 OrderGraph.sortPoints(/*fixBlue=*/false);
-                liveSend(OrderGraph.parseOrder(datasets["data"], 'sell'));
+                let quantity = document.querySelector("#buyQuantityInput");
+                liveSend(OrderGraph.parseOrder('sell', datasets["data"], parseInt(quantity.value)));
             } else {
                 button.innerText = "Send Sell";
                 OrderGraph.isRedActive = true;
