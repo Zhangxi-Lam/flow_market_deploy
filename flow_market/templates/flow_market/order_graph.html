@@ -27,6 +27,9 @@
         static hasBlue = true;
         static hasRed = true;
 
+        static buyOrderId = crypto.randomUUID();
+        static sellOrderId = crypto.randomUUID();
+
         get data() {
             return {
                 datasets: [{
@@ -201,7 +204,7 @@
                 datasets["borderColor"] = BLUE;
                 OrderGraph.sortPoints(/*fixBlue=*/true);
                 let quantity = document.querySelector("#buyQuantityInput");
-                liveSend(OrderGraph.parseOrder('buy', datasets["data"], parseInt(quantity.value)));
+                liveSend(OrderGraph.parseOrder(OrderGraph.buyOrderId, 'buy', datasets["data"], parseInt(quantity.value)));
             } else {
                 button.innerText = "Send Buy";
                 OrderGraph.isBlueActive = true;
@@ -209,20 +212,13 @@
                 if (!OrderGraph.hasRed) {
                     OrderGraph.addPoints(/*isBlue=*/false);
                 }
+                liveSend({
+                    'message_type': 'remove_order',
+                    'order_id': OrderGraph.buyOrderId
+                });
+                OrderGraph.buyOrderId = crypto.randomUUID();
             }
             OrderGraph.myChart.update();
-        }
-
-        static parseOrder(direction, data, quantity) {
-            return {
-                'message_type': 'add_order',
-                'direction': direction,
-                'max_price_x': data[MAX_PRICE_INDEX].x,
-                'max_price_y': data[MAX_PRICE_INDEX].y,
-                'min_price_x': data[MIN_PRICE_INDEX].x,
-                'min_price_y': data[MIN_PRICE_INDEX].y,
-                'quantity': quantity
-            };
         }
 
         static sellButtonClick() {
@@ -238,7 +234,7 @@
                 datasets["borderColor"] = RED;
                 OrderGraph.sortPoints(/*fixBlue=*/false);
                 let quantity = document.querySelector("#buyQuantityInput");
-                liveSend(OrderGraph.parseOrder('sell', datasets["data"], parseInt(quantity.value)));
+                liveSend(OrderGraph.parseOrder(OrderGraph.sellOrderId, 'sell', datasets["data"], parseInt(quantity.value)));
             } else {
                 button.innerText = "Send Sell";
                 OrderGraph.isRedActive = true;
@@ -246,9 +242,28 @@
                 if (!OrderGraph.hasBlue) {
                     OrderGraph.addPoints(/*isBlue=*/true);
                 }
+                liveSend({
+                    'message_type': 'remove_order',
+                    'order_id': OrderGraph.sellOrderId
+                });
+                OrderGraph.sellOrderId = crypto.randomUUID();
+
 
             }
             OrderGraph.myChart.update();
+        }
+
+        static parseOrder(orderId, direction, data, quantity) {
+            return {
+                'message_type': 'add_order',
+                'order_id': orderId,
+                'direction': direction,
+                'max_price_x': data[MAX_PRICE_INDEX].x,
+                'max_price_y': data[MAX_PRICE_INDEX].y,
+                'min_price_x': data[MIN_PRICE_INDEX].x,
+                'min_price_y': data[MIN_PRICE_INDEX].y,
+                'quantity': quantity
+            };
         }
 
         static buyQuantityButtonClick(increment) {
@@ -289,9 +304,11 @@
 
         static addPoints(isBlue) {
             if (isBlue) {
+                document.querySelector("#buyButton").disabled = false;
                 OrderGraph.hasBlue = true;
                 OrderGraph.resetPoints(isBlue);
             } else {
+                document.querySelector("#sellButton").disabled = false;
                 OrderGraph.hasRed = true;
                 OrderGraph.resetPoints(isBlue);
             }
@@ -299,9 +316,11 @@
 
         static removePoints(isBlue) {
             if (isBlue) {
+                document.querySelector("#buyButton").disabled = true;
                 OrderGraph.hasBlue = false;
                 OrderGraph.myChart.data.datasets[BIDS_DATASETS_INDEX]["data"] = null;
             } else {
+                document.querySelector("#sellButton").disabled = true;
                 OrderGraph.hasRed = false;
                 OrderGraph.myChart.data.datasets[ASKS_DATASETS_INDEX]["data"] = null;
             }

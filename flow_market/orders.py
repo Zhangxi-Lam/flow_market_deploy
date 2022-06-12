@@ -1,4 +1,3 @@
-import uuid
 from pprint import pprint
 from .config import Config
 
@@ -6,7 +5,7 @@ from .config import Config
 class Order():
     def __init__(self, id_in_group, order: dict) -> None:
         self.id_in_group = id_in_group
-        self.order_id = uuid.uuid4().hex
+        self.order_id = order['order_id']
         self.direction = order['direction']
         self.max_price_point = Point(
             order['max_price_x'], order['max_price_y'], is_max_price=True)
@@ -19,6 +18,9 @@ class Order():
 
     def __repr__(self) -> str:
         return self.__dict__.__str__()
+
+    def fill(self, clearing_rate):
+        self.quantity -= clearing_rate
 
 
 class Point(dict):
@@ -43,11 +45,14 @@ class Point(dict):
     def __getattr__(self, field: str):
         return self[field]
 
+# The OrderBook of the group
+
 
 class OrderBook():
     def __init__(self, config: Config) -> None:
         self.config = config
 
+        self.orders = {}  # {order_id: Order}
         self.bids_orders = {}   # {id_in_group: {order_id: Order}}
         self.asks_orders = {}
         self.raw_bids_points = []     # [Point, ...], sorted by y desc
@@ -57,21 +62,23 @@ class OrderBook():
 
         self.intersect_points = []  # [Point, ...]
 
-        self.precise_price = None
+        self.precise_price_in_cents = None
         self.precise_rate = None
 
     def __repr__(self) -> str:
         return self.__dict__.__str__()
 
     def add_order(self, order: Order):
+        self.orders[order.order_id] = order
+
         is_buy = order.direction == 'buy'
-        orders = self.bids_orders if is_buy else self.asks_orders
-        points = self.raw_bids_points if is_buy else self.raw_asks_points
-        player_orders = orders.get(
+        group_orders = self.bids_orders if is_buy else self.asks_orders
+        player_orders = group_orders.get(
             order.id_in_group, {})
         player_orders[order.order_id] = order
-        orders[order.id_in_group] = player_orders
+        group_orders[order.id_in_group] = player_orders
 
+        points = self.raw_bids_points if is_buy else self.raw_asks_points
         points.append(order.max_price_point)
         points.append(order.min_price_point)
         points.sort(
@@ -80,10 +87,27 @@ class OrderBook():
         self.update_combined_points(is_buy)
         self.update_intersect_points()
 
+    def find_order(self, order_id):
+        return self.orders[order_id]
+
+    def remove_order(self, order: Order):
+        is_buy = order.direction == 'buy'
+        group_orders = self.bids_orders if is_buy else self.asks_orders
+        del group_orders[order.id_in_group][order.order_id]
+
+        points = self.raw_bids_points if is_buy else self.raw_asks_points
+        points.remove(order.max_price_point)
+        points.remove(order.min_price_point)
+
+        self.update_combined_points(is_buy)
+        self.update_intersect_points()
+
     def update_combined_points(self, is_buy):
         if is_buy and not self.raw_bids_points:
+            self.combined_bids_points = []
             return
         if not is_buy and not self.raw_asks_points:
+            self.combined_asks_points = []
             return
 
         points = self.raw_bids_points if is_buy else self.raw_asks_points
@@ -116,17 +140,17 @@ class OrderBook():
     def update_intersect_points(self):
         best_bid_in_cents = self.get_best_bid_in_cents()
         self.update_clearing_price_and_rate(best_bid_in_cents)
-        if self.precise_price and self.precise_rate:
+        if self.precise_price_in_cents and self.precise_rate:
             self.intersect_points = [
-                Point(0, self.precise_price / 100),
-                Point(self.precise_rate, self.precise_price / 100),
+                Point(0, self.precise_price_in_cents / 100),
+                Point(self.precise_rate, self.precise_price_in_cents / 100),
                 Point(self.precise_rate, 0)]
         else:
             self.intersect_points = []
 
     def update_clearing_price_and_rate(self, y_lo):
         if y_lo < 0:
-            self.precise_price, self.precise_rate = None, None
+            self.precise_price_in_cents, self.precise_rate = None, None
             return
         buy_lo = Point(self.get_x(y_lo, is_buy=True), y_lo)
         sell_lo = Point(self.get_x(y_lo, is_buy=False), y_lo)
@@ -136,11 +160,11 @@ class OrderBook():
 
         w = Point.get_w(buy_lo, sell_lo, buy_hi, sell_hi)
 
-        self.precise_price = round(
+        self.precise_price_in_cents = round(
             sell_lo.y + w * (sell_hi.y - sell_lo.y), self.config.precision)
         self.precise_rate = round(
             sell_lo.x + w * (sell_hi.x - sell_lo.x), self.config.precision)
-        print(self.precise_price, self.precise_rate)
+        print(self.precise_price_in_cents, self.precise_rate)
 
     # Get the best bid
     def get_best_bid_in_cents(self):
@@ -183,3 +207,27 @@ class OrderBook():
                 else:
                     hi = mid
         return lo
+
+    # def transact(self):
+    #     if not self.precise_price_in_cents or not self.precise_rate:
+    #         return
+
+    #     min_quantity = None
+    #     order_to_be_filled = []
+    #     for id_in_group, player_orders in self.bids_orders:
+    #         for order in player_orders.value():
+    #             if order.direction == 'buy':
+    #                 if order.max_price_point.y * 100 > self.precise_price_in_cents:
+    #                     order_to_be_filled.append(order)
+    #                     min_quantity = min(
+    #                         min_quantity, order.quantity) if min_quantity else order.quantity
+    #             else:
+    #                 if order.min_price_point.y * 100 < self.precise_price_in_cents:
+    #                     order_to_be_filled.append(order)
+    #                     min_quantity = min(
+    #                         min_quantity, order.quantity) if min_quantity else order.quantity
+
+    #     for order in order_to_be_filled:
+    #         order.fill(min(min_quantity, self.precise_rate))
+    #         if order.quantity <= 0:
+    #             self.remove_order(order)

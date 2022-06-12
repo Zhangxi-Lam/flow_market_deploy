@@ -24,6 +24,10 @@ class MarketPage(Page):
 
         if message_type == 'add_order':
             MarketPage.add_order(order_book, player.id_in_group, data)
+        elif message_type == 'remove_order':
+            MarketPage.remove_order(order_book, data)
+        # elif message_type == 'update':
+            # order_book.transact()
 
         response = {
             'message_type': message_type,
@@ -40,6 +44,11 @@ class MarketPage(Page):
     def add_order(order_book: OrderBook, id_in_group, data):
         order = Order(id_in_group, data)
         order_book.add_order(order)
+
+    @staticmethod
+    def remove_order(order_book: OrderBook, data):
+        order = order_book.find_order(data['order_id'])
+        order_book.remove_order(order)
 
     @staticmethod
     def update_order_book(order_book: OrderBook):
