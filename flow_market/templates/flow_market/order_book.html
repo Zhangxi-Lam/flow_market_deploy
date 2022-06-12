@@ -27,6 +27,15 @@
                     backgroundColor: RED,
                     borderColor: RED,
                     data: []
+                },
+                {
+                    label: 'Transact',
+                    pointRadius: 0,
+                    pointHitRadius: 25,
+                    showLine: true,
+                    backgroundColor: GREEN,
+                    borderColor: GREEN,
+                    data: []
                 }]
             }
         }
@@ -75,6 +84,7 @@
         update(data) {
             OrderBook.myChart.data.datasets[BIDS_DATASETS_INDEX].data = data['bids_order_points']
             OrderBook.myChart.data.datasets[ASKS_DATASETS_INDEX].data = data['asks_order_points']
+            OrderBook.myChart.data.datasets[2].data = data['transact_points']
             OrderBook.myChart.update();
         }
 

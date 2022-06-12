@@ -25,11 +25,10 @@ class MarketPage(Page):
         if message_type == 'add_order':
             MarketPage.add_order(order_book, player.id_in_group, data)
 
-        # Update page
-        response = {
-            'message_type': message_type,
-            'data': MarketPage.update_order_book(order_book)
-        }
+            response = {
+                'message_type': message_type,
+                'data': MarketPage.update_order_book(order_book)
+            }
         return {0: response}
 
     @staticmethod
@@ -44,12 +43,11 @@ class MarketPage(Page):
 
     @staticmethod
     def update_order_book(order_book: OrderBook):
-        order_book.update_combined_points(is_buy=True)
-        order_book.update_combined_points(is_buy=False)
-        order_book.get_rate(8, is_buy=True)
+        print(order_book.combined_bids_points)
         return {
             'bids_order_points': order_book.combined_bids_points,
-            'asks_order_points': order_book.combined_asks_points
+            'asks_order_points': order_book.combined_asks_points,
+            'transact_points': order_book.intersect_points,
         }
 
 
