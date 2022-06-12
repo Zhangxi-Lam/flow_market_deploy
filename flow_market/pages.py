@@ -25,10 +25,10 @@ class MarketPage(Page):
         if message_type == 'add_order':
             MarketPage.add_order(order_book, player.id_in_group, data)
 
-            response = {
-                'message_type': message_type,
-                'data': MarketPage.update_order_book(order_book)
-            }
+        response = {
+            'message_type': message_type,
+            'data': MarketPage.update_order_book(order_book)
+        }
         return {0: response}
 
     @staticmethod

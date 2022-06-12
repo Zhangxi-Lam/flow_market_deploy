@@ -60,6 +60,9 @@ class OrderBook():
         self.precise_price = None
         self.precise_rate = None
 
+    def __repr__(self) -> str:
+        return self.__dict__.__str__()
+
     def add_order(self, order: Order):
         is_buy = order.direction == 'buy'
         orders = self.bids_orders if is_buy else self.asks_orders

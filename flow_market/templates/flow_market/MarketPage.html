@@ -48,11 +48,11 @@ Page title
     var orderGraph = new OrderGraph();
     orderGraph.show();
 
-    // var updateMarketPage = window.setInterval(function () {
-    //     liveSend({
-    //         'message_type': 'update'
-    //     })
-    // }, 1000);
+    var updateMarketPage = window.setInterval(function () {
+        liveSend({
+            'message_type': 'update'
+        })
+    }, 1000);
 
     function liveRecv(data) {
         orderBook.update(data['data'])
