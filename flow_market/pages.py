@@ -43,7 +43,6 @@ class MarketPage(Page):
 
     @staticmethod
     def update_order_book(order_book: OrderBook):
-        print(order_book.combined_bids_points)
         return {
             'bids_order_points': order_book.combined_bids_points,
             'asks_order_points': order_book.combined_asks_points,

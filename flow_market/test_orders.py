@@ -74,7 +74,7 @@ class TestOrderBook(unittest.TestCase):
             Point(2, 18),
             Point(2, 20)]
 
-        y_cents = order_book.get_intersect_left()
+        y_cents = order_book.get_best_bid_in_cents()
         self.assertEqual(y_cents, 1000)
 
 

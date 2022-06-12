@@ -24,13 +24,18 @@ class Order():
 class Point(dict):
 
     @staticmethod
+    def get_w(buy_lo, sell_lo, buy_hi, sell_hi):
+        return (buy_lo.x - sell_lo.x) / (buy_lo.x - sell_lo.x + sell_hi.x - buy_hi.x)
+
+    @staticmethod
     def get_slope(p1, p2):
         if p1.x == p2.x:
             raise ValueError("Two Point objects have the same x")
         return (p1.y - p2.y) / (p1.x - p2.x)
 
     def __init__(self, x, y, is_max_price=None) -> None:
-        dict.__init__(self, x=x, y=y, is_max_price=is_max_price, slope=None)
+        dict.__init__(self, x=x, y=y,
+                      is_max_price=is_max_price, slope=None)
 
     def __setattr__(self, field: str, value):
         self[field] = value
@@ -51,6 +56,9 @@ class OrderBook():
         self.combined_asks_points = []     # [Point, ...], sorted by y asc
 
         self.intersect_points = []  # [Point, ...]
+
+        self.precise_price = None
+        self.precise_rate = None
 
     def add_order(self, order: Order):
         is_buy = order.direction == 'buy'
@@ -103,44 +111,53 @@ class OrderBook():
         return
 
     def update_intersect_points(self):
-        y_cents = self.get_intersect_left()
-        if y_cents < 0:
+        best_bid_in_cents = self.get_best_bid_in_cents()
+        self.update_clearing_price_and_rate(best_bid_in_cents)
+        if self.precise_price and self.precise_rate:
+            self.intersect_points = [
+                Point(0, self.precise_price / 100),
+                Point(self.precise_rate, self.precise_price / 100),
+                Point(self.precise_rate, 0)]
+        else:
+            self.intersect_points = []
+
+    def update_clearing_price_and_rate(self, y_lo):
+        if y_lo < 0:
+            self.precise_price, self.precise_rate = None, None
             return
-        price, rate = self.get_clearing_price_and_rate(y_cents)
-        self.intersect_points = [
-            Point(0, price), Point(rate, price), Point(rate, 0)]
+        buy_lo = Point(self.get_x(y_lo, is_buy=True), y_lo)
+        sell_lo = Point(self.get_x(y_lo, is_buy=False), y_lo)
+        y_hi = y_lo + self.config.dollar_to_cent
+        buy_hi = Point(self.get_x(y_hi, is_buy=True), y_hi)
+        sell_hi = Point(self.get_x(y_hi, is_buy=False), y_hi)
 
-    def get_clearing_price_and_rate(self, y_cents_left):
-        price = y_cents_left / self.config.dollar_to_cent
-        i = self.get_y_left(self.combined_bids_points,
-                            y_cents_left, is_buy=True)
-        rate = self.get_x(
-            y_cents_left, self.combined_bids_points[i], self.combined_bids_points[i + 1])
-        return price, rate
+        w = Point.get_w(buy_lo, sell_lo, buy_hi, sell_hi)
 
-    # Get the y_cents to the left of the intersect
-    def get_intersect_left(self):
+        self.precise_price = round(
+            sell_lo.y + w * (sell_hi.y - sell_lo.y), self.config.precision)
+        self.precise_rate = round(
+            sell_lo.x + w * (sell_hi.x - sell_lo.x), self.config.precision)
+        print(self.precise_price, self.precise_rate)
+
+    # Get the best bid
+    def get_best_bid_in_cents(self):
         if not self.combined_bids_points or not self.combined_asks_points:
             return -1
         lo, hi = 0, self.config.y_max * self.config.dollar_to_cent + 1
         while lo < hi - 1:
             mid = lo + (hi - lo) // 2
-            buy_i = self.get_y_left(
-                self.combined_bids_points, mid, is_buy=True)
-            buy_x = self.get_x(
-                mid, self.combined_bids_points[buy_i], self.combined_bids_points[buy_i + 1])
-            sell_i = self.get_y_left(
-                self.combined_asks_points, mid, is_buy=False)
-            sell_x = self.get_x(
-                mid, self.combined_asks_points[sell_i], self.combined_asks_points[sell_i + 1])
-            # print(lo, hi, mid, buy_x, sell_x)
+            buy_x = self.get_x(mid, is_buy=True)
+            sell_x = self.get_x(mid, is_buy=False)
             if sell_x <= buy_x:
                 lo = mid
             else:
                 hi = mid
         return lo
 
-    def get_x(self, y_cents, p1: Point, p2: Point):
+    def get_x(self, y_cents, is_buy):
+        points = self.combined_bids_points if is_buy else self.combined_asks_points
+        i = self.get_y_left(points, y_cents, is_buy)
+        p1, p2 = points[i], points[i + 1]
         if p1.x == p2.x:
             return p1.x
         slope = Point.get_slope(p1, p2) * self.config.dollar_to_cent
