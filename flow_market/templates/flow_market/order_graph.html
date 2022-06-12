@@ -194,6 +194,23 @@
                 document.getElementById("orderGraph"), this.config);
         }
 
+        update(orders_to_be_removed) {
+            if (orders_to_be_removed && orders_to_be_removed.length > 0) {
+                console.log(orders_to_be_removed);
+                console.log(OrderGraph.buyOrderId);
+                console.log(OrderGraph.sellOrderId);
+                for (const orderId of orders_to_be_removed) {
+                    if (orderId == OrderGraph.buyOrderId) {
+                        console.log("here1")
+                        OrderGraph.resetBuyButton();
+                    } else if (orderId == OrderGraph.sellOrderId) {
+                        console.log("here2")
+                        OrderGraph.resetSellButton();
+                    }
+                }
+            }
+        }
+
         static buyButtonClick() {
             let datasets = OrderGraph.myChart.data.datasets[BIDS_DATASETS_INDEX];
             let button = document.querySelector("#buyButton");
@@ -206,17 +223,23 @@
                 let quantity = document.querySelector("#buyQuantityInput");
                 liveSend(OrderGraph.parseOrder(OrderGraph.buyOrderId, 'buy', datasets["data"], parseInt(quantity.value)));
             } else {
-                button.innerText = "Send Buy";
-                OrderGraph.isBlueActive = true;
-                OrderGraph.resetPoints(/*isBlue=*/true);
-                if (!OrderGraph.hasRed) {
-                    OrderGraph.addPoints(/*isBlue=*/false);
-                }
                 liveSend({
                     'message_type': 'remove_order',
                     'order_id': OrderGraph.buyOrderId
                 });
-                OrderGraph.buyOrderId = crypto.randomUUID();
+                OrderGraph.resetBuyButton();
+            }
+            OrderGraph.myChart.update();
+        }
+
+        static resetBuyButton() {
+            OrderGraph.buyOrderId = crypto.randomUUID();
+
+            document.querySelector("#buyButton").innerText = "Send Buy";
+            OrderGraph.isBlueActive = true;
+            OrderGraph.resetPoints(/*isBlue=*/true);
+            if (!OrderGraph.hasRed) {
+                OrderGraph.addPoints(/*isBlue=*/false);
             }
             OrderGraph.myChart.update();
         }
@@ -236,19 +259,23 @@
                 let quantity = document.querySelector("#buyQuantityInput");
                 liveSend(OrderGraph.parseOrder(OrderGraph.sellOrderId, 'sell', datasets["data"], parseInt(quantity.value)));
             } else {
-                button.innerText = "Send Sell";
-                OrderGraph.isRedActive = true;
-                OrderGraph.resetPoints(/*isBlue=*/false);
-                if (!OrderGraph.hasBlue) {
-                    OrderGraph.addPoints(/*isBlue=*/true);
-                }
                 liveSend({
                     'message_type': 'remove_order',
                     'order_id': OrderGraph.sellOrderId
                 });
-                OrderGraph.sellOrderId = crypto.randomUUID();
+                OrderGraph.resetSellButton();
+            }
+            OrderGraph.myChart.update();
+        }
 
+        static resetSellButton() {
+            OrderGraph.sellOrderId = crypto.randomUUID();
 
+            document.querySelector("#sellButton").innerText = "Send Sell";
+            OrderGraph.isRedActive = true;
+            OrderGraph.resetPoints(/*isBlue=*/false);
+            if (!OrderGraph.hasBlue) {
+                OrderGraph.addPoints(/*isBlue=*/true);
             }
             OrderGraph.myChart.update();
         }

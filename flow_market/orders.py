@@ -164,7 +164,6 @@ class OrderBook():
             sell_lo.y + w * (sell_hi.y - sell_lo.y), self.config.precision)
         self.precise_rate = round(
             sell_lo.x + w * (sell_hi.x - sell_lo.x), self.config.precision)
-        print(self.precise_price_in_cents, self.precise_rate)
 
     # Get the best bid
     def get_best_bid_in_cents(self):
@@ -208,26 +207,29 @@ class OrderBook():
                     hi = mid
         return lo
 
-    # def transact(self):
-    #     if not self.precise_price_in_cents or not self.precise_rate:
-    #         return
+    def transact(self):
+        if not self.precise_price_in_cents or not self.precise_rate or not self.orders:
+            return
 
-    #     min_quantity = None
-    #     order_to_be_filled = []
-    #     for id_in_group, player_orders in self.bids_orders:
-    #         for order in player_orders.value():
-    #             if order.direction == 'buy':
-    #                 if order.max_price_point.y * 100 > self.precise_price_in_cents:
-    #                     order_to_be_filled.append(order)
-    #                     min_quantity = min(
-    #                         min_quantity, order.quantity) if min_quantity else order.quantity
-    #             else:
-    #                 if order.min_price_point.y * 100 < self.precise_price_in_cents:
-    #                     order_to_be_filled.append(order)
-    #                     min_quantity = min(
-    #                         min_quantity, order.quantity) if min_quantity else order.quantity
+        min_quantity = None
+        order_to_be_filled = []
+        for order in self.orders.values():
+            if order.direction == 'buy':
+                if order.max_price_point.y * 100 > self.precise_price_in_cents:
+                    order_to_be_filled.append(order)
+                    min_quantity = min(
+                        min_quantity, order.quantity) if min_quantity else order.quantity
+            else:
+                if order.min_price_point.y * 100 < self.precise_price_in_cents:
+                    order_to_be_filled.append(order)
+                    min_quantity = min(
+                        min_quantity, order.quantity) if min_quantity else order.quantity
 
-    #     for order in order_to_be_filled:
-    #         order.fill(min(min_quantity, self.precise_rate))
-    #         if order.quantity <= 0:
-    #             self.remove_order(order)
+        orders_to_be_removed = []
+        current_rate = self.precise_rate
+        for order in order_to_be_filled:
+            order.fill(min(min_quantity, current_rate))
+            if order.quantity <= 0:
+                orders_to_be_removed.append(order.order_id)
+                self.remove_order(order)
+        return orders_to_be_removed

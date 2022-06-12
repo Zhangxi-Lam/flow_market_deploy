@@ -22,16 +22,18 @@ class MarketPage(Page):
             player.group.id_in_subsession, order_books)
         order_book = order_books[player.group.id_in_subsession]
 
+        orders_to_be_removed = []
         if message_type == 'add_order':
             MarketPage.add_order(order_book, player.id_in_group, data)
         elif message_type == 'remove_order':
             MarketPage.remove_order(order_book, data)
-        # elif message_type == 'update':
-            # order_book.transact()
+        elif message_type == 'update':
+            orders_to_be_removed = order_book.transact()
 
         response = {
             'message_type': message_type,
-            'data': MarketPage.update_order_book(order_book)
+            'order_graph_data': orders_to_be_removed,
+            'order_book_data': MarketPage.update_order_book(order_book),
         }
         return {0: response}
 

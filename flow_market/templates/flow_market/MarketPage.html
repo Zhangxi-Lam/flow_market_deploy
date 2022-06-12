@@ -55,10 +55,8 @@ Page title
     }, 1000);
 
     function liveRecv(data) {
-        orderBook.update(data['data'])
-        if (data['message_type'] == 'add_order') {
-            orderBook.update(data['data'])
-        }
+        orderGraph.update(data['order_graph_data']);
+        orderBook.update(data['order_book_data']);
     }
 
 </script>
