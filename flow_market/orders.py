@@ -17,7 +17,8 @@ class Order():
         self.quantity = order['quantity']
 
     def __repr__(self) -> str:
-        return self.__dict__.__str__()
+        return str(self.order_id) + ' ' + str(self.quantity)
+        # return self.__dict__.__str__()
 
     def fill(self, clearing_rate):
         self.quantity -= clearing_rate
@@ -45,10 +46,12 @@ class Point(dict):
     def __getattr__(self, field: str):
         return self[field]
 
-# The OrderBook of the group
-
 
 class OrderBook():
+    """
+    The OrderBook of the group
+    """
+
     def __init__(self, config: Config) -> None:
         self.config = config
 
@@ -91,6 +94,8 @@ class OrderBook():
         return self.orders[order_id]
 
     def remove_order(self, order: Order):
+        del self.orders[order.order_id]
+
         is_buy = order.direction == 'buy'
         group_orders = self.bids_orders if is_buy else self.asks_orders
         del group_orders[order.id_in_group][order.order_id]
@@ -207,29 +212,52 @@ class OrderBook():
                     hi = mid
         return lo
 
-    def transact(self):
+    def transact(self, group):
         if not self.precise_price_in_cents or not self.precise_rate or not self.orders:
             return
 
+        transact_rate = self.get_transact_rate(self.precise_price_in_cents)
+        transact_price_in_cents = self.precise_price_in_cents
+        transact_orders = self.get_transact_orders(self.precise_price_in_cents)
+
+        complete_orders = []
+        for order in transact_orders:
+            self.fill_order(order, transact_price_in_cents, transact_rate,
+                            group.get_player_by_id(order.id_in_group))
+            if order.quantity <= 0:
+                complete_orders.append(order.order_id)
+                self.remove_order(order)
+        return complete_orders
+
+    def fill_order(self, order: Order, price, rate, player):
+        order.quantity -= rate
+        if order.direction == 'buy':
+            player.inventory += rate
+            player.cash -= rate * price
+        else:
+            player.inventory -= rate
+            player.cash += rate * price
+
+    def get_transact_rate(self, transact_price_in_cents):
         min_quantity = None
-        order_to_be_filled = []
         for order in self.orders.values():
             if order.direction == 'buy':
-                if order.max_price_point.y * 100 > self.precise_price_in_cents:
-                    order_to_be_filled.append(order)
+                if order.max_price_point.y * 100 > transact_price_in_cents:
                     min_quantity = min(
                         min_quantity, order.quantity) if min_quantity else order.quantity
             else:
-                if order.min_price_point.y * 100 < self.precise_price_in_cents:
-                    order_to_be_filled.append(order)
+                if order.min_price_point.y * 100 < transact_price_in_cents:
                     min_quantity = min(
                         min_quantity, order.quantity) if min_quantity else order.quantity
+        return min(min_quantity, self.precise_rate)
 
-        orders_to_be_removed = []
-        current_rate = self.precise_rate
-        for order in order_to_be_filled:
-            order.fill(min(min_quantity, current_rate))
-            if order.quantity <= 0:
-                orders_to_be_removed.append(order.order_id)
-                self.remove_order(order)
-        return orders_to_be_removed
+    def get_transact_orders(self, transact_price_in_cetns):
+        transact_orders = []
+        for order in self.orders.values():
+            if order.direction == 'buy':
+                if order.max_price_point.y * 100 > transact_price_in_cetns:
+                    transact_orders.append(order)
+            else:
+                if order.min_price_point.y * 100 < transact_price_in_cetns:
+                    transact_orders.append(order)
+        return transact_orders

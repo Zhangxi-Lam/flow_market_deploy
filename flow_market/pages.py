@@ -1,10 +1,11 @@
+from email import message
 from django import conf
 from otree.api import Currency as c, currency_range
 
 from flow_market.config import Config
 from flow_market.orders import OrderBook, Order
 from ._builtin import Page, WaitPage
-from .models import Constants, Player
+from .models import Constants, Player, Group
 
 
 config = Config()
@@ -16,26 +17,25 @@ class MarketPage(Page):
     @staticmethod
     def live_method(player: Player, data):
         message_type = data['message_type']
-        response = {}
 
         MarketPage.init_if_not_exist(
             player.group.id_in_subsession, order_books)
         order_book = order_books[player.group.id_in_subsession]
 
-        orders_to_be_removed = []
+        complete_orders = []
         if message_type == 'add_order':
             MarketPage.add_order(order_book, player.id_in_group, data)
         elif message_type == 'remove_order':
             MarketPage.remove_order(order_book, data)
         elif message_type == 'update':
-            orders_to_be_removed = order_book.transact()
+            complete_orders = order_book.transact(player.group)
+            # print(complete_orders)
+            # print(order_book.orders)
 
-        response = {
-            'message_type': message_type,
-            'order_graph_data': orders_to_be_removed,
-            'order_book_data': MarketPage.update_order_book(order_book),
-        }
-        return {0: response}
+        response = MarketPage.create_response(
+            message_type, data, complete_orders, order_book, player)
+
+        return response
 
     @staticmethod
     def init_if_not_exist(id_in_subsession, order_books):
@@ -51,6 +51,23 @@ class MarketPage(Page):
     def remove_order(order_book: OrderBook, data):
         order = order_book.find_order(data['order_id'])
         order_book.remove_order(order)
+
+    @staticmethod
+    def create_response(message_type, data, complete_orders, order_book, player: Player):
+        group_response = {}
+        for p in player.group.get_players():
+            # Update group level response
+            group_response[p.id_in_group] = {
+                'message_type': message_type,
+                'order_graph_data': complete_orders,
+                'order_book_data': MarketPage.update_order_book(order_book),
+            }
+
+            # Update player level response
+            if message_type == 'update' and player.id_in_group == p.id_in_group:
+                group_response[p.id_in_group]['inventory_data'] = {'time': data['time'],
+                                                                   'inventory': player.inventory}
+        return group_response
 
     @staticmethod
     def update_order_book(order_book: OrderBook):

@@ -196,15 +196,10 @@
 
         update(orders_to_be_removed) {
             if (orders_to_be_removed && orders_to_be_removed.length > 0) {
-                console.log(orders_to_be_removed);
-                console.log(OrderGraph.buyOrderId);
-                console.log(OrderGraph.sellOrderId);
                 for (const orderId of orders_to_be_removed) {
                     if (orderId == OrderGraph.buyOrderId) {
-                        console.log("here1")
                         OrderGraph.resetBuyButton();
                     } else if (orderId == OrderGraph.sellOrderId) {
-                        console.log("here2")
                         OrderGraph.resetSellButton();
                     }
                 }

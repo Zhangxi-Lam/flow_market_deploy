@@ -1,4 +1,5 @@
 import asyncio
+from email.policy import default
 import uuid
 from jsonfield import JSONField
 from otree import live
@@ -33,8 +34,13 @@ class Subsession(BaseSubsession):
 
 
 class Group(BaseGroup):
-    pass
+    def get_group_inventory_data(self):
+        result = {}
+        for player in self.get_players():
+            result[player.id_in_group] = player.inventory
+        return result
 
 
 class Player(BasePlayer):
-    pass
+    inventory = models.FloatField(initial=0)
+    cash = models.FloatField(initial=0)

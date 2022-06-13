@@ -21,6 +21,8 @@ Page title
 {% include "flow_market/constants.html" %}
 {% include "flow_market/order_graph.html" %}
 {% include "flow_market/order_book.html" %}
+{% include "flow_market/inventory_chart.html" %}
+
 <div>
     <h5>Your Input</h5>
     <canvas id="orderGraph"></canvas>
@@ -41,6 +43,11 @@ Page title
     <canvas id="orderBook"></canvas>
 </div>
 
+<div>
+    <h5>Inventory</h5>
+    <canvas id="inventoryChart"></canvas>
+</div>
+
 <script>
     var orderBook = new OrderBook();
     orderBook.show();
@@ -48,15 +55,25 @@ Page title
     var orderGraph = new OrderGraph();
     orderGraph.show();
 
+    var inventoryChart = new InventoryChart();
+    inventoryChart.show();
+
+    var time = 0;
+
     var updateMarketPage = window.setInterval(function () {
+        time += 1;
         liveSend({
-            'message_type': 'update'
+            'message_type': 'update',
+            'time': time,
         })
     }, 1000);
 
     function liveRecv(data) {
         orderGraph.update(data['order_graph_data']);
         orderBook.update(data['order_book_data']);
+        if (data['inventory_data']) {
+            inventoryChart.update(data['inventory_data']);
+        }
     }
 
 </script>
