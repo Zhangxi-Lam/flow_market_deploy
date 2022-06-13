@@ -22,6 +22,7 @@ Page title
 {% include "flow_market/order_graph.html" %}
 {% include "flow_market/order_book.html" %}
 {% include "flow_market/inventory_chart.html" %}
+{% include "flow_market/cash_chart.html" %}
 
 <div>
     <h5>Your Input</h5>
@@ -42,10 +43,13 @@ Page title
     <h5>Market</h5>
     <canvas id="orderBook"></canvas>
 </div>
-
 <div>
     <h5>Inventory</h5>
     <canvas id="inventoryChart"></canvas>
+</div>
+<div>
+    <h5>Cash</h5>
+    <canvas id="cashChart"></canvas>
 </div>
 
 <script>
@@ -57,6 +61,9 @@ Page title
 
     var inventoryChart = new InventoryChart();
     inventoryChart.show();
+
+    var cashChart = new CashChart();
+    cashChart.show();
 
     var time = 0;
 
@@ -73,6 +80,9 @@ Page title
         orderBook.update(data['order_book_data']);
         if (data['inventory_data']) {
             inventoryChart.update(data['inventory_data']);
+        }
+        if (data['cash_data']) {
+            cashChart.update(data['cash_data']);
         }
     }
 

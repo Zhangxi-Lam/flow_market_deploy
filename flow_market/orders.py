@@ -229,14 +229,14 @@ class OrderBook():
                 self.remove_order(order)
         return complete_orders
 
-    def fill_order(self, order: Order, price, rate, player):
+    def fill_order(self, order: Order, price_in_cents, rate, player):
         order.quantity -= rate
         if order.direction == 'buy':
             player.inventory += rate
-            player.cash -= rate * price
+            player.cash -= rate * price_in_cents / 100
         else:
             player.inventory -= rate
-            player.cash += rate * price
+            player.cash += rate * price_in_cents / 100
 
     def get_transact_rate(self, transact_price_in_cents):
         min_quantity = None

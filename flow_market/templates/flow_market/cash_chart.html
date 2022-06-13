@@ -2,14 +2,14 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata@2.2.3/dist/chartjs-plugin-dragdata.min.js"></script>
 
 <script>
-    class InventoryChart {
+    class CashChart {
         // Class variables
         static myChart;
 
         get data() {
             return {
                 datasets: [{
-                    label: 'Inventories',
+                    label: 'Cash',
                     data: [{ x: 0, y: 0 }],
                     borderColor: BLUE,
                 }]
@@ -34,11 +34,11 @@
                 y: {
                     title: {
                         display: true,
-                        text: 'Inventory',
+                        text: 'Cash',
                     },
                     type: 'linear',
                     suggestedMin: 0,
-                    suggestedMax: 5
+                    suggestedMax: 10
                 }
             }
         }
@@ -54,12 +54,12 @@
         }
 
         show() {
-            InventoryChart.myChart = new Chart(document.getElementById("inventoryChart"), this.config);
+            CashChart.myChart = new Chart(document.getElementById("cashChart"), this.config);
         }
 
         update(data) {
-            InventoryChart.myChart.data.datasets[0].data.push({ x: data['time'], y: data['inventory'] })
-            InventoryChart.myChart.update();
+            CashChart.myChart.data.datasets[0].data.push({ x: data['time'], y: data['cash'] })
+            CashChart.myChart.update();
         }
     }
 </script>

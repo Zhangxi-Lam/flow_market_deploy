@@ -28,12 +28,14 @@ class MarketPage(Page):
         elif message_type == 'remove_order':
             MarketPage.remove_order(order_book, data)
         elif message_type == 'update':
+            if player.id_in_group != 1:
+                # We only let the first player in the group do the update to
+                # avoid duplicate transactions.
+                return
             complete_orders = order_book.transact(player.group)
-            # print(complete_orders)
-            # print(order_book.orders)
 
         response = MarketPage.create_response(
-            message_type, data, complete_orders, order_book, player)
+            message_type, data, complete_orders, order_book, player.group)
 
         return response
 
@@ -53,20 +55,22 @@ class MarketPage(Page):
         order_book.remove_order(order)
 
     @staticmethod
-    def create_response(message_type, data, complete_orders, order_book, player: Player):
+    def create_response(message_type, data, complete_orders, order_book, group: Group):
         group_response = {}
-        for p in player.group.get_players():
+        for player in group.get_players():
             # Update group level response
-            group_response[p.id_in_group] = {
+            group_response[player.id_in_group] = {
                 'message_type': message_type,
                 'order_graph_data': complete_orders,
                 'order_book_data': MarketPage.update_order_book(order_book),
             }
 
             # Update player level response
-            if message_type == 'update' and player.id_in_group == p.id_in_group:
-                group_response[p.id_in_group]['inventory_data'] = {'time': data['time'],
-                                                                   'inventory': player.inventory}
+            if message_type == 'update':
+                group_response[player.id_in_group]['inventory_data'] = {
+                    'time': data['time'], 'inventory': player.inventory}
+                group_response[player.id_in_group]['cash_data'] = {
+                    'time': data['time'], 'cash': player.cash}
         return group_response
 
     @staticmethod
