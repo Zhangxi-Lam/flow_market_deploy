@@ -1,6 +1,7 @@
 from .flo_config import FloConfig
 from .flo_point import FloPoint
 from .flo_order import FloOrder
+import time
 
 
 class FloOrderBook():
@@ -9,6 +10,7 @@ class FloOrderBook():
     """
 
     def __init__(self, config: FloConfig) -> None:
+        self.start_time = time.time()
         self.config = config
 
         self.orders = {}  # {order_id: FloOrder}
@@ -217,3 +219,13 @@ class FloOrderBook():
                 if order.min_price_point.y * 100 < transact_price_in_cetns:
                     transact_orders.append(order)
         return transact_orders
+
+    def get_time_since_start(self):
+        return time.time() - self.start_time
+
+    def get_frontend_response(self):
+        return {
+            'bids_order_points': self.combined_bids_points,
+            'asks_order_points': self.combined_asks_points,
+            'transact_points': self.intersect_points,
+        }

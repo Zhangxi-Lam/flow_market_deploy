@@ -1,5 +1,5 @@
-from .config import Config
-from .orders import OrderBook, Point
+from ..config import Config
+from ..orders import OrderBook, Point
 import unittest
 import sys
 import os

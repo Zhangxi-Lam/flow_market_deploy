@@ -13,7 +13,6 @@ from otree.api import (
     Currency as c,
     currency_range,
 )
-from .orders import OrderBook, Order
 
 
 author = 'Your name here'

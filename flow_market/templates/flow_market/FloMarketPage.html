@@ -65,24 +65,20 @@ Page title
     var cashChart = new CashChart();
     cashChart.show();
 
-    var time = 0;
-
     var updateMarketPage = window.setInterval(function () {
-        time += 1;
         liveSend({
             'message_type': 'update',
-            'time': time,
         })
     }, 1000);
 
     function liveRecv(data) {
         orderGraph.update(data['order_graph_data']);
         orderBook.update(data['order_book_data']);
-        if (data['inventory_data']) {
-            inventoryChart.update(data['inventory_data']);
+        if (data['inventory_chart_data']) {
+            inventoryChart.update(data['inventory_chart_data']);
         }
-        if (data['cash_data']) {
-            cashChart.update(data['cash_data']);
+        if (data['cash_chart_data']) {
+            cashChart.update(data['cash_chart_data']);
         }
     }
 

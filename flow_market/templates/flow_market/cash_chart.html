@@ -10,7 +10,7 @@
             return {
                 datasets: [{
                     label: 'Cash',
-                    data: [{ x: 0, y: 0 }],
+                    data: [],
                     borderColor: BLUE,
                 }]
             }
@@ -58,7 +58,7 @@
         }
 
         update(data) {
-            CashChart.myChart.data.datasets[0].data.push({ x: data['time'], y: data['cash'] })
+            CashChart.myChart.data.datasets[0].data = data;
             CashChart.myChart.update();
         }
     }

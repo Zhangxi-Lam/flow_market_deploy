@@ -10,7 +10,7 @@
             return {
                 datasets: [{
                     label: 'Inventories',
-                    data: [{ x: 0, y: 0 }],
+                    data: [],
                     borderColor: BLUE,
                 }]
             }
@@ -58,7 +58,7 @@
         }
 
         update(data) {
-            InventoryChart.myChart.data.datasets[0].data.push({ x: data['time'], y: data['inventory'] })
+            InventoryChart.myChart.data.datasets[0].data = data;
             InventoryChart.myChart.update();
         }
     }
