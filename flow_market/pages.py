@@ -23,6 +23,8 @@ class MarketPage(Page):
         order_book = order_books[player.group.id_in_subsession]
 
         complete_orders = []
+        inventory_data = {}
+        cash_data = {}
         if message_type == 'add_order':
             MarketPage.add_order(order_book, player.id_in_group, data)
         elif message_type == 'remove_order':
@@ -33,10 +35,14 @@ class MarketPage(Page):
                 # avoid duplicate transactions.
                 return
             complete_orders = order_book.transact(player.group)
+            inventory_data = player.group.get_inventory_data(
+                data['time'])
+            cash_data = player.group.get_cash_data(data['time'])
 
-        response = MarketPage.create_response(
-            message_type, data, complete_orders, order_book, player.group)
-
+        response = MarketPage.create_response(player.group,
+                                              message_type, MarketPage.get_order_book_data(
+                                                  order_book),
+                                              complete_orders, inventory_data, cash_data)
         return response
 
     @staticmethod
@@ -55,26 +61,26 @@ class MarketPage(Page):
         order_book.remove_order(order)
 
     @staticmethod
-    def create_response(message_type, data, complete_orders, order_book, group: Group):
+    def create_response(group: Group, message_type, order_book_data,
+                        complete_orders=[], inventory_data={}, cash_data={}):
         group_response = {}
         for player in group.get_players():
-            # Update group level response
-            group_response[player.id_in_group] = {
+            player_response = {
                 'message_type': message_type,
+                'order_book_data': order_book_data,
                 'order_graph_data': complete_orders,
-                'order_book_data': MarketPage.update_order_book(order_book),
             }
+            if player.id_in_group in inventory_data:
+                player_response['inventory_data'] = inventory_data[player.id_in_group]
 
-            # Update player level response
-            if message_type == 'update':
-                group_response[player.id_in_group]['inventory_data'] = {
-                    'time': data['time'], 'inventory': player.inventory}
-                group_response[player.id_in_group]['cash_data'] = {
-                    'time': data['time'], 'cash': player.cash}
+            if player.id_in_group in cash_data:
+                player_response['cash_data'] = cash_data[player.id_in_group]
+
+            group_response[player.id_in_group] = player_response
         return group_response
 
     @staticmethod
-    def update_order_book(order_book: OrderBook):
+    def get_order_book_data(order_book: OrderBook):
         return {
             'bids_order_points': order_book.combined_bids_points,
             'asks_order_points': order_book.combined_asks_points,
