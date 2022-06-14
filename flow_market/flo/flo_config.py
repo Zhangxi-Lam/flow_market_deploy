@@ -1,4 +1,4 @@
-class Config():
+class FloConfig():
     """The config of the experiment, including some constants"""
 
     def __init__(self) -> None:
