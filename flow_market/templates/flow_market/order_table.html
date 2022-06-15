@@ -1,0 +1,73 @@
+<script>
+    class OrderTable {
+        show() {
+            var table = document.querySelector('#activeOrderTable');
+            var newRow = document.createElement('tr');
+
+            var direction = document.createElement('td');
+            direction.innerHTML = 'Direction';
+            var price = document.createElement('td');
+            price.innerHTML = 'Price';
+            var quantity = document.createElement('td');
+            quantity.innerHTML = 'Quantity';
+            var progress = document.createElement('td');
+            progress.innerHTML = 'Progress';
+
+            newRow.append(direction, price, quantity, progress);
+            table.appendChild(newRow);
+
+            table = document.querySelector('#executedOrderTable');
+            newRow = document.createElement('tr');
+
+            direction = document.createElement('td');
+            direction.innerHTML = 'Direction';
+            price = document.createElement('td');
+            price.innerHTML = 'Price';
+            quantity = document.createElement('td');
+            quantity.innerHTML = 'Quantity';
+
+            newRow.append(direction, price, quantity);
+            table.appendChild(newRow);
+        }
+
+        update(data) {
+            var table = document.querySelector('#activeOrderTable');
+            for (var i = 1; i < table.rows.length; i++) {
+                table.deleteRow(1);
+            }
+            data['active_orders'].forEach(element => {
+                const newRow = document.createElement('tr');
+
+                const direction = document.createElement('td');
+                direction.innerHTML = element['direction'];
+                const price = document.createElement('td');
+                price.innerHTML = element['price'];
+                const quantity = document.createElement('td');
+                quantity.innerHTML = element['quantity'];
+                const progress = document.createElement('td');
+                progress.innerHTML = element['progress'];
+
+                newRow.append(direction, price, quantity, progress);
+                table.appendChild(newRow);
+            });
+
+            table = document.querySelector('#executedOrderTable');
+            for (var i = 1; i < table.rows.length; i++) {
+                table.deleteRow(1);
+            }
+            data['executed_orders'].forEach(element => {
+                const newRow = document.createElement('tr');
+
+                const direction = document.createElement('td');
+                direction.innerHTML = element['direction'];
+                const price = document.createElement('td');
+                price.innerHTML = element['price'];
+                const quantity = document.createElement('td');
+                quantity.innerHTML = element['quantity'];
+
+                newRow.append(direction, price, quantity);
+                table.appendChild(newRow);
+            });
+        }
+    }
+</script>

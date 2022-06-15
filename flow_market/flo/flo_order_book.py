@@ -188,13 +188,13 @@ class FloOrderBook():
         for order in transact_orders:
             self.fill_order(order, transact_price_in_cents, transact_rate,
                             group.get_player_by_id(order.id_in_group))
-            if order.quantity <= 0:
+            if order.is_complete():
                 complete_orders.append(order)
                 self.remove_order(order)
         return complete_orders
 
     def fill_order(self, order: FloOrder, price_in_cents, rate, player):
-        order.quantity -= rate
+        order.fill(rate)
         if order.direction == 'buy':
             player.inventory += rate
             player.cash -= rate * price_in_cents / 100

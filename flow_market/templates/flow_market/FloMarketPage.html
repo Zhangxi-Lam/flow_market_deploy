@@ -15,6 +15,12 @@ Page title
         height: 300px;
         display: block;
     }
+
+    table,
+    th,
+    td {
+        border: 1px solid black;
+    }
 </style>
 
 
@@ -23,6 +29,7 @@ Page title
 {% include "flow_market/order_book.html" %}
 {% include "flow_market/inventory_chart.html" %}
 {% include "flow_market/cash_chart.html" %}
+{% include "flow_market/order_table.html" %}
 
 <div>
     <h5>Your Input</h5>
@@ -52,6 +59,17 @@ Page title
     <canvas id="cashChart"></canvas>
 </div>
 
+<div>
+    <h5>Active Orders</h5>
+    <table id="activeOrderTable">
+    </table>
+</div>
+<div>
+    <h5>Executed Orders</h5>
+    <table id="executedOrderTable">
+    </table>
+</div>
+
 <script>
     var orderBook = new OrderBook();
     orderBook.show();
@@ -64,6 +82,9 @@ Page title
 
     var cashChart = new CashChart();
     cashChart.show();
+
+    var orderTable = new OrderTable();
+    orderTable.show();
 
     var updateFloMarketPage = window.setInterval(function () {
         if (orderGraph.shouldRequestUpdate()) {
@@ -86,6 +107,9 @@ Page title
         }
         if (data['cash_chart_data']) {
             cashChart.update(data['cash_chart_data']);
+        }
+        if (data['order_table_data']) {
+            orderTable.update(data['order_table_data']);
         }
     }
 

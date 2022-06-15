@@ -15,10 +15,17 @@ class FloOrder():
         self.max_price_point.slope = slope
         self.min_price_point.slope = slope
         self.quantity = order['quantity']
+        self.fill_quantity = 0
 
     def __repr__(self) -> str:
         return str(self.order_id) + ' ' + str(self.quantity)
         # return self.__dict__.__str__()
 
     def fill(self, clearing_rate):
-        self.quantity -= clearing_rate
+        self.fill_quantity += clearing_rate
+
+    def is_complete(self):
+        return self.fill_quantity >= self.quantity
+
+    def progress(self):
+        return str(round(self.fill_quantity / self.quantity, 2) * 100) + '%'
