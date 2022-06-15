@@ -10,7 +10,6 @@ class FloOrderBook():
     """
 
     def __init__(self, config: FloConfig) -> None:
-        self.start_time = time.time()
         self.config = config
 
         self.orders = {}  # {order_id: FloOrder}
@@ -28,6 +27,13 @@ class FloOrderBook():
 
     def __repr__(self) -> str:
         return self.__dict__.__str__()
+
+    def get_frontend_response(self):
+        return {
+            'bids_order_points': self.combined_bids_points,
+            'asks_order_points': self.combined_asks_points,
+            'transact_points': self.intersect_points,
+        }
 
     def add_order(self, order: FloOrder):
         self.orders[order.order_id] = order
@@ -171,19 +177,19 @@ class FloOrderBook():
         return lo
 
     def transact(self, group):
+        complete_orders = []
         if not self.precise_price_in_cents or not self.precise_rate or not self.orders:
-            return
+            return complete_orders
 
         transact_rate = self.get_transact_rate(self.precise_price_in_cents)
         transact_price_in_cents = self.precise_price_in_cents
         transact_orders = self.get_transact_orders(self.precise_price_in_cents)
 
-        complete_orders = []
         for order in transact_orders:
             self.fill_order(order, transact_price_in_cents, transact_rate,
                             group.get_player_by_id(order.id_in_group))
             if order.quantity <= 0:
-                complete_orders.append(order.order_id)
+                complete_orders.append(order)
                 self.remove_order(order)
         return complete_orders
 
@@ -219,13 +225,3 @@ class FloOrderBook():
                 if order.min_price_point.y * 100 < transact_price_in_cetns:
                     transact_orders.append(order)
         return transact_orders
-
-    def get_time_since_start(self):
-        return time.time() - self.start_time
-
-    def get_frontend_response(self):
-        return {
-            'bids_order_points': self.combined_bids_points,
-            'asks_order_points': self.combined_asks_points,
-            'transact_points': self.intersect_points,
-        }

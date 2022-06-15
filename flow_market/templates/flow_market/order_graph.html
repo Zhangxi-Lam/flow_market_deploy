@@ -3,32 +3,13 @@
 
 <script>
     class OrderGraph {
-        // Constant variables
-        static floDataStartingBids = [
-            { x: 0, y: YMAX },
-            { x: 0, y: 1 }, // maxPrice
-            { x: 1, y: 0 }, // minPrice
-            { x: 1, y: 0 },
-        ];
-        static floDataStartingAsks = [
-            { x: 1, y: YMAX },
-            { x: 1, y: 20 }, // maxPrice
-            { x: 0, y: 19 }, // minPrice
-            { x: 0, y: 0 },
-        ];
-
         // Class variables
-        static floDataBids = JSON.parse(JSON.stringify(this.floDataStartingBids));
-        static floDataAsks = JSON.parse(JSON.stringify(this.floDataStartingAsks));
         static myChart;
-        static orderBook;
-        static isBlueActive = true; // If user can drag blue points
-        static isRedActive = true;  // If user can drag red points
-        static hasBlue = true;
-        static hasRed = true;
+        static bidActive = true;
+        static askActive = true;
+        static buyOrderId;
+        static sellOrderId;
 
-        static buyOrderId = crypto.randomUUID();
-        static sellOrderId = crypto.randomUUID();
 
         get data() {
             return {
@@ -41,7 +22,7 @@
                     showLine: true,
                     backgroundColor: BLUE,
                     borderColor: BLUE_TRANSPARENT,
-                    data: OrderGraph.floDataBids,
+                    data: []
                 },
                 {
                     label: 'Asks',
@@ -52,7 +33,7 @@
                     showLine: true,
                     backgroundColor: RED,
                     borderColor: RED_TRANSPARENT,
-                    data: OrderGraph.floDataAsks,
+                    data: []
                 }]
             }
         }
@@ -92,18 +73,18 @@
                     showTooltip: true,
                     onDragStart: function (e, datasetIndex, index, value) {
                         if (index == 0 || index == 4) { return false; }
-                        if (datasetIndex == BIDS_DATASETS_INDEX && !OrderGraph.isBlueActive) {
+                        if (datasetIndex == BIDS_DATASETS_INDEX && !OrderGraph.bidActive) {
                             return false;
                         }
-                        if (datasetIndex == ASKS_DATASETS_INDEX && !OrderGraph.isRedActive) {
+                        if (datasetIndex == ASKS_DATASETS_INDEX && !OrderGraph.askActive) {
                             return false;
                         }
                     },
                     onDrag: function (e, datasetIndex, index, value) {
-                        let bids = OrderGraph.floDataBids;
+                        let bids = OrderGraph.myChart.data.datasets[0].data;
                         let bidsMax = bids[MAX_PRICE_INDEX];
                         let bidsMin = bids[MIN_PRICE_INDEX];
-                        let asks = OrderGraph.floDataAsks;
+                        let asks = OrderGraph.myChart.data.datasets[1].data;
                         let asksMax = asks[MAX_PRICE_INDEX];
                         let asksMin = asks[MIN_PRICE_INDEX];
                         if (datasetIndex == BIDS_DATASETS_INDEX) {
@@ -116,7 +97,7 @@
                                 if (value.y <= bidsMin.y) {
                                     bidsMax.y = bidsMin.y + 1;
                                 }
-                                if (!OrderGraph.isRedActive && value.y >= asksMin.y) {
+                                if (!OrderGraph.askActive && value.y >= asksMin.y) {
                                     bidsMax.y = asksMin.y - 1;
                                 }
                             } else {
@@ -139,7 +120,7 @@
                                 if (value.y >= asksMax.y) {
                                     asksMin.y = asksMax.y - 1;
                                 }
-                                if (!OrderGraph.isBlueActive && value.y <= bidsMax.y) {
+                                if (!OrderGraph.bidActive && value.y <= bidsMax.y) {
                                     asksMin.y = bidsMax.y + 1;
                                 }
                             } else {
@@ -174,10 +155,10 @@
                             if (element.index != MIN_PRICE_INDEX && element.index != MAX_PRICE_INDEX) {
                                 return;
                             }
-                            if (element.datasetIndex == BIDS_DATASETS_INDEX && !OrderGraph.isBlueActive) {
+                            if (element.datasetIndex == BIDS_DATASETS_INDEX && !OrderGraph.bidActive) {
                                 return;
                             }
-                            if (element.datasetIndex == ASKS_DATASETS_INDEX && !OrderGraph.isRedActive) {
+                            if (element.datasetIndex == ASKS_DATASETS_INDEX && !OrderGraph.askActive) {
                                 return;
                             }
                             document.querySelector("#orderGraph").style.cursor = "grab";
@@ -194,91 +175,107 @@
                 document.getElementById("orderGraph"), this.config);
         }
 
-        update(orders_to_be_removed) {
-            if (orders_to_be_removed && orders_to_be_removed.length > 0) {
-                for (const orderId of orders_to_be_removed) {
-                    if (orderId == OrderGraph.buyOrderId) {
-                        OrderGraph.resetBuyButton();
-                    } else if (orderId == OrderGraph.sellOrderId) {
-                        OrderGraph.resetSellButton();
-                    }
-                }
+        update(data) {
+            OrderGraph.bidActive = data['bid_active'];
+            OrderGraph.myChart.data.datasets[0].data = data['bid_data'];
+            OrderGraph.buyOrderId = data['buy_order_id'];
+            if (!data['bid_data']) {
+                this.disableButton(/*isBuy=*/true);
+            } else if (OrderGraph.bidActive) {
+                this.setPointsActive(/*isBuy=*/true);
+            } else {
+                this.setPointsInactive(/*isBuy=*/true)
+            }
+
+            OrderGraph.askActive = data['ask_active'];
+            OrderGraph.myChart.data.datasets[1].data = data['ask_data'];
+            OrderGraph.sellOrderId = data['sell_order_id'];
+            if (!data['ask_data']) {
+                this.disableButton(/*isBuy=*/false);
+            } else if (OrderGraph.askActive) {
+                this.setPointsActive(/*isBuy=*/false);
+            } else {
+                this.setPointsInactive(/*isBuy=*/false)
+            }
+            OrderGraph.myChart.update();
+        }
+
+        shouldRequestUpdate() {
+            return OrderGraph.myChart.data.datasets[0].data.length == 0 &&
+                OrderGraph.myChart.data.datasets[1].data.length == 0;
+        }
+
+        disableButton(isBuy) {
+            if (isBuy) {
+                document.querySelector("#buyButton").disabled = true;
+            } else {
+                document.querySelector("#sellButton").disabled = true;
             }
         }
+
+        setPointsActive(isBuy) {
+            if (isBuy) {
+                let datasets = OrderGraph.myChart.data.datasets[0];
+                datasets["pointRadius"] = [0, 6, 6, 0];
+                datasets["borderColor"] = BLUE_TRANSPARENT;
+                document.querySelector("#buyButton").disabled = false;
+                document.querySelector("#buyButton").innerText = "Send Buy";
+            } else {
+                let datasets = OrderGraph.myChart.data.datasets[1];
+                datasets["pointRadius"] = [0, 6, 6, 0];
+                datasets["borderColor"] = RED_TRANSPARENT;
+                document.querySelector("#sellButton").disabled = false;
+                document.querySelector("#sellButton").innerText = "Send Sell";
+            }
+        }
+
+        setPointsInactive(isBuy) {
+            if (isBuy) {
+                let datasets = OrderGraph.myChart.data.datasets[0];
+                datasets["pointRadius"] = [0, 0, 0, 0];
+                datasets["borderColor"] = BLUE;
+                document.querySelector("#buyButton").disabled = false;
+                document.querySelector("#buyButton").innerText = "Cancel Buy";
+            } else {
+                let datasets = OrderGraph.myChart.data.datasets[1];
+                datasets["pointRadius"] = [0, 0, 0, 0];
+                datasets["borderColor"] = RED;
+                document.querySelector("#sellButton").disabled = false;
+                document.querySelector("#sellButton").innerText = "Cancel Sell";
+            }
+        }
+
 
         static buyButtonClick() {
             let datasets = OrderGraph.myChart.data.datasets[BIDS_DATASETS_INDEX];
             let button = document.querySelector("#buyButton");
-            if (OrderGraph.isBlueActive) {
-                button.innerText = "Cancel Buy";
-                OrderGraph.isBlueActive = false;
-                datasets["pointRadius"] = [0, 0, 0, 0];
-                datasets["borderColor"] = BLUE;
-                OrderGraph.sortPoints(/*fixBlue=*/true);
+            if (OrderGraph.bidActive) {
                 let quantity = document.querySelector("#buyQuantityInput");
-                liveSend(OrderGraph.parseOrder(OrderGraph.buyOrderId, 'buy', datasets["data"], parseInt(quantity.value)));
+                liveSend(OrderGraph.parseOrder('buy', datasets["data"], parseInt(quantity.value)));
             } else {
                 liveSend({
                     'message_type': 'remove_order',
                     'order_id': OrderGraph.buyOrderId
                 });
-                OrderGraph.resetBuyButton();
             }
-            OrderGraph.myChart.update();
-        }
-
-        static resetBuyButton() {
-            OrderGraph.buyOrderId = crypto.randomUUID();
-
-            document.querySelector("#buyButton").innerText = "Send Buy";
-            OrderGraph.isBlueActive = true;
-            OrderGraph.resetPoints(/*isBlue=*/true);
-            if (!OrderGraph.hasRed) {
-                OrderGraph.addPoints(/*isBlue=*/false);
-            }
-            OrderGraph.myChart.update();
         }
 
         static sellButtonClick() {
-            if (!OrderGraph.hasRed) {
-                return;
-            }
             let datasets = OrderGraph.myChart.data.datasets[ASKS_DATASETS_INDEX];
-            let button = document.querySelector("#sellButton");
-            if (OrderGraph.isRedActive) {
-                button.innerText = "Cancel Sell";
-                OrderGraph.isRedActive = false;
-                datasets["pointRadius"] = [0, 0, 0, 0];
-                datasets["borderColor"] = RED;
-                OrderGraph.sortPoints(/*fixBlue=*/false);
+            if (OrderGraph.askActive) {
                 let quantity = document.querySelector("#buyQuantityInput");
-                liveSend(OrderGraph.parseOrder(OrderGraph.sellOrderId, 'sell', datasets["data"], parseInt(quantity.value)));
+                liveSend(OrderGraph.parseOrder('sell', datasets["data"], parseInt(quantity.value)));
             } else {
                 liveSend({
                     'message_type': 'remove_order',
                     'order_id': OrderGraph.sellOrderId
                 });
-                OrderGraph.resetSellButton();
             }
-            OrderGraph.myChart.update();
         }
 
-        static resetSellButton() {
-            OrderGraph.sellOrderId = crypto.randomUUID();
-
-            document.querySelector("#sellButton").innerText = "Send Sell";
-            OrderGraph.isRedActive = true;
-            OrderGraph.resetPoints(/*isBlue=*/false);
-            if (!OrderGraph.hasBlue) {
-                OrderGraph.addPoints(/*isBlue=*/true);
-            }
-            OrderGraph.myChart.update();
-        }
-
-        static parseOrder(orderId, direction, data, quantity) {
+        static parseOrder(direction, data, quantity) {
             return {
                 'message_type': 'add_order',
-                'order_id': orderId,
                 'direction': direction,
                 'max_price_x': data[MAX_PRICE_INDEX].x,
                 'max_price_y': data[MAX_PRICE_INDEX].y,
@@ -286,101 +283,6 @@
                 'min_price_y': data[MIN_PRICE_INDEX].y,
                 'quantity': quantity
             };
-        }
-
-        static buyQuantityButtonClick(increment) {
-            let input = document.querySelector("#buyQuantityInput");
-            if (increment) {
-                input.value = parseInt(input.value) + parseInt(input.step);
-            } else {
-                input.value = parseInt(input.value) - parseInt(input.step);
-            }
-        }
-
-        static sellQuantityButtonClick(increment) {
-            let input = document.querySelector("#sellQuantityInput");
-            if (increment) {
-                input.value = parseInt(input.value) + parseInt(input.step);
-            } else {
-                input.value = parseInt(input.value) - parseInt(input.step);
-            }
-        }
-
-        static resetPoints(isBlue) {
-            if (isBlue) {
-                let datasets = OrderGraph.myChart.data.datasets[BIDS_DATASETS_INDEX];
-                datasets["pointRadius"] = [0, 6, 6, 0];
-                datasets["borderColor"] = BLUE_TRANSPARENT;
-                OrderGraph.floDataBids = JSON.parse(JSON.stringify(OrderGraph.floDataStartingBids));
-                datasets["data"] = OrderGraph.floDataBids;
-                OrderGraph.sortPoints(isBlue);
-            } else {
-                let datasets = OrderGraph.myChart.data.datasets[ASKS_DATASETS_INDEX];
-                datasets["pointRadius"] = [0, 6, 6, 0];
-                datasets["borderColor"] = RED_TRANSPARENT;
-                OrderGraph.floDataAsks = JSON.parse(JSON.stringify(OrderGraph.floDataStartingAsks));
-                datasets["data"] = OrderGraph.floDataAsks;
-                OrderGraph.sortPoints(isBlue);
-            }
-        }
-
-        static addPoints(isBlue) {
-            if (isBlue) {
-                document.querySelector("#buyButton").disabled = false;
-                OrderGraph.hasBlue = true;
-                OrderGraph.resetPoints(isBlue);
-            } else {
-                document.querySelector("#sellButton").disabled = false;
-                OrderGraph.hasRed = true;
-                OrderGraph.resetPoints(isBlue);
-            }
-        }
-
-        static removePoints(isBlue) {
-            if (isBlue) {
-                document.querySelector("#buyButton").disabled = true;
-                OrderGraph.hasBlue = false;
-                OrderGraph.myChart.data.datasets[BIDS_DATASETS_INDEX]["data"] = null;
-            } else {
-                document.querySelector("#sellButton").disabled = true;
-                OrderGraph.hasRed = false;
-                OrderGraph.myChart.data.datasets[ASKS_DATASETS_INDEX]["data"] = null;
-            }
-
-        }
-
-        static sortPoints(fixBlue) {
-            let bidsMax = OrderGraph.floDataBids[MAX_PRICE_INDEX];
-            let bidsMin = OrderGraph.floDataBids[MIN_PRICE_INDEX];
-            let asksMax = OrderGraph.floDataAsks[MAX_PRICE_INDEX];
-            let asksMin = OrderGraph.floDataAsks[MIN_PRICE_INDEX];
-
-            if (asksMin.y <= bidsMax.y) {
-                if (fixBlue) {
-                    // Adjust Red
-                    if (bidsMax.y <= YMAX - 2) {
-                        asksMin.y = bidsMax.y + 1;
-                        if (asksMax.y <= asksMin.y) {
-                            asksMax.y = asksMin.y + 1;
-                        }
-                    }
-                    else {
-                        OrderGraph.removePoints(/*isBlue=*/false);
-                    }
-                }
-                else {
-                    // Adjust Blue
-                    if (asksMin.y >= 2) {
-                        bidsMax.y = asksMin.y - 1;
-                        if (bidsMin.y >= bidsMax.y) {
-                            bidsMin.y = bidsMax.y - 1;
-                        }
-                    }
-                    else {
-                        OrderGraph.removePoints(/*isBlue=*/true);
-                    }
-                }
-            }
         }
     }
 

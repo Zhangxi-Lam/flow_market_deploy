@@ -8,6 +8,9 @@ class InventoryChart():
         self.time = None
         self.inventory_data = []
 
+    def get_frontend_response(self):
+        return self.inventory_data
+
     def get_sec_since_start(self):
         if self.time is None:
             self.time = 0
@@ -18,6 +21,3 @@ class InventoryChart():
     def update(self, inventory):
         self.inventory_data.append(InventoryChartPoint(
             self.get_sec_since_start(), inventory))
-
-    def get_frontend_response(self):
-        return self.inventory_data

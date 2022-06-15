@@ -8,12 +8,14 @@ from flow_market.common.cash_chart import CashChart
 from .flo.flo_order import FloOrder
 from .flo.flo_order_book import FloOrderBook
 from .flo.flo_config import FloConfig
+from .flo.flo_order_graph import FloOrderGraph
 from ._builtin import Page, WaitPage
 from .models import Constants, Player, Group
 
 
 config = FloConfig()
 flo_order_books = {}    # {id_in_subsession: FloOrderBook}
+flo_order_graphs = {}    # {id_in_subsession: {id_in_group: FloOrderGraph}}
 inventory_charts = {}   # {id_in_subsession: {id_in_group: InventoryChart}}
 cash_charts = {}   # {id_in_subsession: {id_in_group: CashChart}}
 
@@ -27,20 +29,29 @@ class FloMarketPage(Page):
         FloMarketPage.init(player)
 
         order_book = flo_order_books[player.group.id_in_subsession]
+        order_graph = flo_order_graphs[player.group.id_in_subsession][player.id_in_group]
 
-        if message_type == 'add_order':
-            order_book.add_order(FloOrder(player.id_in_group, data))
+        if message_type == 'order_graph_update_request':
+            order_graph.send_update_to_frontend = True
+            return
+        elif message_type == 'add_order':
+            print(data)
+            order = FloOrder(player.id_in_group, data)
+            order_book.add_order(order)
+            order_graph.add_order(order)
+            return FloMarketPage.create_response(player.group)
         elif message_type == 'remove_order':
-            order_book.remove_order(order_book.find_order(data['order_id']))
-        elif message_type == 'update':
+            print(data)
+            order = order_book.find_order(data['order_id'])
+            order_book.remove_order(order)
+            order_graph.remove_order(order)
+        else:   # update
             if player.id_in_group != 1:
                 # We only let the first player in the group do the update to
                 # avoid duplicate transactions.
                 return
             FloMarketPage.update(player.group)
-
-        response = FloMarketPage.create_response(player.group)
-        return response
+            return FloMarketPage.create_response(player.group)
 
     @staticmethod
     def init(player: Player):
@@ -48,6 +59,12 @@ class FloMarketPage(Page):
         if id_in_subsession not in flo_order_books:
             flo_order_books[id_in_subsession] = FloOrderBook(
                 config)
+
+        if id_in_subsession not in flo_order_graphs:
+            flo_order_graphs[id_in_subsession] = {}
+        if id_in_group not in flo_order_graphs[id_in_subsession]:
+            flo_order_graphs[id_in_subsession][id_in_group] = FloOrderGraph()
+
         if id_in_subsession not in inventory_charts:
             inventory_charts[id_in_subsession] = {}
         if id_in_group not in inventory_charts[id_in_subsession]:
@@ -61,7 +78,10 @@ class FloMarketPage(Page):
     @staticmethod
     def update(group: Group):
         id_in_subsession = group.id_in_subsession
-        flo_order_books[id_in_subsession].transact(group)
+        completed_orders = flo_order_books[id_in_subsession].transact(group)
+        for order in completed_orders:
+            flo_order_graphs[id_in_subsession][order.id_in_group].remove_order(
+                order)
 
         for player in group.get_players():
             id_in_group = player.id_in_group
@@ -73,7 +93,7 @@ class FloMarketPage(Page):
                     player.cash)
 
     @staticmethod
-    def create_response(group: Group, complete_orders=[]):
+    def create_response(group: Group):
         """
         Response: {
             id_in_group: {
@@ -88,17 +108,21 @@ class FloMarketPage(Page):
         id_in_subsession = group.id_in_subsession
         group_response = {}
         for player in group.get_players():
+            id_in_group = player.id_in_group
             player_response = {
                 'message_type': 'update',
                 'order_book_data': flo_order_books[id_in_subsession].get_frontend_response(),
-                'order_graph_data': complete_orders,
             }
-            if id_in_subsession in inventory_charts and player.id_in_group in inventory_charts[id_in_subsession]:
-                player_response['inventory_chart_data'] = inventory_charts[id_in_subsession][player.id_in_group].get_frontend_response()
-            if id_in_subsession in cash_charts and player.id_in_group in cash_charts[id_in_subsession]:
-                player_response['cash_chart_data'] = cash_charts[id_in_subsession][player.id_in_group].get_frontend_response(
+            if id_in_subsession in flo_order_graphs and id_in_group in flo_order_graphs[id_in_subsession]:
+                player_response['order_graph_data'] = flo_order_graphs[id_in_subsession][id_in_group].get_frontend_response(
                 )
-            group_response[player.id_in_group] = player_response
+            if id_in_subsession in inventory_charts and id_in_group in inventory_charts[id_in_subsession]:
+                player_response['inventory_chart_data'] = inventory_charts[id_in_subsession][id_in_group].get_frontend_response(
+                )
+            if id_in_subsession in cash_charts and id_in_group in cash_charts[id_in_subsession]:
+                player_response['cash_chart_data'] = cash_charts[id_in_subsession][id_in_group].get_frontend_response(
+                )
+            group_response[id_in_group] = player_response
         return group_response
 
 

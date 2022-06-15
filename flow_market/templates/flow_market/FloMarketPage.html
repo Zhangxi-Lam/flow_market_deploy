@@ -65,15 +65,22 @@ Page title
     var cashChart = new CashChart();
     cashChart.show();
 
-    var updateMarketPage = window.setInterval(function () {
+    var updateFloMarketPage = window.setInterval(function () {
+        if (orderGraph.shouldRequestUpdate()) {
+            liveSend({
+                'message_type': 'order_graph_update_request'
+            })
+        }
         liveSend({
             'message_type': 'update',
         })
     }, 1000);
 
     function liveRecv(data) {
-        orderGraph.update(data['order_graph_data']);
         orderBook.update(data['order_book_data']);
+        if (data['order_graph_data']) {
+            orderGraph.update(data['order_graph_data']);
+        }
         if (data['inventory_chart_data']) {
             inventoryChart.update(data['inventory_chart_data']);
         }

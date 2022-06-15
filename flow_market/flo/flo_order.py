@@ -1,10 +1,11 @@
 from .flo_point import FloPoint
+import uuid
 
 
 class FloOrder():
     def __init__(self, id_in_group, order: dict) -> None:
         self.id_in_group = id_in_group
-        self.order_id = order['order_id']
+        self.order_id = str(uuid.uuid4())
         self.direction = order['direction']
         self.max_price_point = FloPoint(
             order['max_price_x'], order['max_price_y'], is_max_price=True)
