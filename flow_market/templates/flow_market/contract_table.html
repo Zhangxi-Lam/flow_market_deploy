@@ -45,7 +45,7 @@
                 const quantity = document.createElement('td');
                 quantity.innerHTML = element['quantity'];
                 const deadline = document.createElement('td');
-                deadline.innerHTML = element['remaining'];
+                deadline.innerHTML = element['remaining'] + ' s';
 
                 newRow.append(direction, price, quantity, deadline);
                 table.appendChild(newRow);

@@ -19,4 +19,6 @@ class InventoryChart():
             self.get_time(), inventory))
 
     def get_time(self):
+        print(round(time.time() - self.start_time, 0),
+              time.time() - self.start_time)
         return round(time.time() - self.start_time, 0)

@@ -7,7 +7,6 @@ class StatusChart():
         self.cash = None
 
     def get_frontend_response(self):
-        print(self.cash, self.inventory)
         return {
             'inventory': self.inventory,
             'cash': self.cash,
