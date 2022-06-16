@@ -3,8 +3,7 @@ from .flo_order import FloOrder
 
 
 class FloOrderTable():
-    def __init__(self, player: Player) -> None:
-        self.id_in_group = player.id_in_group
+    def __init__(self) -> None:
         self.active_orders = set()
         self.executed_orders = set()
 

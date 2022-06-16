@@ -30,6 +30,7 @@ Page title
 {% include "flow_market/inventory_chart.html" %}
 {% include "flow_market/cash_chart.html" %}
 {% include "flow_market/order_table.html" %}
+{% include "flow_market/contract_table.html" %}
 
 <div>
     <h5>Your Input</h5>
@@ -70,6 +71,17 @@ Page title
     </table>
 </div>
 
+<div>
+    <h5>Active Contracts</h5>
+    <table id="activeContractTable">
+    </table>
+</div>
+<div>
+    <h5>Executed Contracts</h5>
+    <table id="executedContractTable">
+    </table>
+</div>
+
 <script>
     var orderBook = new OrderBook();
     orderBook.show();
@@ -85,6 +97,9 @@ Page title
 
     var orderTable = new OrderTable();
     orderTable.show();
+
+    var contractTable = new ContractTable();
+    contractTable.show();
 
     var updateFloMarketPage = window.setInterval(function () {
         if (orderGraph.shouldRequestUpdate()) {
@@ -110,6 +125,10 @@ Page title
         }
         if (data['order_table_data']) {
             orderTable.update(data['order_table_data']);
+        }
+        if (data['contract_table_data']) {
+            console.log(data['contract_table_data'])
+            contractTable.update(data['contract_table_data']);
         }
     }
 

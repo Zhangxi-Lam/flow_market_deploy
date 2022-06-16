@@ -1,0 +1,73 @@
+<script>
+    class ContractTable {
+        show() {
+            var table = document.querySelector('#activeContractTable');
+            var newRow = document.createElement('tr');
+
+            var direction = document.createElement('td');
+            direction.innerHTML = 'Direction';
+            var price = document.createElement('td');
+            price.innerHTML = 'Price';
+            var quantity = document.createElement('td');
+            quantity.innerHTML = 'Quantity';
+            var deadline = document.createElement('td');
+            deadline.innerHTML = 'Deadline';
+
+            newRow.append(direction, price, quantity, deadline);
+            table.appendChild(newRow);
+
+            table = document.querySelector('#executedContractTable');
+            newRow = document.createElement('tr');
+
+            direction = document.createElement('td');
+            direction.innerHTML = 'Direction';
+            price = document.createElement('td');
+            price.innerHTML = 'Price';
+            quantity = document.createElement('td');
+            quantity.innerHTML = 'Quantity';
+
+            newRow.append(direction, price, quantity);
+            table.appendChild(newRow);
+        }
+
+        update(data) {
+            var table = document.querySelector('#activeContractTable');
+            for (var i = 1; i < table.rows.length; i++) {
+                table.deleteRow(1);
+            }
+            data['active_contracts'].forEach(element => {
+                const newRow = document.createElement('tr');
+
+                const direction = document.createElement('td');
+                direction.innerHTML = element['direction'];
+                const price = document.createElement('td');
+                price.innerHTML = element['price'];
+                const quantity = document.createElement('td');
+                quantity.innerHTML = element['quantity'];
+                const deadline = document.createElement('td');
+                deadline.innerHTML = element['remaining'];
+
+                newRow.append(direction, price, quantity, deadline);
+                table.appendChild(newRow);
+            });
+
+            table = document.querySelector('#executedContractTable');
+            for (var i = 1; i < table.rows.length; i++) {
+                table.deleteRow(1);
+            }
+            data['executed_contracts'].forEach(element => {
+                const newRow = document.createElement('tr');
+
+                const direction = document.createElement('td');
+                direction.innerHTML = element['direction'];
+                const price = document.createElement('td');
+                price.innerHTML = element['price'];
+                const quantity = document.createElement('td');
+                quantity.innerHTML = element['quantity'];
+
+                newRow.append(direction, price, quantity);
+                table.appendChild(newRow);
+            });
+        }
+    }
+</script>

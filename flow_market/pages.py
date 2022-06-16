@@ -10,8 +10,10 @@ from .flo.flo_order_book import FloOrderBook
 from .flo.flo_config import FloConfig
 from .flo.flo_order_graph import FloOrderGraph
 from .flo.flo_order_table import FloOrderTable
+from .flo.flo_contract_table import FloContractTable
 from ._builtin import Page, WaitPage
-from .models import Constants, Player, Group
+from .models import Constants, Player, Group, Subsession
+import time
 
 
 config = FloConfig()
@@ -19,7 +21,8 @@ flo_order_books = {}    # {id_in_subsession: FloOrderBook}
 flo_order_graphs = {}   # {id_in_subsession: {id_in_group: FloOrderGraph}}
 inventory_charts = {}   # {id_in_subsession: {id_in_group: InventoryChart}}
 cash_charts = {}        # {id_in_subsession: {id_in_group: CashChart}}
-flo_order_table = {}    # {id_in_subsession: {id_in_group: ActiveOrdersTable}}
+flo_order_tables = {}    # {id_in_subsession: {id_in_group: FloOrderTable}}
+flo_contract_tables = {}    # {id_in_subsession: {id_in_group: FloContractTable}}
 
 
 class FloMarketPage(Page):
@@ -28,11 +31,12 @@ class FloMarketPage(Page):
     def live_method(player: Player, data):
         message_type = data['message_type']
 
-        FloMarketPage.init(player)
+        if not flo_order_books:
+            FloMarketPage.init(player.group.subsession)
 
         order_book = flo_order_books[player.group.id_in_subsession]
         order_graph = flo_order_graphs[player.group.id_in_subsession][player.id_in_group]
-        order_table = flo_order_table[player.group.id_in_subsession][player.id_in_group]
+        order_table = flo_order_tables[player.group.id_in_subsession][player.id_in_group]
 
         if message_type == 'order_graph_update_request':
             order_graph.send_update_to_frontend = True
@@ -58,51 +62,47 @@ class FloMarketPage(Page):
             return FloMarketPage.respond(player.group)
 
     @staticmethod
-    def init(player: Player):
-        id_in_subsession, id_in_group = player.group.id_in_subsession, player.id_in_group
-        if id_in_subsession not in flo_order_books:
-            flo_order_books[id_in_subsession] = FloOrderBook(
-                config)
-
-        if id_in_subsession not in flo_order_graphs:
+    def init(subsession: Subsession):
+        start_time = time.time()
+        for g in subsession.get_groups():
+            id_in_subsession = g.id_in_subsession
+            flo_order_books[id_in_subsession] = FloOrderBook(config)
             flo_order_graphs[id_in_subsession] = {}
-        if id_in_group not in flo_order_graphs[id_in_subsession]:
-            flo_order_graphs[id_in_subsession][id_in_group] = FloOrderGraph()
-
-        if id_in_subsession not in inventory_charts:
+            flo_order_tables[id_in_subsession] = {}
+            flo_contract_tables[id_in_subsession] = {}
             inventory_charts[id_in_subsession] = {}
-        if id_in_group not in inventory_charts[id_in_subsession]:
-            inventory_charts[id_in_subsession][id_in_group] = InventoryChart()
-
-        if id_in_subsession not in cash_charts:
             cash_charts[id_in_subsession] = {}
-        if id_in_group not in cash_charts[id_in_subsession]:
-            cash_charts[id_in_subsession][id_in_group] = CashChart()
-
-        if id_in_subsession not in flo_order_table:
-            flo_order_table[id_in_subsession] = {}
-        if id_in_group not in flo_order_table[id_in_subsession]:
-            flo_order_table[id_in_subsession][id_in_group] = FloOrderTable(
-                player)
+            for p in g.get_players():
+                id_in_group = p.id_in_group
+                flo_order_graphs[id_in_subsession][id_in_group] = FloOrderGraph()
+                flo_order_tables[id_in_subsession][id_in_group] = FloOrderTable()
+                flo_contract_tables[id_in_subsession][id_in_group] = FloContractTable(
+                    id_in_subsession, id_in_group, start_time)
+                inventory_charts[id_in_subsession][id_in_group] = InventoryChart(
+                    start_time)
+                cash_charts[id_in_subsession][id_in_group] = CashChart(
+                    start_time)
 
     @staticmethod
     def update(group: Group):
         id_in_subsession = group.id_in_subsession
+
+        # Order transaction
         completed_orders = flo_order_books[id_in_subsession].transact(group)
         for order in completed_orders:
             flo_order_graphs[id_in_subsession][order.id_in_group].remove_order(
                 order)
-            flo_order_table[id_in_subsession][order.id_in_group].remove_order(
+            flo_order_tables[id_in_subsession][order.id_in_group].remove_order(
                 order)
 
         for player in group.get_players():
             id_in_group = player.id_in_group
-            if id_in_subsession in inventory_charts and id_in_group in inventory_charts[id_in_subsession]:
-                inventory_charts[id_in_subsession][id_in_group].update(
-                    player.inventory)
-            if id_in_subsession in cash_charts and id_in_group in cash_charts[id_in_subsession]:
-                cash_charts[id_in_subsession][id_in_group].update(
-                    player.cash)
+            # Contract transaction
+            flo_contract_tables[id_in_subsession][id_in_group].update(player)
+            inventory_charts[id_in_subsession][id_in_group].update(
+                player.inventory)
+            cash_charts[id_in_subsession][id_in_group].update(
+                player.cash)
 
     @staticmethod
     def respond(group: Group):
@@ -125,19 +125,16 @@ class FloMarketPage(Page):
             player_response = {
                 'message_type': 'update',
                 'order_book_data': flo_order_books[id_in_subsession].get_frontend_response(),
+                'order_graph_data': flo_order_graphs[id_in_subsession][id_in_group].get_frontend_response(
+                ),
+                'inventory_chart_data': inventory_charts[id_in_subsession][id_in_group].get_frontend_response(
+                ),
+                'cash_chart_data': cash_charts[id_in_subsession][id_in_group].get_frontend_response(
+                ),
+                'order_table_data': flo_order_tables[id_in_subsession][id_in_group].get_frontend_response(
+                ),
+                'contract_table_data': flo_contract_tables[id_in_subsession][id_in_group].get_frontend_response(),
             }
-            if id_in_subsession in flo_order_graphs and id_in_group in flo_order_graphs[id_in_subsession]:
-                player_response['order_graph_data'] = flo_order_graphs[id_in_subsession][id_in_group].get_frontend_response(
-                )
-            if id_in_subsession in inventory_charts and id_in_group in inventory_charts[id_in_subsession]:
-                player_response['inventory_chart_data'] = inventory_charts[id_in_subsession][id_in_group].get_frontend_response(
-                )
-            if id_in_subsession in cash_charts and id_in_group in cash_charts[id_in_subsession]:
-                player_response['cash_chart_data'] = cash_charts[id_in_subsession][id_in_group].get_frontend_response(
-                )
-            if id_in_subsession in flo_order_table and id_in_group in flo_order_table[id_in_subsession]:
-                player_response['order_table_data'] = flo_order_table[id_in_subsession][id_in_group].get_frontend_response(
-                )
             group_response[id_in_group] = player_response
         return group_response
 
