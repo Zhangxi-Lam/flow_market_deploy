@@ -4,6 +4,7 @@ from otree.api import Currency as c, currency_range
 
 from flow_market.common.inventory_chart import InventoryChart
 from flow_market.common.cash_chart import CashChart
+from flow_market.common.status_chart import StatusChart
 
 from .flo.flo_order import FloOrder
 from .flo.flo_order_book import FloOrderBook
@@ -19,10 +20,11 @@ import time
 config = FloConfig()
 flo_order_books = {}    # {id_in_subsession: FloOrderBook}
 flo_order_graphs = {}   # {id_in_subsession: {id_in_group: FloOrderGraph}}
-inventory_charts = {}   # {id_in_subsession: {id_in_group: InventoryChart}}
-cash_charts = {}        # {id_in_subsession: {id_in_group: CashChart}}
 flo_order_tables = {}    # {id_in_subsession: {id_in_group: FloOrderTable}}
 flo_contract_tables = {}    # {id_in_subsession: {id_in_group: FloContractTable}}
+inventory_charts = {}   # {id_in_subsession: {id_in_group: InventoryChart}}
+cash_charts = {}        # {id_in_subsession: {id_in_group: CashChart}}
+status_charts = {}        # {id_in_subsession: {id_in_group: StatusChart}}
 
 
 class FloMarketPage(Page):
@@ -72,6 +74,7 @@ class FloMarketPage(Page):
             flo_contract_tables[id_in_subsession] = {}
             inventory_charts[id_in_subsession] = {}
             cash_charts[id_in_subsession] = {}
+            status_charts[id_in_subsession] = {}
             for p in g.get_players():
                 id_in_group = p.id_in_group
                 flo_order_graphs[id_in_subsession][id_in_group] = FloOrderGraph()
@@ -82,6 +85,7 @@ class FloMarketPage(Page):
                     start_time)
                 cash_charts[id_in_subsession][id_in_group] = CashChart(
                     start_time)
+                status_charts[id_in_subsession][id_in_group] = StatusChart()
 
     @staticmethod
     def update(group: Group):
@@ -103,6 +107,7 @@ class FloMarketPage(Page):
                 player.inventory)
             cash_charts[id_in_subsession][id_in_group].update(
                 player.cash)
+            status_charts[id_in_subsession][id_in_group].update(player)
 
     @staticmethod
     def respond(group: Group):
@@ -115,6 +120,7 @@ class FloMarketPage(Page):
                 'inventory_chart_data':
                 'cash_chart_data':
                 'order_table_data':
+                'contract_table_data':
             }
         }
         """
@@ -130,6 +136,8 @@ class FloMarketPage(Page):
                 'inventory_chart_data': inventory_charts[id_in_subsession][id_in_group].get_frontend_response(
                 ),
                 'cash_chart_data': cash_charts[id_in_subsession][id_in_group].get_frontend_response(
+                ),
+                'status_chart_data': status_charts[id_in_subsession][id_in_group].get_frontend_response(
                 ),
                 'order_table_data': flo_order_tables[id_in_subsession][id_in_group].get_frontend_response(
                 ),
