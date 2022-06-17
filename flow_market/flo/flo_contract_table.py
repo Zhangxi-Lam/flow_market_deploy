@@ -1,6 +1,7 @@
 import csv
 import time
 from ..models import Player
+from ..common.my_timer import MyTimer
 
 
 class Contract(dict):
@@ -28,10 +29,10 @@ class Contract(dict):
 
 
 class FloContractTable():
-    def __init__(self, id_in_subsession, id_in_group, start_time) -> None:
+    def __init__(self, id_in_subsession, id_in_group, timer: MyTimer) -> None:
         self.id_in_subsession = id_in_subsession
         self.id_in_group = id_in_group
-        self.start_time = start_time
+        self.timer = timer
         self.contracts = self.get_contracts()
         self.active_contracts = []
         self.executed_contracts = []
@@ -44,7 +45,7 @@ class FloContractTable():
 
     def update(self, player: Player):
         self.active_contracts = []
-        t = self.get_time()
+        t = self.timer.get_time()
         for c in self.contracts:
             if t >= c.deadline:
                 if not c.has_executed:
@@ -80,6 +81,3 @@ class FloContractTable():
             if self.id_in_group == contract.id_in_group:
                 contracts.append(contract)
         return contracts
-
-    def get_time(self):
-        return round(time.time() - self.start_time, 0)

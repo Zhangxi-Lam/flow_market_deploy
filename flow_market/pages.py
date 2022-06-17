@@ -5,6 +5,7 @@ from otree.api import Currency as c, currency_range
 from flow_market.common.inventory_chart import InventoryChart
 from flow_market.common.cash_chart import CashChart
 from flow_market.common.status_chart import StatusChart
+from flow_market.common.my_timer import MyTimer
 
 from .flo.flo_order import FloOrder
 from .flo.flo_order_book import FloOrderBook
@@ -25,6 +26,7 @@ flo_contract_tables = {}    # {id_in_subsession: {id_in_group: FloContractTable}
 inventory_charts = {}   # {id_in_subsession: {id_in_group: InventoryChart}}
 cash_charts = {}        # {id_in_subsession: {id_in_group: CashChart}}
 status_charts = {}        # {id_in_subsession: {id_in_group: StatusChart}}
+timer = MyTimer()
 
 
 class FloMarketPage(Page):
@@ -65,7 +67,6 @@ class FloMarketPage(Page):
 
     @staticmethod
     def init(subsession: Subsession):
-        start_time = time.time()
         for g in subsession.get_groups():
             id_in_subsession = g.id_in_subsession
             flo_order_books[id_in_subsession] = FloOrderBook(config)
@@ -80,15 +81,16 @@ class FloMarketPage(Page):
                 flo_order_graphs[id_in_subsession][id_in_group] = FloOrderGraph()
                 flo_order_tables[id_in_subsession][id_in_group] = FloOrderTable()
                 flo_contract_tables[id_in_subsession][id_in_group] = FloContractTable(
-                    id_in_subsession, id_in_group, start_time)
+                    id_in_subsession, id_in_group, timer)
                 inventory_charts[id_in_subsession][id_in_group] = InventoryChart(
-                    start_time)
+                    timer)
                 cash_charts[id_in_subsession][id_in_group] = CashChart(
-                    start_time)
+                    timer)
                 status_charts[id_in_subsession][id_in_group] = StatusChart()
 
     @staticmethod
     def update(group: Group):
+        timer.tick()
         id_in_subsession = group.id_in_subsession
 
         # Order transaction

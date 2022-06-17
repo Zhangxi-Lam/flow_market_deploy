@@ -1,5 +1,7 @@
 import time
 
+from flow_market.common.my_timer import MyTimer
+
 
 class CashChartPoint(dict):
     def __init__(self, time, cash):
@@ -7,8 +9,8 @@ class CashChartPoint(dict):
 
 
 class CashChart():
-    def __init__(self, start_time) -> None:
-        self.start_time = start_time
+    def __init__(self, timer: MyTimer) -> None:
+        self.timer = timer
         self.cash_data = []
 
     def get_frontend_response(self):
@@ -16,7 +18,4 @@ class CashChart():
 
     def update(self, cash):
         self.cash_data.append(CashChartPoint(
-            self.get_time(), cash))
-
-    def get_time(self):
-        return round(time.time() - self.start_time, 0)
+            self.timer.get_time(), cash))
