@@ -25,6 +25,9 @@ class FloOrder():
         self.fill_quantity += clearing_rate
         self.fill_quantity = min(self.fill_quantity, self.quantity)
 
+    def remaining_quantity(self):
+        return self.quantity - self.fill_quantity
+
     def is_complete(self):
         return self.fill_quantity >= self.quantity
 

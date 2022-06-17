@@ -208,11 +208,11 @@ class FloOrderBook():
             if order.direction == 'buy':
                 if order.max_price_point.y * 100 > transact_price_in_cents:
                     min_quantity = min(
-                        min_quantity, order.quantity) if min_quantity else order.quantity
+                        min_quantity, order.remaining_quantity()) if min_quantity else order.remaining_quantity()
             else:
                 if order.min_price_point.y * 100 < transact_price_in_cents:
                     min_quantity = min(
-                        min_quantity, order.quantity) if min_quantity else order.quantity
+                        min_quantity, order.remaining_quantity()) if min_quantity else order.remaining_quantity()
         return min(min_quantity, self.precise_rate)
 
     def get_transact_orders(self, transact_price_in_cetns):
