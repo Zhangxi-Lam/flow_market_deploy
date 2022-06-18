@@ -4,22 +4,64 @@
 
 
 {% block title %}
-Page title
+Flo Market
 {% endblock %}
 
 
 {% block content %}
 <style>
-    .order-input {
-        width: 390px;
-        height: 300px;
-        display: block;
+    .otree-body.container {
+        margin-left: 0px;
+        margin-right: 0px;
+        max-width: 100%;
     }
 
-    table,
-    th,
+    .row1 {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .row2 {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .column {
+        margin: auto;
+    }
+
+    .block {
+        border: 1px solid black;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .block canvas {
+        height: 300px !important
+    }
+
+    .sub-table table {
+        width: 300px;
+        height: 150px;
+    }
+
+    .sub-chart canvas {
+        height: 150px !important;
+    }
+
+    h5 {
+        text-align: center;
+    }
+
+    table {
+        margin: 2px;
+    }
+
     td {
         border: 1px solid black;
+        height: 10px;
     }
 </style>
 
@@ -33,62 +75,73 @@ Page title
 {% include "flow_market/contract_table.html" %}
 {% include "flow_market/status_chart.html" %}
 
-<div>
-    <h5>Your Input</h5>
-    <canvas id="orderGraph"></canvas>
 
-    <button id="buyQuantityInc" onclick="OrderGraph.buyQuantityButtonClick(true)">+</button>
-    <input id="buyQuantityInput" type="number" value="10" min="1" max="100" step="5" />
-    <button id="buyQuantityDec" onclick="OrderGraph.buyQuantityButtonClick(false)">-</button>
-    <button type="button" id="buyButton" onclick="OrderGraph.buyButtonClick()">Send Buy</button>
+<div class="row1">
+    <div class="column">
+        <div class="block">
+            <div class="sub-table">
+                <h5>Active Contracts</h5>
+                <table id="activeContractTable">
+                </table>
+            </div>
+            <div class="sub-table">
+                <h5>Active Orders</h5>
+                <table id="activeOrderTable">
+                </table>
+            </div>
+        </div>
+        <div class="block">
+            <div class="sub-table">
+                <h5>Executed Orders</h5>
+                <table id="executedOrderTable">
+                </table>
+            </div>
+            <div class="sub-table">
+                <h5>Executed Contracts</h5>
+                <table id="executedContractTable">
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="column">
+        <div class="block">
+            <h5>Your Input</h5>
+            <canvas id="orderGraph"></canvas>
+            <div>
+                <button id="buyQuantityInc" onclick="OrderGraph.buyQuantityButtonClick(true)">+</button>
+                <input id="buyQuantityInput" type="number" value="10" min="1" max="100" step="5" />
+                <button id="buyQuantityDec" onclick="OrderGraph.buyQuantityButtonClick(false)">-</button>
+                <button type="button" id="buyButton" onclick="OrderGraph.buyButtonClick()">Send Buy</button>
 
-    <button id="sellQuantityInc" onclick="OrderGraph.sellQuantityButtonClick(true)">+</button>
-    <input id="sellQuantityInput" type="number" value="10" min="1" max="100" step="5" />
-    <button id="sellQuantityDec" onclick="OrderGraph.sellQuantityButtonClick(false)">-</button>
-    <button type="button" id="sellButton" onclick="OrderGraph.sellButtonClick()">Send Sell</button>
+                <button id="sellQuantityInc" onclick="OrderGraph.sellQuantityButtonClick(true)">+</button>
+                <input id="sellQuantityInput" type="number" value="10" min="1" max="100" step="5" />
+                <button id="sellQuantityDec" onclick="OrderGraph.sellQuantityButtonClick(false)">-</button>
+                <button type="button" id="sellButton" onclick="OrderGraph.sellButtonClick()">Send Sell</button>
+            </div>
+        </div>
+    </div>
+    <div class="column">
+        <div class="block">
+            <h5>Market</h5>
+            <canvas id="orderBook"></canvas>
+        </div>
+        <div class="block">
+            <div class="sub-chart">
+                <h5>Inventory</h5>
+                <canvas id="inventoryChart"></canvas>
+            </div>
+            <div class="sub-chart">
+                <h5>Cash</h5>
+                <canvas id="cashChart"></canvas>
+            </div>
+        </div>
+    </div>
 </div>
-
-<div>
-    <h5>Market</h5>
-    <canvas id="orderBook"></canvas>
-</div>
-<div>
-    <h5>Inventory</h5>
-    <canvas id="inventoryChart"></canvas>
-</div>
-<div>
-    <h5>Cash</h5>
-    <canvas id="cashChart"></canvas>
-</div>
-
-<div>
-    <h5>Active Orders</h5>
-    <table id="activeOrderTable">
-    </table>
-</div>
-<div>
-    <h5>Executed Orders</h5>
-    <table id="executedOrderTable">
-    </table>
-</div>
-
-<div>
-    <h5>Active Contracts</h5>
-    <table id="activeContractTable">
-    </table>
-</div>
-<div>
-    <h5>Executed Contracts</h5>
-    <table id="executedContractTable">
-    </table>
-</div>
-
-<div>
-    <h5>Status</h5>
-    <h6>Cash: </h6>
-    <h6 id="cashStatus"></h6>
-    <h6>Inventory: </h6>
-    <h6 id="inventoryStatus"></h6>
+<div class="row2">
+    <h5>Cash: </h5>
+    <h5 id="cashStatus"></h5>
+    <h5>Inventory: </h5>
+    <h5 id="inventoryStatus"></h5>
 </div>
 
 <script>
