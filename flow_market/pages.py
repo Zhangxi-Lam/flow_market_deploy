@@ -106,9 +106,9 @@ class FloMarketPage(Page):
             # Contract transaction
             flo_contract_tables[id_in_subsession][id_in_group].update(player)
             inventory_charts[id_in_subsession][id_in_group].update(
-                player.inventory)
+                player.get_inventory())
             cash_charts[id_in_subsession][id_in_group].update(
-                player.cash)
+                player.get_cash())
             status_charts[id_in_subsession][id_in_group].update(player)
 
     @staticmethod

@@ -1,3 +1,4 @@
+from flow_market.models import Player
 from .flo_config import FloConfig
 from .flo_point import FloPoint
 from .flo_order import FloOrder
@@ -193,14 +194,14 @@ class FloOrderBook():
                 self.remove_order(order)
         return complete_orders
 
-    def fill_order(self, order: FloOrder, price_in_cents, rate, player):
+    def fill_order(self, order: FloOrder, price_in_cents, rate, player: Player):
         order.fill(rate)
         if order.direction == 'buy':
-            player.inventory += rate
-            player.cash -= rate * price_in_cents / 100
+            player.update_inventory(rate)
+            player.update_cash(-rate * price_in_cents / 100)
         else:
-            player.inventory -= rate
-            player.cash += rate * price_in_cents / 100
+            player.update_inventory(-rate)
+            player.update_cash(rate * price_in_cents / 100)
 
     def get_transact_rate(self, transact_price_in_cents):
         min_quantity = None

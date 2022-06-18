@@ -59,11 +59,11 @@ class FloContractTable():
         contract.has_executed = True
         is_buy = contract['direction']
         if is_buy:
-            player.inventory -= contract['quantity']
-            player.cash += contract['quantity'] * contract['price']
+            player.update_inventory(-contract['quantity'])
+            player.update_cash(contract['quantity'] * contract['price'])
         else:
-            player.inventory += contract['quantity']
-            player.cash -= contract['quantity'] * contract['price']
+            player.update_inventory(contract['quantity'])
+            player.update_cash(-contract['quantity'] * contract['price'])
 
     def get_contracts(self):
         contracts = []

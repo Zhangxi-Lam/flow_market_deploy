@@ -13,5 +13,5 @@ class StatusChart():
         }
 
     def update(self, player: Player):
-        self.inventory = player.inventory
-        self.cash = player.cash
+        self.inventory = player.get_inventory()
+        self.cash = player.get_cash()

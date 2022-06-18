@@ -37,5 +37,17 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
-    inventory = models.FloatField(initial=0)
-    cash = models.FloatField(initial=0)
+    _inventory = models.FloatField(initial=0)
+    _cash = models.FloatField(initial=0)
+
+    def update_inventory(self, delta):
+        self._inventory += delta
+
+    def get_inventory(self):
+        return round(self._inventory, 2)
+
+    def update_cash(self, delta):
+        self._cash += delta
+
+    def get_cash(self):
+        return round(self._cash, 2)
