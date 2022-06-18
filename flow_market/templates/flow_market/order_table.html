@@ -31,10 +31,22 @@
         }
 
         update(data) {
+            console.log(data);
             var table = document.querySelector('#activeOrderTable');
-            for (var i = 1; i < table.rows.length; i++) {
-                table.deleteRow(1);
-            }
+            table.innerHTML = "";
+
+            var newRow = document.createElement('tr');
+            var direction = document.createElement('td');
+            direction.innerHTML = 'Direction';
+            var price = document.createElement('td');
+            price.innerHTML = 'Price';
+            var quantity = document.createElement('td');
+            quantity.innerHTML = 'Quantity';
+            var progress = document.createElement('td');
+            progress.innerHTML = 'Progress';
+            newRow.append(direction, price, quantity, progress);
+            table.appendChild(newRow);
+
             data['active_orders'].forEach(element => {
                 const newRow = document.createElement('tr');
 
@@ -52,9 +64,18 @@
             });
 
             table = document.querySelector('#executedOrderTable');
-            for (var i = 1; i < table.rows.length; i++) {
-                table.deleteRow(1);
-            }
+            table.innerHTML = "";
+
+            newRow = document.createElement('tr');
+            direction = document.createElement('td');
+            direction.innerHTML = 'Direction';
+            price = document.createElement('td');
+            price.innerHTML = 'Price';
+            quantity = document.createElement('td');
+            quantity.innerHTML = 'Quantity';
+            newRow.append(direction, price, quantity);
+            table.appendChild(newRow);
+
             data['executed_orders'].forEach(element => {
                 const newRow = document.createElement('tr');
 
