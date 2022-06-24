@@ -1,7 +1,7 @@
 import csv
 import time
 from ..models import Player
-from ..common.my_timer import MyTimer
+from .my_timer import MyTimer
 
 
 class Contract(dict):
@@ -28,7 +28,7 @@ class Contract(dict):
             self.remaining = round(self.deadline - t, 0)
 
 
-class FloContractTable():
+class ContractTable():
     def __init__(self, id_in_subsession, id_in_group, timer: MyTimer) -> None:
         self.id_in_subsession = id_in_subsession
         self.id_in_group = id_in_group

@@ -6,6 +6,7 @@ from flow_market.common.inventory_chart import InventoryChart
 from flow_market.common.cash_chart import CashChart
 from flow_market.common.profit_chart import ProfitChart
 from flow_market.common.status_chart import StatusChart
+from flow_market.common.contract_table import ContractTable
 from flow_market.common.my_timer import MyTimer
 
 from .flo.flo_order import FloOrder
@@ -13,7 +14,6 @@ from .flo.flo_order_book import FloOrderBook
 from .flo.flo_config import FloConfig
 from .flo.flo_order_graph import FloOrderGraph
 from .flo.flo_order_table import FloOrderTable
-from .flo.flo_contract_table import FloContractTable
 from ._builtin import Page, WaitPage
 from .models import Constants, Player, Group, Subsession
 
@@ -82,7 +82,7 @@ class FloMarketPage(Page):
                 id_in_group = p.id_in_group
                 flo_order_graphs[id_in_subsession][id_in_group] = FloOrderGraph()
                 flo_order_tables[id_in_subsession][id_in_group] = FloOrderTable()
-                flo_contract_tables[id_in_subsession][id_in_group] = FloContractTable(
+                flo_contract_tables[id_in_subsession][id_in_group] = ContractTable(
                     id_in_subsession, id_in_group, timer)
                 inventory_charts[id_in_subsession][id_in_group] = InventoryChart(
                     timer)
