@@ -22,7 +22,7 @@ class FloOrder():
         # return self.__dict__.__str__()
 
     def fill(self, clearing_rate):
-        self.fill_quantity += clearing_rate
+        self.fill_quantity = round(self.fill_quantity + clearing_rate, 2)
         self.fill_quantity = min(self.fill_quantity, self.quantity)
 
     def remaining_quantity(self):

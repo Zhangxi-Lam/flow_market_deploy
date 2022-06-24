@@ -4,6 +4,7 @@ from otree.api import Currency as c, currency_range
 
 from flow_market.common.inventory_chart import InventoryChart
 from flow_market.common.cash_chart import CashChart
+from flow_market.common.profit_chart import ProfitChart
 from flow_market.common.status_chart import StatusChart
 from flow_market.common.my_timer import MyTimer
 
@@ -15,7 +16,6 @@ from .flo.flo_order_table import FloOrderTable
 from .flo.flo_contract_table import FloContractTable
 from ._builtin import Page, WaitPage
 from .models import Constants, Player, Group, Subsession
-import time
 
 
 config = FloConfig()
@@ -25,6 +25,7 @@ flo_order_tables = {}    # {id_in_subsession: {id_in_group: FloOrderTable}}
 flo_contract_tables = {}    # {id_in_subsession: {id_in_group: FloContractTable}}
 inventory_charts = {}   # {id_in_subsession: {id_in_group: InventoryChart}}
 cash_charts = {}        # {id_in_subsession: {id_in_group: CashChart}}
+profit_charts = {}      # {id_in_subsession: {id_in_group: ProfitChart}}
 status_charts = {}        # {id_in_subsession: {id_in_group: StatusChart}}
 timer = MyTimer()
 
@@ -75,6 +76,7 @@ class FloMarketPage(Page):
             flo_contract_tables[id_in_subsession] = {}
             inventory_charts[id_in_subsession] = {}
             cash_charts[id_in_subsession] = {}
+            profit_charts[id_in_subsession] = {}
             status_charts[id_in_subsession] = {}
             for p in g.get_players():
                 id_in_group = p.id_in_group
@@ -85,6 +87,8 @@ class FloMarketPage(Page):
                 inventory_charts[id_in_subsession][id_in_group] = InventoryChart(
                     timer)
                 cash_charts[id_in_subsession][id_in_group] = CashChart(
+                    timer)
+                profit_charts[id_in_subsession][id_in_group] = ProfitChart(
                     timer)
                 status_charts[id_in_subsession][id_in_group] = StatusChart()
 
@@ -109,6 +113,9 @@ class FloMarketPage(Page):
                 player.get_inventory())
             cash_charts[id_in_subsession][id_in_group].update(
                 player.get_cash())
+            profit_charts[id_in_subsession][id_in_group].update(
+                player,
+                flo_contract_tables[id_in_subsession][id_in_group].active_contracts)
             status_charts[id_in_subsession][id_in_group].update(player)
 
     @staticmethod
@@ -138,6 +145,8 @@ class FloMarketPage(Page):
                 'inventory_chart_data': inventory_charts[id_in_subsession][id_in_group].get_frontend_response(
                 ),
                 'cash_chart_data': cash_charts[id_in_subsession][id_in_group].get_frontend_response(
+                ),
+                'profit_chart_data': profit_charts[id_in_subsession][id_in_group].get_frontend_response(
                 ),
                 'status_chart_data': status_charts[id_in_subsession][id_in_group].get_frontend_response(
                 ),

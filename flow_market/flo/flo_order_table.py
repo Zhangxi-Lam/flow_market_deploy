@@ -25,7 +25,6 @@ class FloOrderTable():
                 'quantity': order.fill_quantity,
             })
 
-        print(active_orders)
         return {
             'active_orders': active_orders,
             'executed_orders': executed_orders

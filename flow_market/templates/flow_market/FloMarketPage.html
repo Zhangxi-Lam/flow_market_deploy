@@ -75,6 +75,7 @@ Flo Market
 {% include "flow_market/order_table.html" %}
 {% include "flow_market/contract_table.html" %}
 {% include "flow_market/status_chart.html" %}
+{% include "flow_market/profit_chart.html" %}
 
 
 <div class="row1">
@@ -120,6 +121,10 @@ Flo Market
                 <button type="button" id="sellButton" onclick="OrderGraph.sellButtonClick()">Send Sell</button>
             </div>
         </div>
+        <div class="block">
+            <h5>Projected Profit</h5>
+            <canvas id="profitChart"></canvas>
+        </div>
     </div>
     <div class="column">
         <div class="block">
@@ -164,7 +169,12 @@ Flo Market
     var contractTable = new ContractTable();
     contractTable.show();
 
+    var profitChart = new ProfitChart();
+    profitChart.show();
+
+
     var statusChart = new StatusChart();
+
 
     var updateFloMarketPage = window.setInterval(function () {
         if (orderGraph.shouldRequestUpdate()) {
@@ -187,6 +197,9 @@ Flo Market
         }
         if (data['cash_chart_data']) {
             cashChart.update(data['cash_chart_data']);
+        }
+        if (data['profit_chart_data']) {
+            profitChart.update(data['profit_chart_data']);
         }
         if (data['status_chart_data']) {
             statusChart.update(data['status_chart_data']);

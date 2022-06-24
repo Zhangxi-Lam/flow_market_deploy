@@ -1,0 +1,66 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata@2.2.3/dist/chartjs-plugin-dragdata.min.js"></script>
+
+<script>
+    class ProfitChart {
+        // Class variables
+        static myChart;
+
+        get data() {
+            return {
+                datasets: [{
+                    label: 'Profit',
+                    data: [],
+                    pointRadius: 0,
+                    borderColor: BLUE,
+                }]
+            }
+        }
+
+        get scales() {
+            return {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Time'
+                    },
+                    type: 'linear',
+                    min: 0,
+                    suggestedMax: 60,
+                    position: 'bottom',
+                    ticks: {
+                        stepSize: 1,
+                    },
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Projected Profit',
+                    },
+                    type: 'linear',
+                    suggestedMin: 0,
+                    suggestedMax: 10
+                }
+            }
+        }
+
+        get config() {
+            return {
+                type: 'line',
+                data: this.data,
+                options: {
+                    scales: this.scales
+                }
+            }
+        }
+
+        show() {
+            ProfitChart.myChart = new Chart(document.getElementById("profitChart"), this.config);
+        }
+
+        update(data) {
+            ProfitChart.myChart.data.datasets[0].data = data;
+            ProfitChart.myChart.update();
+        }
+    }
+</script>
