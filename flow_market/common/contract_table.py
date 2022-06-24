@@ -27,6 +27,9 @@ class Contract(dict):
         if t < self.deadline:
             self.remaining = round(self.deadline - t, 0)
 
+    def execute(self, executed_quantity):
+        self.quantity = executed_quantity
+
 
 class ContractTable():
     def __init__(self, id_in_subsession, id_in_group, timer: MyTimer) -> None:
@@ -63,11 +66,13 @@ class ContractTable():
                 player.get_inventory(), contract.quantity) if player.get_inventory() > 0 else 0
             player.update_inventory(-executed_quantity)
             player.update_cash(executed_quantity * contract['price'])
+            contract.execute(executed_quantity)
         else:
             executed_quantity = min(-player.get_inventory(),
                                     contract.quantity) if player.get_inventory() < 0 else 0
             player.update_inventory(executed_quantity)
             player.update_cash(-executed_quantity * contract['price'])
+            contract.execute(executed_quantity)
 
     def get_contracts(self):
         contracts = []
