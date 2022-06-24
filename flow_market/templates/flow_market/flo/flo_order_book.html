@@ -2,7 +2,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata@2.2.3/dist/chartjs-plugin-dragdata.min.js"></script>
 
 <script>
-    class OrderBook {
+    class FloOrderBook {
         // Class variables
         static myChart;
         static floBidsPointsRaw = [];  // {y: 10, slope:-1, isMax: true}
@@ -78,14 +78,14 @@
         }
 
         show() {
-            OrderBook.myChart = new Chart(document.getElementById("orderBook"), this.config);
+            FloOrderBook.myChart = new Chart(document.getElementById("orderBook"), this.config);
         }
 
         update(data) {
-            OrderBook.myChart.data.datasets[BIDS_DATASETS_INDEX].data = data['bids_order_points']
-            OrderBook.myChart.data.datasets[ASKS_DATASETS_INDEX].data = data['asks_order_points']
-            OrderBook.myChart.data.datasets[2].data = data['transact_points']
-            OrderBook.myChart.update();
+            FloOrderBook.myChart.data.datasets[BIDS_DATASETS_INDEX].data = data['bids_order_points']
+            FloOrderBook.myChart.data.datasets[ASKS_DATASETS_INDEX].data = data['asks_order_points']
+            FloOrderBook.myChart.data.datasets[2].data = data['transact_points']
+            FloOrderBook.myChart.update();
         }
 
     }
