@@ -1,0 +1,252 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata@2.2.3/dist/chartjs-plugin-dragdata.min.js"></script>
+
+<script>
+    class CdaOrderGraph {
+        // Class variables
+        static myChart;
+        static bidActive = true;
+        static askActive = true;
+        static buyOrderId;
+        static sellOrderId;
+
+
+        get data() {
+            return {
+                datasets: [{
+                    label: 'Bids',
+                    pointRadius: [0, 6, 0],
+                    pointHitRadius: [0, 25, 0],
+                    pointStyle: ["", "circle", "rect", ""],
+                    dragData: true,
+                    showLine: true,
+                    backgroundColor: BLUE,
+                    borderColor: BLUE_TRANSPARENT,
+                    data: []
+                },
+                {
+                    label: 'Asks',
+                    pointRadius: [0, 6, 0],
+                    pointHitRadius: [0, 25, 0],
+                    pointStyle: ["", "rect", "circle", ""],
+                    dragData: true,
+                    showLine: true,
+                    backgroundColor: RED,
+                    borderColor: RED_TRANSPARENT,
+                    data: []
+                }]
+            }
+        }
+
+        get scales() {
+            return {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Quantity'
+                    },
+                    type: 'linear',
+                    min: 0,
+                    max: 5,
+                    position: 'bottom',
+                    ticks: {
+                        stepSize: 1,
+                    },
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Price',
+                    },
+                    type: 'linear',
+                    min: 0,
+                    max: YMAX,
+                }
+            }
+        }
+
+        get plugins() {
+            return {
+                dragData: {
+                    round: 0,
+                    dragX: true,
+                    showTooltip: true,
+                    onDragStart: function (e, datasetIndex, index, value) {
+                        if (index == 0 || index == 3) { return false; }
+                        if (datasetIndex == 0 && !CdaOrderGraph.bidActive) {
+                            return false;
+                        }
+                        if (datasetIndex == 1 && !CdaOrderGraph.askActive) {
+                            return false;
+                        }
+                    },
+                    onDrag: function (e, datasetIndex, index, value) {
+                        let bids = CdaOrderGraph.myChart.data.datasets[0].data;
+                        let bidsPoint = bids[1];
+                        let asks = CdaOrderGraph.myChart.data.datasets[1].data;
+                        let asksPoint = asks[1];
+                        if (datasetIndex == 0) {
+                            // Dragging bids
+                            if (!CdaOrderGraph.askActive && value.y >= asksPoint.y) {
+                                bidsPoint.y = asksPoint.y - 1;
+                            }
+                            bids[0].y = bidsPoint.y;
+                            bids[2].x = bidsPoint.x;
+                        } else {
+                            // Dragging asks
+                            if (!CdaOrderGraph.bidActive && value.y <= bidsPoint.y) {
+                                asksMin.y = bidsPoint.y + 1;
+                            }
+                            asks[0].y = asksPoint.y;
+                            asks[2].x = asksPoint.x;
+                        }
+                    },
+                    onDragEnd: function (e, datasetIndex, index, value) {
+                    },
+                }
+            }
+        }
+
+        get config() {
+            return {
+                type: 'scatter',
+                data: this.data,
+                options: {
+                    scales: this.scales,
+                    plugins: this.plugins,
+                    onHover: (e, chartElement) => {
+                        let element = chartElement[0]
+                        if (element != null) {
+                            if (element.index != 1) {
+                                return;
+                            }
+                            if (element.datasetIndex == 0 && !CdaOrderGraph.bidActive) {
+                                return;
+                            }
+                            if (element.datasetIndex == 1 && !CdaOrderGraph.askActive) {
+                                return;
+                            }
+                            document.querySelector("#orderGraph").style.cursor = "grab";
+                        } else {
+                            document.querySelector("#orderGraph").style.cursor = "default";
+                        }
+                    }
+                }
+            };
+        }
+
+        show() {
+            CdaOrderGraph.myChart = new Chart(
+                document.getElementById("orderGraph"), this.config);
+        }
+
+        update(data) {
+            CdaOrderGraph.bidActive = data['bid_active'];
+            CdaOrderGraph.myChart.data.datasets[0].data = data['bid_data'];
+            CdaOrderGraph.buyOrderId = data['buy_order_id'];
+            if (!data['bid_data']) {
+                this.disableButton(/*isBuy=*/true);
+            } else if (CdaOrderGraph.bidActive) {
+                this.setPointsActive(/*isBuy=*/true);
+            } else {
+                this.setPointsInactive(/*isBuy=*/true)
+            }
+
+            CdaOrderGraph.askActive = data['ask_active'];
+            CdaOrderGraph.myChart.data.datasets[1].data = data['ask_data'];
+            CdaOrderGraph.sellOrderId = data['sell_order_id'];
+            if (!data['ask_data']) {
+                this.disableButton(/*isBuy=*/false);
+            } else if (CdaOrderGraph.askActive) {
+                this.setPointsActive(/*isBuy=*/false);
+            } else {
+                this.setPointsInactive(/*isBuy=*/false)
+            }
+            CdaOrderGraph.myChart.update();
+        }
+
+        shouldRequestUpdate() {
+            return CdaOrderGraph.myChart.data.datasets[0].data.length == 0 &&
+                CdaOrderGraph.myChart.data.datasets[1].data.length == 0;
+        }
+
+        disableButton(isBuy) {
+            if (isBuy) {
+                document.querySelector("#buyButton").disabled = true;
+            } else {
+                document.querySelector("#sellButton").disabled = true;
+            }
+        }
+
+        setPointsActive(isBuy) {
+            if (isBuy) {
+                let datasets = CdaOrderGraph.myChart.data.datasets[0];
+                datasets["pointRadius"] = [0, 6, 0];
+                datasets["borderColor"] = BLUE_TRANSPARENT;
+                document.querySelector("#buyButton").disabled = false;
+                document.querySelector("#buyButton").innerText = "Send Buy";
+            } else {
+                let datasets = CdaOrderGraph.myChart.data.datasets[1];
+                datasets["pointRadius"] = [0, 6, 0];
+                datasets["borderColor"] = RED_TRANSPARENT;
+                document.querySelector("#sellButton").disabled = false;
+                document.querySelector("#sellButton").innerText = "Send Sell";
+            }
+        }
+
+        setPointsInactive(isBuy) {
+            if (isBuy) {
+                let datasets = CdaOrderGraph.myChart.data.datasets[0];
+                datasets["pointRadius"] = [0, 0, 0];
+                datasets["borderColor"] = BLUE;
+                document.querySelector("#buyButton").disabled = false;
+                document.querySelector("#buyButton").innerText = "Cancel Buy";
+            } else {
+                let datasets = CdaOrderGraph.myChart.data.datasets[1];
+                datasets["pointRadius"] = [0, 0, 0];
+                datasets["borderColor"] = RED;
+                document.querySelector("#sellButton").disabled = false;
+                document.querySelector("#sellButton").innerText = "Cancel Sell";
+            }
+        }
+
+
+        static buyButtonClick() {
+            let datasets = CdaOrderGraph.myChart.data.datasets[0];
+            let button = document.querySelector("#buyButton");
+            if (CdaOrderGraph.bidActive) {
+                let quantity = document.querySelector("#buyQuantityInput");
+                liveSend(CdaOrderGraph.parseOrder('buy', datasets["data"]));
+            } else {
+                liveSend({
+                    'message_type': 'remove_order',
+                    'order_id': CdaOrderGraph.buyOrderId
+                });
+            }
+        }
+
+        static sellButtonClick() {
+            let datasets = CdaOrderGraph.myChart.data.datasets[1];
+            if (CdaOrderGraph.askActive) {
+                let quantity = document.querySelector("#buyQuantityInput");
+                liveSend(CdaOrderGraph.parseOrder('sell', datasets["data"]));
+            } else {
+                liveSend({
+                    'message_type': 'remove_order',
+                    'order_id': CdaOrderGraph.sellOrderId
+                });
+            }
+        }
+
+        static parseOrder(direction, data, quantity) {
+            return {
+                'message_type': 'add_order',
+                'direction': direction,
+                'price': data[1].x,
+                'quantity': data[1].y,
+            };
+        }
+    }
+
+
+</script>

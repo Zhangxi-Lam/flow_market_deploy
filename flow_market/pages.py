@@ -5,6 +5,8 @@ from flow_market.common.status_chart import StatusChart
 from flow_market.common.contract_table import ContractTable
 from flow_market.common.my_timer import MyTimer
 
+from .cda.cda_order import CdaOrder
+from .cda.cda_order_graph import CdaOrderGraph
 from .flo.flo_order import FloOrder
 from .flo.flo_order_book import FloOrderBook
 from .flo.flo_config import FloConfig
@@ -17,6 +19,7 @@ from .models import Player, Group, Subsession
 config = FloConfig()
 flo_order_books = {}  # {id_in_subsession: FloOrderBook}
 flo_order_graphs = {}  # {id_in_subsession: {id_in_group: FloOrderGraph}}
+cda_order_graphs = {}  # {id_in_subsession: {id_in_group: CdaOrderGraph}}
 flo_order_tables = {}  # {id_in_subsession: {id_in_group: FloOrderTable}}
 flo_contract_tables = {}  # {id_in_subsession: {id_in_group: FloContractTable}}
 inventory_charts = {}  # {id_in_subsession: {id_in_group: InventoryChart}}
@@ -67,16 +70,16 @@ class FloMarketPage(Page):
     def init(subsession: Subsession):
         timer.reset()
         r = subsession.round_number
-        for g in subsession.get_groups():
-            flo_order_books[r] = {}
-            flo_order_graphs[r] = {}
-            flo_order_tables[r] = {}
-            flo_contract_tables[r] = {}
-            inventory_charts[r] = {}
-            cash_charts[r] = {}
-            profit_charts[r] = {}
-            status_charts[r] = {}
+        flo_order_books[r] = {}
+        flo_order_graphs[r] = {}
+        flo_order_tables[r] = {}
+        flo_contract_tables[r] = {}
+        inventory_charts[r] = {}
+        cash_charts[r] = {}
+        profit_charts[r] = {}
+        status_charts[r] = {}
 
+        for g in subsession.get_groups():
             id_in_subsession = g.id_in_subsession
             flo_order_books[r][id_in_subsession] = FloOrderBook(config)
             flo_order_graphs[r][id_in_subsession] = {}
@@ -177,4 +180,74 @@ class FloMarketPage(Page):
         return group_response
 
 
-page_sequence = [FloMarketPage]
+class CdaMarketPage(Page):
+    @staticmethod
+    def live_method(player: Player, data):
+        message_type = data["message_type"]
+
+        r = player.subsession.round_number
+        if r not in cda_order_graphs:
+            CdaMarketPage.init(player.group.subsession)
+
+        id_in_subsession = player.group.id_in_subsession
+        id_in_group = player.id_in_group
+        order_graph = cda_order_graphs[r][id_in_subsession][id_in_group]
+
+        if message_type == "order_graph_update_request":
+            order_graph.send_update_to_frontend = True
+            return
+        elif message_type == "add_order":
+            order = CdaOrder(player.id_in_group, data)
+            order_graph.add_order(order)
+            return CdaMarketPage.respond(player.group)
+        else:
+            # update
+            if id_in_group != 1:
+                return
+            CdaMarketPage.update(player.group)
+            return CdaMarketPage.respond(player.group)
+
+    @staticmethod
+    def init(subsession: Subsession):
+        timer.reset()
+        r = subsession.round_number
+        cda_order_graphs[r] = {}
+
+        for g in subsession.get_groups():
+            id_in_subsession = g.id_in_subsession
+            cda_order_graphs[r][id_in_subsession] = {}
+
+            for p in g.get_players():
+                id_in_group = p.id_in_group
+                cda_order_graphs[r][id_in_subsession][id_in_group] = CdaOrderGraph()
+
+    @staticmethod
+    def update(group: Group):
+        pass
+
+    @staticmethod
+    def respond(group: Group):
+        """
+        Response: {
+            id_in_group: {
+                'message_type': 'update'
+                'order_graph_data':
+            }
+        }
+        """
+        r = group.subsession.round_number
+        id_in_subsession = group.id_in_subsession
+        group_response = {}
+        for player in group.get_players():
+            id_in_group = player.id_in_group
+            player_response = {
+                "message_type": "update",
+                "order_graph_data": cda_order_graphs[r][id_in_subsession][
+                    id_in_group
+                ].get_frontend_response(),
+            }
+            group_response[id_in_group] = player_response
+        return group_response
+
+
+page_sequence = [CdaMarketPage]
