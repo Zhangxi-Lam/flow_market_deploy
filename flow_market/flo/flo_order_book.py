@@ -2,10 +2,9 @@ from flow_market.models import Player
 from .flo_config import FloConfig
 from .flo_point import FloPoint
 from .flo_order import FloOrder
-import time
 
 
-class FloOrderBook():
+class FloOrderBook:
     """
     The OrderBook of the group
     """
@@ -14,12 +13,12 @@ class FloOrderBook():
         self.config = config
 
         self.orders = {}  # {order_id: FloOrder}
-        self.bids_orders = {}   # {id_in_group: {order_id: FloOrder}}
+        self.bids_orders = {}  # {id_in_group: {order_id: FloOrder}}
         self.asks_orders = {}
-        self.raw_bids_points = []     # [FloPoint, ...], sorted by y desc
-        self.raw_asks_points = []     # [FloPoint, ...], sorted by y asc
-        self.combined_bids_points = []     # [FloPoint, ...], sorted by y desc
-        self.combined_asks_points = []     # [FloPoint, ...], sorted by y asc
+        self.raw_bids_points = []  # [FloPoint, ...], sorted by y desc
+        self.raw_asks_points = []  # [FloPoint, ...], sorted by y asc
+        self.combined_bids_points = []  # [FloPoint, ...], sorted by y desc
+        self.combined_asks_points = []  # [FloPoint, ...], sorted by y asc
 
         self.intersect_points = []  # [FloPoint, ...]
 
@@ -31,26 +30,24 @@ class FloOrderBook():
 
     def get_frontend_response(self):
         return {
-            'bids_order_points': self.combined_bids_points,
-            'asks_order_points': self.combined_asks_points,
-            'transact_points': self.intersect_points,
+            "bids_order_points": self.combined_bids_points,
+            "asks_order_points": self.combined_asks_points,
+            "transact_points": self.intersect_points,
         }
 
     def add_order(self, order: FloOrder):
         self.orders[order.order_id] = order
 
-        is_buy = order.direction == 'buy'
+        is_buy = order.direction == "buy"
         group_orders = self.bids_orders if is_buy else self.asks_orders
-        player_orders = group_orders.get(
-            order.id_in_group, {})
+        player_orders = group_orders.get(order.id_in_group, {})
         player_orders[order.order_id] = order
         group_orders[order.id_in_group] = player_orders
 
         points = self.raw_bids_points if is_buy else self.raw_asks_points
         points.append(order.max_price_point)
         points.append(order.min_price_point)
-        points.sort(
-            reverse=is_buy, key=lambda point: point.y)
+        points.sort(reverse=is_buy, key=lambda point: point.y)
 
         self.update_combined_points(is_buy)
         self.update_intersect_points()
@@ -59,9 +56,10 @@ class FloOrderBook():
         return self.orders[order_id]
 
     def remove_order(self, order: FloOrder):
-        del self.orders[order.order_id]
+        if order.order_id in self.orders:
+            del self.orders[order.order_id]
 
-        is_buy = order.direction == 'buy'
+        is_buy = order.direction == "buy"
         group_orders = self.bids_orders if is_buy else self.asks_orders
         del group_orders[order.id_in_group][order.order_id]
 
@@ -92,7 +90,7 @@ class FloOrderBook():
             x += (point.y - y) * inverse
             result.append(FloPoint(x, point.y))
             # Update
-            change = (1 / point.slope) if is_buy else - 1 / point.slope
+            change = (1 / point.slope) if is_buy else -1 / point.slope
             if point.is_max_price:
                 inverse += change
             else:
@@ -114,7 +112,8 @@ class FloOrderBook():
             self.intersect_points = [
                 FloPoint(0, self.precise_price_in_cents / 100),
                 FloPoint(self.precise_rate, self.precise_price_in_cents / 100),
-                FloPoint(self.precise_rate, 0)]
+                FloPoint(self.precise_rate, 0),
+            ]
         else:
             self.intersect_points = []
 
@@ -131,9 +130,11 @@ class FloOrderBook():
         w = FloPoint.get_w(buy_lo, sell_lo, buy_hi, sell_hi)
 
         self.precise_price_in_cents = round(
-            sell_lo.y + w * (sell_hi.y - sell_lo.y), self.config.precision)
+            sell_lo.y + w * (sell_hi.y - sell_lo.y), self.config.precision
+        )
         self.precise_rate = round(
-            sell_lo.x + w * (sell_hi.x - sell_lo.x), self.config.precision)
+            sell_lo.x + w * (sell_hi.x - sell_lo.x), self.config.precision
+        )
 
     # Get the best bid
     def get_best_bid_in_cents(self):
@@ -157,8 +158,10 @@ class FloOrderBook():
         if p1.x == p2.x:
             return p1.x
         slope = FloPoint.get_slope(p1, p2) * self.config.dollar_to_cent
-        return round(p1.x + (y_cents - p1.y * self.config.dollar_to_cent) * 1 / slope,
-                     self.config.precision)
+        return round(
+            p1.x + (y_cents - p1.y * self.config.dollar_to_cent) * 1 / slope,
+            self.config.precision,
+        )
 
     # Get the index of the FloPoint to the left of the y_cents
     def get_y_left(self, combined_points, y_cents, is_buy):
@@ -187,8 +190,12 @@ class FloOrderBook():
         transact_orders = self.get_transact_orders(self.precise_price_in_cents)
 
         for order in transact_orders:
-            self.fill_order(order, transact_price_in_cents, transact_rate,
-                            group.get_player_by_id(order.id_in_group))
+            self.fill_order(
+                order,
+                transact_price_in_cents,
+                transact_rate,
+                group.get_player_by_id(order.id_in_group),
+            )
             if order.is_complete():
                 complete_orders.append(order)
                 self.remove_order(order)
@@ -196,7 +203,7 @@ class FloOrderBook():
 
     def fill_order(self, order: FloOrder, price_in_cents, rate, player: Player):
         order.fill(rate)
-        if order.direction == 'buy':
+        if order.direction == "buy":
             player.update_inventory(rate)
             player.update_cash(-rate * price_in_cents / 100)
         else:
@@ -206,20 +213,26 @@ class FloOrderBook():
     def get_transact_rate(self, transact_price_in_cents):
         min_quantity = None
         for order in self.orders.values():
-            if order.direction == 'buy':
+            if order.direction == "buy":
                 if order.max_price_point.y * 100 > transact_price_in_cents:
-                    min_quantity = min(
-                        min_quantity, order.remaining_quantity()) if min_quantity else order.remaining_quantity()
+                    min_quantity = (
+                        min(min_quantity, order.remaining_quantity())
+                        if min_quantity
+                        else order.remaining_quantity()
+                    )
             else:
                 if order.min_price_point.y * 100 < transact_price_in_cents:
-                    min_quantity = min(
-                        min_quantity, order.remaining_quantity()) if min_quantity else order.remaining_quantity()
+                    min_quantity = (
+                        min(min_quantity, order.remaining_quantity())
+                        if min_quantity
+                        else order.remaining_quantity()
+                    )
         return min(min_quantity, self.precise_rate)
 
     def get_transact_orders(self, transact_price_in_cetns):
         transact_orders = []
         for order in self.orders.values():
-            if order.direction == 'buy':
+            if order.direction == "buy":
                 if order.max_price_point.y * 100 > transact_price_in_cetns:
                     transact_orders.append(order)
             else:

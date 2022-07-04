@@ -1,3 +1,4 @@
+from .cda_point import CdaPoint
 import uuid
 
 
@@ -8,6 +9,7 @@ class CdaOrder:
         self.direction = order["direction"]
         self.price = order["price"]
         self.quantity = order["quantity"]
+        self.point = CdaPoint(order["price"], order["quantity"])
         self.fill_quantity = 0
 
     def __repr__(self) -> str:

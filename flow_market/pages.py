@@ -5,6 +5,7 @@ from flow_market.common.status_chart import StatusChart
 from flow_market.common.contract_table import ContractTable
 from flow_market.common.my_timer import MyTimer
 
+from .cda.cda_order_book import CdaOrderBook
 from .cda.cda_order import CdaOrder
 from .cda.cda_order_graph import CdaOrderGraph
 from .flo.flo_order import FloOrder
@@ -18,6 +19,7 @@ from .models import Player, Group, Subsession
 
 config = FloConfig()
 flo_order_books = {}  # {id_in_subsession: FloOrderBook}
+cda_order_books = {}
 flo_order_graphs = {}  # {id_in_subsession: {id_in_group: FloOrderGraph}}
 cda_order_graphs = {}  # {id_in_subsession: {id_in_group: CdaOrderGraph}}
 flo_order_tables = {}  # {id_in_subsession: {id_in_group: FloOrderTable}}
@@ -191,6 +193,7 @@ class CdaMarketPage(Page):
 
         id_in_subsession = player.group.id_in_subsession
         id_in_group = player.id_in_group
+        order_book = cda_order_books[r][id_in_subsession]
         order_graph = cda_order_graphs[r][id_in_subsession][id_in_group]
 
         if message_type == "order_graph_update_request":
@@ -198,7 +201,13 @@ class CdaMarketPage(Page):
             return
         elif message_type == "add_order":
             order = CdaOrder(player.id_in_group, data)
+            order_book.add_order(order)
             order_graph.add_order(order)
+            return CdaMarketPage.respond(player.group)
+        elif message_type == "remove_order":
+            order = order_book.find_order(data["order_id"])
+            order_book.remove_order(order)
+            order_graph.remove_order(order)
             return CdaMarketPage.respond(player.group)
         else:
             # update
@@ -215,10 +224,12 @@ class CdaMarketPage(Page):
 
         for g in subsession.get_groups():
             id_in_subsession = g.id_in_subsession
+            cda_order_books[r] = {}
             cda_order_graphs[r][id_in_subsession] = {}
 
             for p in g.get_players():
                 id_in_group = p.id_in_group
+                cda_order_books[r][id_in_subsession] = CdaOrderBook(config)
                 cda_order_graphs[r][id_in_subsession][id_in_group] = CdaOrderGraph()
 
     @staticmethod

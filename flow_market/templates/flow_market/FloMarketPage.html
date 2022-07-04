@@ -188,7 +188,9 @@ Flo Market
     }, 1000);
 
     function liveRecv(data) {
-        orderBook.update(data['order_book_data']);
+        if (data['order_book_data']) {
+            orderBook.update(data['order_book_data']);
+        }
         if (data['order_graph_data']) {
             orderGraph.update(data['order_graph_data']);
         }

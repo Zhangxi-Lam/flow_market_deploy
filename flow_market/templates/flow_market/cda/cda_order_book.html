@@ -1,0 +1,91 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata@2.2.3/dist/chartjs-plugin-dragdata.min.js"></script>
+
+<script>
+    class CdaOrderBook {
+        // Class variables
+        static myChart;
+        static cdaBidsPointsRaw = [];
+        static cdaAsksPointsRaw = [];
+        get data() {
+            return {
+                datasets: [{
+                    label: 'Bids',
+                    pointRadius: 0,
+                    pointHitRadius: 25,
+                    showLine: true,
+                    backgroundColor: BLUE,
+                    borderColor: BLUE,
+                    data: []
+                },
+                {
+                    label: 'Asks',
+                    pointRadius: 0,
+                    pointHitRadius: 25,
+                    showLine: true,
+                    backgroundColor: RED,
+                    borderColor: RED,
+                    data: []
+                },
+                {
+                    label: 'Transact',
+                    pointRadius: 0,
+                    pointHitRadius: 25,
+                    showLine: true,
+                    backgroundColor: GREEN,
+                    borderColor: GREEN,
+                    data: []
+                }]
+            }
+        }
+
+        get scales() {
+            return {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Quantity'
+                    },
+                    type: 'linear',
+                    min: 0,
+                    suggestedMax: 5,
+                    position: 'bottom',
+                    ticks: {
+                        stepSize: 1,
+                    },
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Price',
+                    },
+                    type: 'linear',
+                    min: 0,
+                    max: YMAX,
+                }
+            }
+        }
+
+        get config() {
+            return {
+                type: 'scatter',
+                data: this.data,
+                options: {
+                    scales: this.scales
+                }
+            };
+        }
+
+        show() {
+            CdaOrderBook.myChart = new Chart(document.getElementById("orderBook"), this.config);
+        }
+
+        update(data) {
+            CdaOrderBook.myChart.data.datasets[0].data = data['bids_order_points']
+            CdaOrderBook.myChart.data.datasets[1].data = data['asks_order_points']
+            CdaOrderBook.myChart.data.datasets[2].data = data['transact_points']
+            CdaOrderBook.myChart.update();
+        }
+
+    }
+</script>

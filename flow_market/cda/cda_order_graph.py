@@ -8,11 +8,11 @@ class CdaOrderGraph:
         self.send_update_to_frontend = True
 
         self.bid_active = True
-        self.bid = CdaPoint(0, 1)
+        self.bid = CdaPoint(1, 1)
         self.buy_order_id = None
 
         self.ask_active = True
-        self.ask = CdaPoint(1, 20)
+        self.ask = CdaPoint(2, 19)
         self.sell_order_id = None
 
     def get_frontend_response(self):
@@ -47,11 +47,11 @@ class CdaOrderGraph:
         is_buy = order.direction == "buy"
         if is_buy:
             self.bid_active = False
-            self.bid = CdaPoint(order.price, order.quantity)
+            self.bid = order.point
             self.buy_order_id = order.order_id
         else:
             self.ask_active = False
-            self.ask = CdaPoint(order.price, order.quantity)
+            self.ask = order.point
             self.sell_order_id = order.order_id
         self.sort_points(adjust_buy=not is_buy)
 
@@ -75,3 +75,27 @@ class CdaOrderGraph:
         else:
             self.ask_active = True
             self.ask = None
+
+    def remove_order(self, order: CdaOrder):
+        self.send_update_to_frontend = True
+
+        is_buy = order.direction == "buy"
+        if is_buy:
+            self.buy_order_id = None
+        else:
+            self.sell_order_id = None
+        self.reset_points(is_buy)
+
+    def reset_points(self, is_buy):
+        print("reset points")
+        if is_buy:
+            self.bid_active = True
+            self.bid = CdaPoint(1, 1)
+            if not self.ask:
+                self.ask = CdaPoint(2, 19)
+        else:
+            self.ask_active = True
+            self.ask = CdaPoint(2, 19)
+            if not self.bid:
+                self.bid_active = True
+                self.bid = CdaPoint(1, 1)
