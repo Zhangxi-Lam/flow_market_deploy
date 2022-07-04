@@ -15,7 +15,7 @@ from otree.api import (
 )
 
 
-author = 'Your name here'
+author = "Your name here"
 
 doc = """
 Your app description
@@ -23,9 +23,9 @@ Your app description
 
 
 class Constants(BaseConstants):
-    name_in_url = 'flow_market'
+    name_in_url = "flow_market"
     players_per_group = 2
-    num_rounds = 1
+    num_rounds = 10
 
 
 class Subsession(BaseSubsession):

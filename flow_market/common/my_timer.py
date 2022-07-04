@@ -1,4 +1,4 @@
-class MyTimer():
+class MyTimer:
     def __init__(self) -> None:
         self.time = None
 
@@ -12,4 +12,4 @@ class MyTimer():
         return self.time
 
     def reset(self):
-        self.time = 0
+        self.time = None
