@@ -1,4 +1,5 @@
 from flow_market.models import Player
+from .cda_point import CdaPoint
 from .cda_order import CdaOrder
 
 
@@ -58,4 +59,32 @@ class CdaOrderBook:
         self.update_combined_points(is_buy)
 
     def update_combined_points(self, is_buy):
-        pass
+        if is_buy and not self.raw_bid_points:
+            self.combined_bid_points = []
+            return
+        if not is_buy and not self.raw_ask_points:
+            self.combined_ask_points = []
+            return
+
+        points = self.raw_bid_points if is_buy else self.raw_ask_points
+        result = [CdaPoint(0, 20)] if is_buy else [CdaPoint(0, 0)]
+        result.append(CdaPoint(0, points[0].y))
+
+        x, y = points[0].x, points[0].y
+        i = 1
+        while i < len(points):
+            if points[i].y != y:
+                result.append(CdaPoint(x, y))
+                result.append(CdaPoint(x, points[i].y))
+                y = points[i].y
+            x += points[i].x
+            i += 1
+        result.append(CdaPoint(x, y))
+        point = CdaPoint(x, 0) if is_buy else CdaPoint(x, 20)
+        result.append(point)
+
+        if is_buy:
+            self.combined_bid_points = result
+        else:
+            self.combined_ask_points = result
+        return

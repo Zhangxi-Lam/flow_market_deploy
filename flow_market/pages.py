@@ -3,6 +3,7 @@ from flow_market.common.cash_chart import CashChart
 from flow_market.common.profit_chart import ProfitChart
 from flow_market.common.status_chart import StatusChart
 from flow_market.common.contract_table import ContractTable
+from flow_market.common.order_table import OrderTable
 from flow_market.common.my_timer import MyTimer
 
 from .cda.cda_order_book import CdaOrderBook
@@ -12,17 +13,17 @@ from .flo.flo_order import FloOrder
 from .flo.flo_order_book import FloOrderBook
 from .flo.flo_config import FloConfig
 from .flo.flo_order_graph import FloOrderGraph
-from .flo.flo_order_table import FloOrderTable
 from ._builtin import Page
 from .models import Player, Group, Subsession
 
 
 config = FloConfig()
-flo_order_books = {}  # {id_in_subsession: FloOrderBook}
 cda_order_books = {}
-flo_order_graphs = {}  # {id_in_subsession: {id_in_group: FloOrderGraph}}
 cda_order_graphs = {}  # {id_in_subsession: {id_in_group: CdaOrderGraph}}
-flo_order_tables = {}  # {id_in_subsession: {id_in_group: FloOrderTable}}
+cda_order_table = {}
+flo_order_books = {}  # {id_in_subsession: FloOrderBook}
+flo_order_graphs = {}  # {id_in_subsession: {id_in_group: FloOrderGraph}}
+order_tables = {}  # {id_in_subsession: {id_in_group: OrderTable}}
 flo_contract_tables = {}  # {id_in_subsession: {id_in_group: FloContractTable}}
 inventory_charts = {}  # {id_in_subsession: {id_in_group: InventoryChart}}
 cash_charts = {}  # {id_in_subsession: {id_in_group: CashChart}}
@@ -43,7 +44,7 @@ class FloMarketPage(Page):
         id_in_subsession = player.group.id_in_subsession
         order_book = flo_order_books[r][id_in_subsession]
         order_graph = flo_order_graphs[r][id_in_subsession][player.id_in_group]
-        order_table = flo_order_tables[r][id_in_subsession][player.id_in_group]
+        order_table = order_tables[r][id_in_subsession][player.id_in_group]
 
         if message_type == "order_graph_update_request":
             order_graph.send_update_to_frontend = True
@@ -74,7 +75,7 @@ class FloMarketPage(Page):
         r = subsession.round_number
         flo_order_books[r] = {}
         flo_order_graphs[r] = {}
-        flo_order_tables[r] = {}
+        order_tables[r] = {}
         flo_contract_tables[r] = {}
         inventory_charts[r] = {}
         cash_charts[r] = {}
@@ -85,7 +86,7 @@ class FloMarketPage(Page):
             id_in_subsession = g.id_in_subsession
             flo_order_books[r][id_in_subsession] = FloOrderBook(config)
             flo_order_graphs[r][id_in_subsession] = {}
-            flo_order_tables[r][id_in_subsession] = {}
+            order_tables[r][id_in_subsession] = {}
             flo_contract_tables[r][id_in_subsession] = {}
             inventory_charts[r][id_in_subsession] = {}
             cash_charts[r][id_in_subsession] = {}
@@ -94,7 +95,7 @@ class FloMarketPage(Page):
             for p in g.get_players():
                 id_in_group = p.id_in_group
                 flo_order_graphs[r][id_in_subsession][id_in_group] = FloOrderGraph()
-                flo_order_tables[r][id_in_subsession][id_in_group] = FloOrderTable()
+                order_tables[r][id_in_subsession][id_in_group] = OrderTable(is_flo=True)
                 flo_contract_tables[r][id_in_subsession][id_in_group] = ContractTable(
                     id_in_subsession, id_in_group, timer
                 )
@@ -115,7 +116,7 @@ class FloMarketPage(Page):
         completed_orders = flo_order_books[r][id_in_subsession].transact(group)
         for order in completed_orders:
             flo_order_graphs[r][id_in_subsession][order.id_in_group].remove_order(order)
-            flo_order_tables[r][id_in_subsession][order.id_in_group].remove_order(order)
+            order_tables[r][id_in_subsession][order.id_in_group].remove_order(order)
 
         for player in group.get_players():
             id_in_group = player.id_in_group
@@ -171,7 +172,7 @@ class FloMarketPage(Page):
                 "status_chart_data": status_charts[r][id_in_subsession][
                     id_in_group
                 ].get_frontend_response(),
-                "order_table_data": flo_order_tables[r][id_in_subsession][
+                "order_table_data": order_tables[r][id_in_subsession][
                     id_in_group
                 ].get_frontend_response(),
                 "contract_table_data": flo_contract_tables[r][id_in_subsession][
@@ -195,6 +196,7 @@ class CdaMarketPage(Page):
         id_in_group = player.id_in_group
         order_book = cda_order_books[r][id_in_subsession]
         order_graph = cda_order_graphs[r][id_in_subsession][id_in_group]
+        # order_table = order_tables[r][id_in_subsession][id_in_group]
 
         if message_type == "order_graph_update_request":
             order_graph.send_update_to_frontend = True
@@ -220,21 +222,53 @@ class CdaMarketPage(Page):
     def init(subsession: Subsession):
         timer.reset()
         r = subsession.round_number
+        cda_order_books[r] = {}
         cda_order_graphs[r] = {}
+        order_tables[r] = {}
+        inventory_charts[r] = {}
+        cash_charts[r] = {}
 
         for g in subsession.get_groups():
             id_in_subsession = g.id_in_subsession
-            cda_order_books[r] = {}
+            cda_order_books[r][id_in_subsession] = CdaOrderBook(config)
             cda_order_graphs[r][id_in_subsession] = {}
+            order_tables[r][id_in_subsession] = {}
+            inventory_charts[r][id_in_subsession] = {}
+            cash_charts[r][id_in_subsession] = {}
 
             for p in g.get_players():
                 id_in_group = p.id_in_group
-                cda_order_books[r][id_in_subsession] = CdaOrderBook(config)
                 cda_order_graphs[r][id_in_subsession][id_in_group] = CdaOrderGraph()
+                order_tables[r][id_in_subsession][id_in_group] = OrderTable(
+                    is_flo=False
+                )
+                inventory_charts[r][id_in_subsession][id_in_group] = InventoryChart(
+                    timer
+                )
+                cash_charts[r][id_in_subsession][id_in_group] = CashChart(timer)
 
     @staticmethod
     def update(group: Group):
+        timer.tick()
+        r = group.subsession.round_number
+        id_in_subsession = group.id_in_subsession
+
+        # Order transaction
         pass
+
+        for player in group.get_players():
+            id_in_group = player.id_in_group
+            # Contract transaction
+            # flo_contract_tables[r][id_in_subsession][id_in_group].update(player)
+            inventory_charts[r][id_in_subsession][id_in_group].update(
+                player.get_inventory()
+            )
+            cash_charts[r][id_in_subsession][id_in_group].update(player.get_cash())
+            # profit_charts[r][id_in_subsession][id_in_group].update(
+            #     player,
+            #     flo_contract_tables[r][id_in_subsession][id_in_group].active_contracts,
+            # )
+            # status_charts[r][id_in_subsession][id_in_group].update(player)
 
     @staticmethod
     def respond(group: Group):
@@ -243,6 +277,7 @@ class CdaMarketPage(Page):
             id_in_group: {
                 'message_type': 'update'
                 'order_graph_data':
+                'order_book_data':
             }
         }
         """
@@ -253,7 +288,16 @@ class CdaMarketPage(Page):
             id_in_group = player.id_in_group
             player_response = {
                 "message_type": "update",
+                "order_book_data": cda_order_books[r][
+                    id_in_subsession
+                ].get_frontend_response(),
                 "order_graph_data": cda_order_graphs[r][id_in_subsession][
+                    id_in_group
+                ].get_frontend_response(),
+                "inventory_chart_data": inventory_charts[r][id_in_subsession][
+                    id_in_group
+                ].get_frontend_response(),
+                "cash_chart_data": cash_charts[r][id_in_subsession][
                     id_in_group
                 ].get_frontend_response(),
             }

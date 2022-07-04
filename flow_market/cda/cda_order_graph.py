@@ -38,7 +38,6 @@ class CdaOrderGraph:
                 {"x": self.ask.x, "y": self.ask.y},
                 {"x": self.ask.x, "y": 0},
             ]
-        print(response)
         return response
 
     def add_order(self, order: CdaOrder):
@@ -87,7 +86,6 @@ class CdaOrderGraph:
         self.reset_points(is_buy)
 
     def reset_points(self, is_buy):
-        print("reset points")
         if is_buy:
             self.bid_active = True
             self.bid = CdaPoint(1, 1)
