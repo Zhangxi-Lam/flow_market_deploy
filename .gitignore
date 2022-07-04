@@ -1,0 +1,6 @@
+venv
+staticfiles
+*.sqlite3
+__temp*
+__pycache__/
+.DS_Store
