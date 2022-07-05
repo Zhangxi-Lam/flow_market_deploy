@@ -71,10 +71,11 @@ CDA Market
 {% include "flow_market/cda/cda_order_graph.html" %}
 {% include "flow_market/cda/cda_order_book.html" %}
 {% include "flow_market/common/inventory_chart.html" %}
+{% include "flow_market/common/order_table.html" %}
+{% include "flow_market/common/contract_table.html" %}
 {% include "flow_market/common/cash_chart.html" %}
 {% include "flow_market/common/profit_chart.html" %}
 {% include "flow_market/common/status_chart.html" %}
-{% include "flow_market/common/contract_table.html" %}
 
 
 <div class="row1">
@@ -155,6 +156,9 @@ CDA Market
     var cashChart = new CashChart();
     cashChart.show();
 
+    var orderTable = new OrderTable();
+    orderTable.show();
+
     var contractTable = new ContractTable();
     contractTable.show();
 
@@ -188,6 +192,18 @@ CDA Market
         }
         if (data['cash_chart_data']) {
             cashChart.update(data['cash_chart_data']);
+        }
+        if (data['profit_chart_data']) {
+            profitChart.update(data['profit_chart_data']);
+        }
+        if (data['status_chart_data']) {
+            statusChart.update(data['status_chart_data']);
+        }
+        if (data['order_table_data']) {
+            orderTable.update(data['order_table_data']);
+        }
+        if (data['contract_table_data']) {
+            contractTable.update(data['contract_table_data']);
         }
     }
 

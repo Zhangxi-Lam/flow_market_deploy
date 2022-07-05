@@ -70,12 +70,12 @@ Flo Market
 {% include "flow_market/constants.html" %}
 {% include "flow_market/flo/flo_order_graph.html" %}
 {% include "flow_market/flo/flo_order_book.html" %}
-{% include "flow_market/flo/flo_order_table.html" %}
 {% include "flow_market/common/inventory_chart.html" %}
 {% include "flow_market/common/cash_chart.html" %}
+{% include "flow_market/common/order_table.html" %}
+{% include "flow_market/common/contract_table.html" %}
 {% include "flow_market/common/profit_chart.html" %}
 {% include "flow_market/common/status_chart.html" %}
-{% include "flow_market/common/contract_table.html" %}
 
 
 <div class="row1">
@@ -157,14 +157,14 @@ Flo Market
     var orderGraph = new FloOrderGraph();
     orderGraph.show();
 
-    var orderTable = new FloOrderTable();
-    orderTable.show();
-
     var inventoryChart = new InventoryChart();
     inventoryChart.show();
 
     var cashChart = new CashChart();
     cashChart.show();
+
+    var orderTable = new OrderTable();
+    orderTable.show();
 
     var contractTable = new ContractTable();
     contractTable.show();

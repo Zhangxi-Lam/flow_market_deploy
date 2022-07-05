@@ -34,6 +34,8 @@ class OrderTable:
                 }
             )
 
+        response = {"active_orders": active_orders, "executed_orders": executed_orders}
+        print(response)
         return {"active_orders": active_orders, "executed_orders": executed_orders}
 
     def add_order(self, order):
