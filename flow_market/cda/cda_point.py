@@ -1,6 +1,6 @@
 class CdaPoint(dict):
-    def __init__(self, x, y) -> None:
-        dict.__init__(self, x=x, y=y)
+    def __init__(self, quantity, price) -> None:
+        dict.__init__(self, x=quantity, y=price)
 
     def __setattr__(self, field: str, value):
         self[field] = value
