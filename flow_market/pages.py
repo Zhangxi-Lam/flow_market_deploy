@@ -13,11 +13,12 @@ from .flo.flo_order import FloOrder
 from .flo.flo_order_book import FloOrderBook
 from .flo.flo_config import FloConfig
 from .flo.flo_order_graph import FloOrderGraph
+from .config_parser import ConfigParser
 from ._builtin import Page
 from .models import Player, Group, Subsession
 
 
-config = FloConfig()
+config = ConfigParser("flow_market/config/config.csv")
 cda_order_books = {}
 cda_order_graphs = {}  # {id_in_subsession: {id_in_group: CdaOrderGraph}}
 cda_order_table = {}
@@ -30,26 +31,25 @@ cash_charts = {}  # {id_in_subsession: {id_in_group: CashChart}}
 profit_charts = {}  # {id_in_subsession: {id_in_group: ProfitChart}}
 status_charts = {}  # {id_in_subsession: {id_in_group: StatusChart}}
 timer = MyTimer()
-is_flo = False
 
 
 class BaseMarketPage(Page):
     @staticmethod
     def get_order_book(r, id_in_subsession):
-        if is_flo:
+        if config.get_round_config(r)["treatment"] == "flo":
             return flo_order_books[r][id_in_subsession]
         return cda_order_books[r][id_in_subsession]
 
     @staticmethod
     def get_order_graph(r, id_in_subsession, id_in_group):
-        if is_flo:
+        if config.get_round_config(r)["treatment"] == "flo":
             return flo_order_graphs[r][id_in_subsession][id_in_group]
         return cda_order_graphs[r][id_in_subsession][id_in_group]
 
     @staticmethod
-    def create_order(id_in_group, data, timestamp):
-        if is_flo:
-            return FloOrder(id_in_group, data)
+    def create_order(r, id_in_group, data, timestamp):
+        if config.get_round_config(r)["treatment"] == "flo":
+            return FloOrder(id_in_group, data, timestamp)
         return CdaOrder(id_in_group, data, timestamp)
 
     @staticmethod
@@ -70,7 +70,7 @@ class BaseMarketPage(Page):
             order_graph.send_update_to_frontend = True
             return
         elif message_type == "add_order":
-            order = BaseMarketPage.create_order(id_in_group, data, timer.get_time())
+            order = BaseMarketPage.create_order(r, id_in_group, data, timer.get_time())
             order_book.add_order(order)
             order_graph.add_order(order)
             order_table.add_order(order)
@@ -93,7 +93,8 @@ class BaseMarketPage(Page):
     def init(subsession: Subsession):
         timer.reset()
         r = subsession.round_number
-        if is_flo:
+        c = config.get_round_config(r)
+        if c["treatment"] == "flo":
             flo_order_books[r] = {}
             flo_order_graphs[r] = {}
         else:
@@ -109,11 +110,11 @@ class BaseMarketPage(Page):
 
         for g in subsession.get_groups():
             id_in_subsession = g.id_in_subsession
-            if is_flo:
-                flo_order_books[r][id_in_subsession] = FloOrderBook(config)
+            if c["treatment"] == "flo":
+                flo_order_books[r][id_in_subsession] = FloOrderBook(c)
                 flo_order_graphs[r][id_in_subsession] = {}
             else:
-                cda_order_books[r][id_in_subsession] = CdaOrderBook(config)
+                cda_order_books[r][id_in_subsession] = CdaOrderBook(c)
                 cda_order_graphs[r][id_in_subsession] = {}
 
             inventory_charts[r][id_in_subsession] = {}
@@ -124,7 +125,7 @@ class BaseMarketPage(Page):
             status_charts[r][id_in_subsession] = {}
             for p in g.get_players():
                 id_in_group = p.id_in_group
-                if is_flo:
+                if c["treatment"] == "flo":
                     flo_order_graphs[r][id_in_subsession][id_in_group] = FloOrderGraph()
                 else:
                     cda_order_graphs[r][id_in_subsession][id_in_group] = CdaOrderGraph()
@@ -132,7 +133,9 @@ class BaseMarketPage(Page):
                     timer
                 )
                 cash_charts[r][id_in_subsession][id_in_group] = CashChart(timer)
-                order_tables[r][id_in_subsession][id_in_group] = OrderTable(is_flo)
+                order_tables[r][id_in_subsession][id_in_group] = OrderTable(
+                    c["treatment"] == "flo"
+                )
                 contract_tables[r][id_in_subsession][id_in_group] = ContractTable(
                     id_in_subsession, id_in_group, timer
                 )
@@ -221,11 +224,13 @@ class BaseMarketPage(Page):
 
 
 class FloMarketPage(BaseMarketPage):
-    pass
+    def is_displayed(self):
+        return config.get_round_config(self.round_number)["treatment"] == "flo"
 
 
 class CdaMarketPage(BaseMarketPage):
-    pass
+    def is_displayed(self):
+        return config.get_round_config(self.round_number)["treatment"] == "cda"
 
 
-page_sequence = [CdaMarketPage]
+page_sequence = [FloMarketPage, CdaMarketPage]

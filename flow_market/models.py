@@ -1,8 +1,3 @@
-import asyncio
-from email.policy import default
-import uuid
-from jsonfield import JSONField
-from otree import live
 from otree.api import (
     models,
     widgets,

@@ -1,5 +1,4 @@
 from flow_market.models import Player
-from .flo_config import FloConfig
 from .flo_point import FloPoint
 from .flo_order import FloOrder
 
@@ -9,7 +8,7 @@ class FloOrderBook:
     The OrderBook of the group
     """
 
-    def __init__(self, config: FloConfig) -> None:
+    def __init__(self, config) -> None:
         self.config = config
 
         self.orders = {}  # {order_id: FloOrder}
@@ -79,7 +78,7 @@ class FloOrderBook:
             return
 
         points = self.raw_bids_points if is_buy else self.raw_asks_points
-        point = FloPoint(0, self.config.y_max) if is_buy else FloPoint(0, 0)
+        point = FloPoint(0, self.config["max_price"]) if is_buy else FloPoint(0, 0)
         result = [point]
 
         x, y = 0, points[0].y
@@ -96,7 +95,7 @@ class FloOrderBook:
             else:
                 inverse -= change
             y = point.y
-        point = FloPoint(x, 0) if is_buy else FloPoint(x, self.config.y_max)
+        point = FloPoint(x, 0) if is_buy else FloPoint(x, self.config["max_price"])
         result.append(point)
 
         if is_buy:
@@ -123,24 +122,24 @@ class FloOrderBook:
             return
         buy_lo = FloPoint(self.get_x(y_lo, is_buy=True), y_lo)
         sell_lo = FloPoint(self.get_x(y_lo, is_buy=False), y_lo)
-        y_hi = y_lo + self.config.dollar_to_cent
+        y_hi = y_lo + 100
         buy_hi = FloPoint(self.get_x(y_hi, is_buy=True), y_hi)
         sell_hi = FloPoint(self.get_x(y_hi, is_buy=False), y_hi)
 
         w = FloPoint.get_w(buy_lo, sell_lo, buy_hi, sell_hi)
 
         self.precise_price_in_cents = round(
-            sell_lo.y + w * (sell_hi.y - sell_lo.y), self.config.precision
+            sell_lo.y + w * (sell_hi.y - sell_lo.y), 2
         )
         self.precise_rate = round(
-            sell_lo.x + w * (sell_hi.x - sell_lo.x), self.config.precision
+            sell_lo.x + w * (sell_hi.x - sell_lo.x), 2
         )
 
     # Get the best bid
     def get_best_bid_in_cents(self):
         if not self.combined_bids_points or not self.combined_asks_points:
             return -1
-        lo, hi = 0, self.config.y_max * self.config.dollar_to_cent + 1
+        lo, hi = 0, self.config["max_price"] * 100 + 1
         while lo < hi - 1:
             mid = lo + (hi - lo) // 2
             buy_x = self.get_x(mid, is_buy=True)
@@ -157,10 +156,10 @@ class FloOrderBook:
         p1, p2 = points[i], points[i + 1]
         if p1.x == p2.x:
             return p1.x
-        slope = FloPoint.get_slope(p1, p2) * self.config.dollar_to_cent
+        slope = FloPoint.get_slope(p1, p2) * 100
         return round(
-            p1.x + (y_cents - p1.y * self.config.dollar_to_cent) * 1 / slope,
-            self.config.precision,
+            p1.x + (y_cents - p1.y * 100) * 1 / slope,
+            2
         )
 
     # Get the index of the FloPoint to the left of the y_cents
@@ -169,12 +168,12 @@ class FloOrderBook:
         while lo < hi - 1:
             mid = lo + (hi - lo) // 2
             if is_buy:
-                if combined_points[mid].y * self.config.dollar_to_cent >= y_cents:
+                if combined_points[mid].y * 100 >= y_cents:
                     lo = mid
                 else:
                     hi = mid
             else:
-                if combined_points[mid].y * self.config.dollar_to_cent <= y_cents:
+                if combined_points[mid].y * 100 <= y_cents:
                     lo = mid
                 else:
                     hi = mid
