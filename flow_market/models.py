@@ -40,6 +40,11 @@ class Player(BasePlayer):
     _inventory = models.FloatField(initial=0)
     _cash = models.FloatField(initial=0)
 
+    def __repr__(self) -> str:
+        return (
+            str(self.id_in_group) + " " + str(self._inventory) + " " + str(self._cash)
+        )
+
     def update_inventory(self, delta):
         self._inventory += delta
 

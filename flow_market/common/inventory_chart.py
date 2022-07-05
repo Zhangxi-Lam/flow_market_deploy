@@ -8,7 +8,7 @@ class InventoryChartPoint(dict):
         dict.__init__(self, x=time, y=inventory)
 
 
-class InventoryChart():
+class InventoryChart:
     def __init__(self, timer: MyTimer) -> None:
         self.timer = timer
         self.inventory_data = []
@@ -17,5 +17,6 @@ class InventoryChart():
         return self.inventory_data
 
     def update(self, inventory):
-        self.inventory_data.append(InventoryChartPoint(
-            self.timer.get_time(), inventory))
+        self.inventory_data.append(
+            InventoryChartPoint(self.timer.get_time(), inventory)
+        )
