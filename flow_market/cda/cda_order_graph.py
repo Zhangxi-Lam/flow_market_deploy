@@ -10,13 +10,13 @@ class CdaOrderGraph(BaseOrderGraph):
         self.ask = CdaPoint(2, 19)
         BaseOrderGraph.__init__(self)
 
-    def has_data(self, is_bid):
-        if is_bid:
+    def has_data(self, is_buy):
+        if is_buy:
             return self.bid is not None
         return self.ask is not None
 
-    def get_data(self, is_bid):
-        if is_bid:
+    def get_data(self, is_buy):
+        if is_buy:
             return [
                 {"x": 0, "y": self.bid.y},
                 {"x": self.bid.x, "y": self.bid.y},

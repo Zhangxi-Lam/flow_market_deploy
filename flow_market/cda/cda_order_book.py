@@ -13,9 +13,6 @@ class CdaOrderBook:
         self.combined_bid_points = []  # [CdaPoint, ...], sorted by y desc
         self.combined_ask_points = []  # [CdaPoint, ...], sorted by y asc
 
-        self.precise_price_in_cents = None
-        self.precise_rate = None
-
     def __repr__(self) -> str:
         return self.__dict__.__str__()
 
@@ -54,10 +51,10 @@ class CdaOrderBook:
         raw_ask_points = []
         for d in self.bid_orders.values():
             for _, order in d.items():
-                raw_bid_points.append(order.point)
+                raw_bid_points.append(CdaPoint(order.remaining_quantity(), price))
         for d in self.ask_orders.values():
             for _, order in d.items():
-                raw_ask_points.append(order.point)
+                raw_ask_points.append(CdaPoint(order.remaining_quantity(), price))
 
         if is_buy and not raw_bid_points:
             self.combined_bid_points = []

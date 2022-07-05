@@ -12,13 +12,13 @@ class FloOrderGraph(BaseOrderGraph):
         self.ask_min = FloPoint(0, 19)
         BaseOrderGraph.__init__(self)
 
-    def has_data(self, is_bid):
-        if is_bid:
+    def has_data(self, is_buy):
+        if is_buy:
             return self.bid_max is not None
         return self.ask_max is not None
 
-    def get_data(self, is_bid):
-        if is_bid:
+    def get_data(self, is_buy):
+        if is_buy:
             return [
                 {"x": self.bid_max.x, "y": Y_MAX},
                 {"x": self.bid_max.x, "y": self.bid_max.y},

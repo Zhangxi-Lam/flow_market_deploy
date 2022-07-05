@@ -9,5 +9,4 @@ class CdaOrder(BaseOrder):
         BaseOrder.__init__(self, id_in_group, order, timestamp)
 
     def fill(self, clearing_rate):
-        self.point.x = self.remaining_quantity()
         BaseOrder.fill(self, clearing_rate)

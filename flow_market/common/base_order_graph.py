@@ -52,7 +52,7 @@ class BaseOrderGraph:
                 self.bid_active = True
 
     def has_data(self, is_buy):
-        return False
+        pass
 
     def get_data(self, is_buy):
         pass
