@@ -1,6 +1,6 @@
 from .flo_order import FloOrder
 from .flo_point import FloPoint
-from flow_market.common.order_graph import BaseOrderGraph
+from flow_market.common.base_order_graph import BaseOrderGraph
 from flow_market.common.constants import Y_MAX
 
 
