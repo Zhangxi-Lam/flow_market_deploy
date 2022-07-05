@@ -11,26 +11,28 @@ from .cda.cda_order import CdaOrder
 from .cda.cda_order_graph import CdaOrderGraph
 from .flo.flo_order import FloOrder
 from .flo.flo_order_book import FloOrderBook
-from .flo.flo_config import FloConfig
 from .flo.flo_order_graph import FloOrderGraph
 from .config_parser import ConfigParser
 from ._builtin import Page
 from .models import Player, Group, Subsession
 
 
+# Global
 config = ConfigParser("flow_market/config/config.csv")
-cda_order_books = {}
-cda_order_graphs = {}  # {id_in_subsession: {id_in_group: CdaOrderGraph}}
-cda_order_table = {}
-flo_order_books = {}  # {id_in_subsession: FloOrderBook}
-flo_order_graphs = {}  # {id_in_subsession: {id_in_group: FloOrderGraph}}
-order_tables = {}  # {id_in_subsession: {id_in_group: OrderTable}}
-contract_tables = {}  # {id_in_subsession: {id_in_group: FloContractTable}}
-inventory_charts = {}  # {id_in_subsession: {id_in_group: InventoryChart}}
-cash_charts = {}  # {id_in_subsession: {id_in_group: CashChart}}
-profit_charts = {}  # {id_in_subsession: {id_in_group: ProfitChart}}
-status_charts = {}  # {id_in_subsession: {id_in_group: StatusChart}}
+# Round level
 timer = MyTimer()
+# Group level
+cda_order_books = {}
+flo_order_books = {}
+# Player level
+cda_order_graphs = {}
+flo_order_graphs = {}
+order_tables = {}
+contract_tables = {}
+inventory_charts = {}
+cash_charts = {}
+profit_charts = {}
+status_charts = {}
 
 
 class BaseMarketPage(Page):
