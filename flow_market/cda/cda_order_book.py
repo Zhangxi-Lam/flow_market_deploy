@@ -51,10 +51,10 @@ class CdaOrderBook:
         raw_ask_points = []
         for d in self.bid_orders.values():
             for _, order in d.items():
-                raw_bid_points.append(CdaPoint(order.remaining_quantity(), price))
+                raw_bid_points.append(CdaPoint(order.remaining_quantity(), order.price))
         for d in self.ask_orders.values():
             for _, order in d.items():
-                raw_ask_points.append(CdaPoint(order.remaining_quantity(), price))
+                raw_ask_points.append(CdaPoint(order.remaining_quantity(), order.price))
 
         if is_buy and not raw_bid_points:
             self.combined_bid_points = []
