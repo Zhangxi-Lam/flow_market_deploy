@@ -21,8 +21,8 @@ class FloOrderBook:
 
         self.intersect_points = []  # [FloPoint, ...]
 
-        self.precise_price_in_cents = None
-        self.precise_rate = None
+        self.clearing_price = None
+        self.clearing_rate = None
 
     def __repr__(self) -> str:
         return self.__dict__.__str__()
@@ -78,7 +78,7 @@ class FloOrderBook:
             return
 
         points = self.raw_bids_points if is_buy else self.raw_asks_points
-        point = FloPoint(0, self.config["max_price"]) if is_buy else FloPoint(0, 0)
+        point = FloPoint(0, 20) if is_buy else FloPoint(0, 0)
         result = [point]
 
         x, y = 0, points[0].y
@@ -105,75 +105,81 @@ class FloOrderBook:
         return
 
     def update_intersect_points(self):
-        best_bid_in_cents = self.get_best_bid_in_cents()
-        self.update_clearing_price_and_rate(best_bid_in_cents)
-        if self.precise_price_in_cents and self.precise_rate:
+        (
+            self.clearing_price,
+            self.clearing_rate,
+        ) = self.get_clearing_price_and_rate()
+        if self.clearing_price and self.clearing_rate:
             self.intersect_points = [
-                FloPoint(0, self.precise_price_in_cents / 100),
-                FloPoint(self.precise_rate, self.precise_price_in_cents / 100),
-                FloPoint(self.precise_rate, 0),
+                FloPoint(0, round(self.clearing_price, 2)),
+                FloPoint(round(self.clearing_rate, 2), round(self.clearing_price, 2)),
+                FloPoint(round(self.clearing_rate, 2), 0),
             ]
         else:
             self.intersect_points = []
 
-    def update_clearing_price_and_rate(self, y_lo):
-        if y_lo < 0:
-            self.precise_price_in_cents, self.precise_rate = None, None
-            return
-        buy_lo = FloPoint(self.get_x(y_lo, is_buy=True), y_lo)
-        sell_lo = FloPoint(self.get_x(y_lo, is_buy=False), y_lo)
-        y_hi = y_lo + 100
-        buy_hi = FloPoint(self.get_x(y_hi, is_buy=True), y_hi)
-        sell_hi = FloPoint(self.get_x(y_hi, is_buy=False), y_hi)
-
-        w = FloPoint.get_w(buy_lo, sell_lo, buy_hi, sell_hi)
-
-        self.precise_price_in_cents = round(
-            sell_lo.y + w * (sell_hi.y - sell_lo.y), 2
-        )
-        self.precise_rate = round(
-            sell_lo.x + w * (sell_hi.x - sell_lo.x), 2
-        )
-
-    # Get the best bid
-    def get_best_bid_in_cents(self):
+    # 1. Find the price_in_ticks s.t. sell_rate <= buy_rate
+    # 2. Use price_in_ticks, price_in_ticks+1 to get 4 points (bid_lo, ask_lo, bid_hi, ask_hi)
+    # 3. Use those 4 points to get the w
+    # 4. Use the w to get the final price and rate
+    def get_clearing_price_and_rate(self):
         if not self.combined_bids_points or not self.combined_asks_points:
-            return -1
-        lo, hi = 0, self.config["max_price"] * 100 + 1
-        while lo < hi - 1:
-            mid = lo + (hi - lo) // 2
-            buy_x = self.get_x(mid, is_buy=True)
-            sell_x = self.get_x(mid, is_buy=False)
-            if sell_x <= buy_x:
-                lo = mid
+            return None, None
+        lo_in_ticks, hi_in_ticks = 0, 20 * 100 + 1
+        while lo_in_ticks < hi_in_ticks - 1:
+            mid_in_ticks = lo_in_ticks + (hi_in_ticks - lo_in_ticks) // 2
+            buy_rate = self.get_rate(mid_in_ticks, is_buy=True)
+            sell_rate = self.get_rate(mid_in_ticks, is_buy=False)
+            if sell_rate <= buy_rate:
+                lo_in_ticks = mid_in_ticks
             else:
-                hi = mid
-        return lo
+                hi_in_ticks = mid_in_ticks
 
-    def get_x(self, y_cents, is_buy):
+        bid_lo_in_ticks = FloPoint(self.get_rate(lo_in_ticks, is_buy=True), lo_in_ticks)
+        ask_lo_in_ticks = FloPoint(
+            self.get_rate(lo_in_ticks, is_buy=False), lo_in_ticks
+        )
+        bid_hi_in_ticks = FloPoint(
+            self.get_rate(lo_in_ticks + 1, is_buy=True), lo_in_ticks + 1
+        )
+        ask_hi_in_ticks = FloPoint(
+            self.get_rate(lo_in_ticks + 1, is_buy=False), lo_in_ticks + 1
+        )
+
+        w = FloPoint.get_w(
+            bid_lo_in_ticks, ask_lo_in_ticks, bid_hi_in_ticks, ask_hi_in_ticks
+        )
+
+        final_price = (
+            ask_lo_in_ticks.y + w * (ask_hi_in_ticks.y - ask_lo_in_ticks.y)
+        ) / 100
+        final_rate = ask_lo_in_ticks.x + w * (ask_hi_in_ticks.x - ask_lo_in_ticks.x)
+        print(final_price, final_rate)
+        return final_price, final_rate
+
+    def get_rate(self, price_in_ticks, is_buy):
         points = self.combined_bids_points if is_buy else self.combined_asks_points
-        i = self.get_y_left(points, y_cents, is_buy)
+        i = self.get_index(points, price_in_ticks, is_buy)
         p1, p2 = points[i], points[i + 1]
         if p1.x == p2.x:
             return p1.x
-        slope = FloPoint.get_slope(p1, p2) * 100
-        return round(
-            p1.x + (y_cents - p1.y * 100) * 1 / slope,
-            2
-        )
+        slope = FloPoint.get_slope(p1, p2)
+        return p1.x + (price_in_ticks - p1.y * 100) / 100 / slope
 
-    # Get the index of the FloPoint to the left of the y_cents
-    def get_y_left(self, combined_points, y_cents, is_buy):
+    # Get the index of the FloPoint such that:
+    # For bid, find the index of the FloPoint with price >= price_in_ticks
+    # For ask, find the index of the FloPoint with price <= price_in_ticks
+    def get_index(self, combined_points, price_in_ticks, is_buy):
         lo, hi = 0, len(combined_points)
         while lo < hi - 1:
             mid = lo + (hi - lo) // 2
             if is_buy:
-                if combined_points[mid].y * 100 >= y_cents:
+                if combined_points[mid].y * 100 >= price_in_ticks:
                     lo = mid
                 else:
                     hi = mid
             else:
-                if combined_points[mid].y * 100 <= y_cents:
+                if combined_points[mid].y * 100 <= price_in_ticks:
                     lo = mid
                 else:
                     hi = mid
@@ -181,17 +187,19 @@ class FloOrderBook:
 
     def transact(self, group):
         complete_orders = []
-        if not self.precise_price_in_cents or not self.precise_rate or not self.orders:
+        if not self.clearing_price or not self.clearing_rate or not self.orders:
             return complete_orders
 
-        transact_rate = self.get_transact_rate(self.precise_price_in_cents)
-        transact_price_in_cents = self.precise_price_in_cents
-        transact_orders = self.get_transact_orders(self.precise_price_in_cents)
+        transact_rate = self.get_transact_rate(self.clearing_price)
+        # Temporarilty store self.clearing_price in transact_price because
+        # self.claring_price will be updated in self.remove_order()
+        transact_price = self.clearing_price
+        transact_orders = self.get_transact_orders(self.clearing_price)
 
         for order in transact_orders:
             self.fill_order(
                 order,
-                transact_price_in_cents,
+                transact_price,
                 transact_rate,
                 group.get_player_by_id(order.id_in_group),
             )
@@ -200,41 +208,49 @@ class FloOrderBook:
                 self.remove_order(order)
         return complete_orders
 
-    def fill_order(self, order: FloOrder, price_in_cents, rate, player: Player):
-        order.fill(rate)
-        if order.direction == "buy":
-            player.update_inventory(rate)
-            player.update_cash(-rate * price_in_cents / 100)
-        else:
-            player.update_inventory(-rate)
-            player.update_cash(rate * price_in_cents / 100)
-
-    def get_transact_rate(self, transact_price_in_cents):
+    # Final transact rate is min(order_quantity, clearing_rate)
+    def get_transact_rate(self, clearing_price):
         min_quantity = None
         for order in self.orders.values():
             if order.direction == "buy":
-                if order.max_price_point.y * 100 > transact_price_in_cents:
+                if order.max_price_point.y > clearing_price:
                     min_quantity = (
                         min(min_quantity, order.remaining_quantity())
                         if min_quantity
                         else order.remaining_quantity()
                     )
             else:
-                if order.min_price_point.y * 100 < transact_price_in_cents:
+                if order.min_price_point.y < clearing_price:
                     min_quantity = (
                         min(min_quantity, order.remaining_quantity())
                         if min_quantity
                         else order.remaining_quantity()
                     )
-        return min(min_quantity, self.precise_rate)
+        return min(min_quantity, self.clearing_rate)
 
-    def get_transact_orders(self, transact_price_in_cetns):
+    def get_transact_orders(self, clearing_price):
         transact_orders = []
         for order in self.orders.values():
             if order.direction == "buy":
-                if order.max_price_point.y * 100 > transact_price_in_cetns:
+                if order.max_price_point.y > clearing_price:
                     transact_orders.append(order)
             else:
-                if order.min_price_point.y * 100 < transact_price_in_cetns:
+                if order.min_price_point.y < clearing_price:
                     transact_orders.append(order)
         return transact_orders
+
+    def fill_order(
+        self,
+        order: FloOrder,
+        clearing_price,
+        transact_rate,
+        player: Player,
+    ):
+        print(transact_rate, clearing_price)
+        order.fill(transact_rate)
+        if order.direction == "buy":
+            player.update_inventory(transact_rate)
+            player.update_cash(-transact_rate * clearing_price)
+        else:
+            player.update_inventory(-transact_rate)
+            player.update_cash(transact_rate * clearing_price)

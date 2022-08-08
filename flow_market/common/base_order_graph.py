@@ -43,19 +43,15 @@ class BaseOrderGraph:
         if is_buy:
             self.bid_active = True
             self.buy_order_id = None
-            if not self.has_data(is_buy=False):
-                self.ask_active = True
         else:
             self.ask_active = True
             self.sell_order_id = None
-            if not self.has_data(is_buy=True):
-                self.bid_active = True
 
     def has_data(self, is_buy):
-        pass
+        raise NotImplementedError()
 
     def get_data(self, is_buy):
-        pass
+        raise NotImplementedError()
 
     def sort_points(self, adjust_buy):
-        pass
+        raise NotImplementedError()

@@ -5,17 +5,28 @@ from .my_timer import MyTimer
 
 
 class Contract(dict):
-    def __init__(self, id_in_subsession, id_in_group, direction, price,
-                 quantity, showtime, deadline):
-        dict.__init__(self, id_in_subsession=int(id_in_subsession),
-                      id_in_group=int(id_in_group),
-                      direction=direction,
-                      price=float(price),
-                      quantity=int(quantity),
-                      showtime=int(showtime),
-                      deadline=int(deadline),
-                      remaining=0,
-                      has_executed=False)
+    def __init__(
+        self,
+        id_in_subsession,
+        id_in_group,
+        direction,
+        price,
+        quantity,
+        showtime,
+        deadline,
+    ):
+        dict.__init__(
+            self,
+            id_in_subsession=int(id_in_subsession),
+            id_in_group=int(id_in_group),
+            direction=direction,
+            price=float(price),
+            quantity=float(quantity),
+            showtime=int(showtime),
+            deadline=int(deadline),
+            remaining=0,
+            has_executed=False,
+        )
 
     def __setattr__(self, field: str, value):
         self[field] = value
@@ -31,7 +42,7 @@ class Contract(dict):
         self.quantity = executed_quantity
 
 
-class ContractTable():
+class ContractTable:
     def __init__(self, id_in_subsession, id_in_group, timer: MyTimer) -> None:
         self.id_in_subsession = id_in_subsession
         self.id_in_group = id_in_group
@@ -42,8 +53,8 @@ class ContractTable():
 
     def get_frontend_response(self):
         return {
-            'active_contracts': self.active_contracts,
-            'executed_contracts': self.executed_contracts
+            "active_contracts": self.active_contracts,
+            "executed_contracts": self.executed_contracts,
         }
 
     def update(self, player: Player):
@@ -60,33 +71,41 @@ class ContractTable():
 
     def execute(self, contract, player: Player):
         contract.has_executed = True
-        is_buy = contract['direction']
+        is_buy = contract["direction"]
         if is_buy:
-            executed_quantity = min(
-                player.get_inventory(), contract.quantity) if player.get_inventory() > 0 else 0
+            executed_quantity = (
+                min(player.get_inventory(), contract.quantity)
+                if player.get_inventory() > 0
+                else 0
+            )
             player.update_inventory(-executed_quantity)
-            player.update_cash(executed_quantity * contract['price'])
+            player.update_cash(executed_quantity * contract["price"])
             contract.execute(executed_quantity)
         else:
-            executed_quantity = min(-player.get_inventory(),
-                                    contract.quantity) if player.get_inventory() < 0 else 0
+            executed_quantity = (
+                min(-player.get_inventory(), contract.quantity)
+                if player.get_inventory() < 0
+                else 0
+            )
             player.update_inventory(executed_quantity)
-            player.update_cash(-executed_quantity * contract['price'])
+            player.update_cash(-executed_quantity * contract["price"])
             contract.execute(executed_quantity)
 
     def get_contracts(self):
         contracts = []
-        path = 'flow_market/config/contracts.csv'
+        path = "flow_market/config/contracts.csv"
         with open(path) as infile:
             rows = list(csv.DictReader(infile))
         for r in rows:
-            contract = Contract(r['id_in_subsession'],
-                                r['id_in_group'],
-                                r['direction'],
-                                r['price'],
-                                r['quantity'],
-                                r['showtime'],
-                                r['deadline'])
+            contract = Contract(
+                r["id_in_subsession"],
+                r["id_in_group"],
+                r["direction"],
+                r["price"],
+                r["quantity"],
+                r["showtime"],
+                r["deadline"],
+            )
             if self.id_in_group == contract.id_in_group:
                 contracts.append(contract)
         return contracts

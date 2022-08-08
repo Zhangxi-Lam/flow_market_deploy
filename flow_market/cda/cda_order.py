@@ -8,5 +8,11 @@ class CdaOrder(BaseOrder):
         self.point = CdaPoint(order["quantity"], order["price"])
         BaseOrder.__init__(self, id_in_group, order, timestamp)
 
-    def fill(self, clearing_rate):
-        BaseOrder.fill(self, clearing_rate)
+    def __repr__(self) -> str:
+        return (
+            str(self.order_id)
+            + " "
+            + str(self.price)
+            + " "
+            + str(self.remaining_quantity())
+        )

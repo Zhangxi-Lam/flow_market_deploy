@@ -176,6 +176,7 @@
         }
 
         update(data) {
+            console.log(data);
             FloOrderGraph.bidActive = data['bid_active'];
             FloOrderGraph.myChart.data.datasets[0].data = data['bid_data'];
             FloOrderGraph.buyOrderId = data['buy_order_id'];

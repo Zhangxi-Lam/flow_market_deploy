@@ -113,10 +113,16 @@ class CdaOrderBook:
             price = bid.price if bid.timestamp < ask.timestamp else ask.price
             quantity = min(bid.remaining_quantity(), ask.remaining_quantity())
             self.fill_order(
-                bid, price * 100, quantity, group.get_player_by_id(bid.id_in_group)
+                bid,
+                price,
+                quantity,
+                group.get_player_by_id(bid.id_in_group),
             )
             self.fill_order(
-                ask, price * 100, quantity, group.get_player_by_id(ask.id_in_group)
+                ask,
+                price,
+                quantity,
+                group.get_player_by_id(ask.id_in_group),
             )
             if bid.is_complete():
                 complete_orders.append(bid)
@@ -130,11 +136,11 @@ class CdaOrderBook:
         self.update_combined_points(is_buy=False)
         return complete_orders
 
-    def fill_order(self, order: CdaOrder, price_in_cents, quantity, player: Player):
+    def fill_order(self, order: CdaOrder, price, quantity, player: Player):
         order.fill(quantity)
         if order.direction == "buy":
             player.update_inventory(quantity)
-            player.update_cash(-quantity * price_in_cents / 100)
+            player.update_cash(-quantity * price)
         else:
             player.update_inventory(-quantity)
-            player.update_cash(quantity * price_in_cents / 100)
+            player.update_cash(quantity * price)

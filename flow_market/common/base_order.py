@@ -10,18 +10,8 @@ class BaseOrder:
         self.timestamp = timestamp
         self.fill_quantity = 0
 
-    def __repr__(self) -> str:
-        return (
-            str(self.order_id)
-            + " "
-            + str(self.price)
-            + " "
-            + str(self.remaining_quantity())
-        )
-        # return self.__dict__.__str__()
-
     def fill(self, clearing_rate):
-        self.fill_quantity = round(self.fill_quantity + clearing_rate, 2)
+        self.fill_quantity = self.fill_quantity + clearing_rate
         self.fill_quantity = min(self.fill_quantity, self.quantity)
 
     def remaining_quantity(self):
