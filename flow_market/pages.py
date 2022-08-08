@@ -226,11 +226,17 @@ class BaseMarketPage(Page):
 
 
 class FloMarketPage(BaseMarketPage):
+    def get_timeout_seconds(self):
+        return config.get_round_config(self.round_number)["round_length"]
+
     def is_displayed(self):
         return config.get_round_config(self.round_number)["treatment"] == "flo"
 
 
 class CdaMarketPage(BaseMarketPage):
+    def get_timeout_seconds(self):
+        return config.get_round_config(self.round_number)["round_length"]
+
     def is_displayed(self):
         return config.get_round_config(self.round_number)["treatment"] == "cda"
 

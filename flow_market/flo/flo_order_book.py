@@ -246,7 +246,6 @@ class FloOrderBook:
         transact_rate,
         player: Player,
     ):
-        print(transact_rate, clearing_price)
         order.fill(transact_rate)
         if order.direction == "buy":
             player.update_inventory(transact_rate)

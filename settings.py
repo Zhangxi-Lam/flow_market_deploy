@@ -4,6 +4,7 @@ SESSION_CONFIGS = [
         display_name="Flow Market",
         num_demo_participants=2,
         app_sequence=["flow_market"],
+        round_length=120,
     ),
 ]
 
