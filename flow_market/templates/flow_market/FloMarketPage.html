@@ -110,14 +110,9 @@ Flo Market
             <h5>Your Input</h5>
             <canvas id="orderGraph"></canvas>
             <div>
-                <button id="buyQuantityInc" onclick="FloOrderGraph.buyQuantityButtonClick(true)">+</button>
-                <input id="buyQuantityInput" type="number" value="10" min="1" max="100" step="5" />
-                <button id="buyQuantityDec" onclick="FloOrderGraph.buyQuantityButtonClick(false)">-</button>
+                <input id="buyQuantityInput" type="number" value="10" min="1" max="100" />
                 <button type="button" id="buyButton" onclick="FloOrderGraph.buyButtonClick()">Send Buy</button>
-
-                <button id="sellQuantityInc" onclick="FloOrderGraph.sellQuantityButtonClick(true)">+</button>
-                <input id="sellQuantityInput" type="number" value="10" min="1" max="100" step="5" />
-                <button id="sellQuantityDec" onclick="FloOrderGraph.sellQuantityButtonClick(false)">-</button>
+                <input id="sellQuantityInput" type="number" value="10" min="1" max="100" />
                 <button type="button" id="sellButton" onclick="FloOrderGraph.sellButtonClick()">Send Sell</button>
             </div>
         </div>
