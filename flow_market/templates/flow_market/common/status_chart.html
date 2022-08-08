@@ -2,9 +2,9 @@
     class StatusChart {
         update(data) {
             var cash = document.getElementById('cashStatus');
-            cash.innerHTML = data['cash'];
+            cash.innerHTML = "Cash: " + data['cash'];
             var inventory = document.getElementById('inventoryStatus');
-            inventory.innerHTML = data['inventory'];
+            inventory.innerHTML = "Inventory: " + data['inventory'];
         }
     }
 </script>

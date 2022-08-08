@@ -154,7 +154,6 @@ class FloOrderBook:
             ask_lo_in_ticks.y + w * (ask_hi_in_ticks.y - ask_lo_in_ticks.y)
         ) / 100
         final_rate = ask_lo_in_ticks.x + w * (ask_hi_in_ticks.x - ask_lo_in_ticks.x)
-        print(final_price, final_rate)
         return final_price, final_rate
 
     def get_rate(self, price_in_ticks, is_buy):

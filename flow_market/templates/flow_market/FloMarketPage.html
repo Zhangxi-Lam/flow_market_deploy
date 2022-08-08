@@ -112,6 +112,8 @@ Flo Market
             <div>
                 <input id="buyQuantityInput" type="number" value="10" min="1" max="100" />
                 <button type="button" id="buyButton" onclick="FloOrderGraph.buyButtonClick()">Send Buy</button>
+            </div>
+            <div>
                 <input id="sellQuantityInput" type="number" value="10" min="1" max="100" />
                 <button type="button" id="sellButton" onclick="FloOrderGraph.sellButtonClick()">Send Sell</button>
             </div>
@@ -128,21 +130,15 @@ Flo Market
         </div>
         <div class="block">
             <div class="sub-chart">
-                <h5>Inventory</h5>
+                <h5 id="inventoryStatus">Inventory</h5>
                 <canvas id="inventoryChart"></canvas>
             </div>
             <div class="sub-chart">
-                <h5>Cash</h5>
+                <h5 id="cashStatus">Cash</h5>
                 <canvas id="cashChart"></canvas>
             </div>
         </div>
     </div>
-</div>
-<div class="row2">
-    <h5>Cash: </h5>
-    <h5 id="cashStatus"></h5>
-    <h5>Inventory: </h5>
-    <h5 id="inventoryStatus"></h5>
 </div>
 
 <script>
