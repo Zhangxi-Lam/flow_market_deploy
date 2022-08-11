@@ -5,7 +5,7 @@ class BaseOrder:
     def __init__(self, id_in_group, order: dict, timestamp) -> None:
         self.id_in_group = id_in_group
         self.order_id = str(uuid.uuid4())
-        self.direction = order["direction"]
+        self.direction = order["direction"]  # buy, sell
         self.quantity = order["quantity"]
         self.timestamp = timestamp
         self.fill_quantity = 0

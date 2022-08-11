@@ -34,6 +34,12 @@ class FloOrderBook:
             "transact_points": self.intersect_points,
         }
 
+    def get_log(self):
+        return {
+            "clearing_price": self.clearing_price,
+            "clearing_rate": self.clearing_rate,
+        }
+
     def add_order(self, order: FloOrder):
         self.orders[order.order_id] = order
 
@@ -189,7 +195,6 @@ class FloOrderBook:
         if not self.clearing_price or not self.clearing_rate or not self.orders:
             return complete_orders
 
-        transact_rate = self.get_transact_rate(self.clearing_price)
         # Temporarilty store self.clearing_price in transact_price because
         # self.claring_price will be updated in self.remove_order()
         transact_price = self.clearing_price
@@ -199,33 +204,13 @@ class FloOrderBook:
             self.fill_order(
                 order,
                 transact_price,
-                transact_rate,
+                order.get_rate(transact_price),
                 group.get_player_by_id(order.id_in_group),
             )
             if order.is_complete():
                 complete_orders.append(order)
                 self.remove_order(order)
         return complete_orders
-
-    # Final transact rate is min(order_quantity, clearing_rate)
-    def get_transact_rate(self, clearing_price):
-        min_quantity = None
-        for order in self.orders.values():
-            if order.direction == "buy":
-                if order.max_price_point.y > clearing_price:
-                    min_quantity = (
-                        min(min_quantity, order.remaining_quantity())
-                        if min_quantity
-                        else order.remaining_quantity()
-                    )
-            else:
-                if order.min_price_point.y < clearing_price:
-                    min_quantity = (
-                        min(min_quantity, order.remaining_quantity())
-                        if min_quantity
-                        else order.remaining_quantity()
-                    )
-        return min(min_quantity, self.clearing_rate)
 
     def get_transact_orders(self, clearing_price):
         transact_orders = []
@@ -245,10 +230,11 @@ class FloOrderBook:
         transact_rate,
         player: Player,
     ):
-        order.fill(transact_rate)
+        final_transact_rate = min(order.remaining_quantity(), transact_rate)
+        order.fill(final_transact_rate)
         if order.direction == "buy":
-            player.update_inventory(transact_rate)
-            player.update_cash(-transact_rate * clearing_price)
+            player.update_inventory(final_transact_rate)
+            player.update_cash(-final_transact_rate * clearing_price)
         else:
-            player.update_inventory(-transact_rate)
-            player.update_cash(transact_rate * clearing_price)
+            player.update_inventory(-final_transact_rate)
+            player.update_cash(final_transact_rate * clearing_price)
