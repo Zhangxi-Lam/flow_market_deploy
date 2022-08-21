@@ -12,12 +12,12 @@ class FloOrderBook:
         self.config = config
 
         self.orders = {}  # {order_id: FloOrder}
-        self.bids_orders = {}  # {id_in_group: {order_id: FloOrder}}
-        self.asks_orders = {}  # {id_in_group: {order_id: FloOrder}}
-        self.raw_bids_points = []  # [FloPoint, ...], sorted by y desc
-        self.raw_asks_points = []  # [FloPoint, ...], sorted by y asc
-        self.combined_bids_points = []  # [FloPoint, ...], sorted by y desc
-        self.combined_asks_points = []  # [FloPoint, ...], sorted by y asc
+        self.bid_orders = {}  # {id_in_group: {order_id: FloOrder}}
+        self.ask_orders = {}  # {id_in_group: {order_id: FloOrder}}
+        self.raw_bid_points = []  # [FloPoint, ...], sorted by y desc
+        self.raw_ask_points = []  # [FloPoint, ...], sorted by y asc
+        self.combined_bid_points = []  # [FloPoint, ...], sorted by y desc
+        self.combined_ask_points = []  # [FloPoint, ...], sorted by y asc
 
         self.intersect_points = []  # [FloPoint, ...]
 
@@ -29,8 +29,8 @@ class FloOrderBook:
 
     def get_frontend_response(self):
         return {
-            "bids_order_points": self.combined_bids_points,
-            "asks_order_points": self.combined_asks_points,
+            "bids_order_points": self.combined_bid_points,
+            "asks_order_points": self.combined_ask_points,
             "transact_points": self.intersect_points,
         }
 
@@ -38,12 +38,12 @@ class FloOrderBook:
         self.orders[order.order_id] = order
 
         is_buy = order.direction == "buy"
-        group_orders = self.bids_orders if is_buy else self.asks_orders
+        group_orders = self.bid_orders if is_buy else self.ask_orders
         player_orders = group_orders.get(order.id_in_group, {})
         player_orders[order.order_id] = order
         group_orders[order.id_in_group] = player_orders
 
-        points = self.raw_bids_points if is_buy else self.raw_asks_points
+        points = self.raw_bid_points if is_buy else self.raw_ask_points
         points.append(order.max_price_point)
         points.append(order.min_price_point)
         points.sort(reverse=is_buy, key=lambda point: point.y)
@@ -54,8 +54,8 @@ class FloOrderBook:
     def find_orders_for_player(self, player: Player):
         id_in_group = player.id_in_group
         orders = {
-            **self.bids_orders.get(id_in_group, {}),
-            **self.asks_orders.get(id_in_group, {}),
+            **self.bid_orders.get(id_in_group, {}),
+            **self.ask_orders.get(id_in_group, {}),
         }
         return orders
 
@@ -67,10 +67,10 @@ class FloOrderBook:
             del self.orders[order.order_id]
 
         is_buy = order.direction == "buy"
-        group_orders = self.bids_orders if is_buy else self.asks_orders
+        group_orders = self.bid_orders if is_buy else self.ask_orders
         del group_orders[order.id_in_group][order.order_id]
 
-        points = self.raw_bids_points if is_buy else self.raw_asks_points
+        points = self.raw_bid_points if is_buy else self.raw_ask_points
         points.remove(order.max_price_point)
         points.remove(order.min_price_point)
 
@@ -78,14 +78,14 @@ class FloOrderBook:
         self.update_intersect_points()
 
     def update_combined_points(self, is_buy):
-        if is_buy and not self.raw_bids_points:
-            self.combined_bids_points = []
+        if is_buy and not self.raw_bid_points:
+            self.combined_bid_points = []
             return
-        if not is_buy and not self.raw_asks_points:
-            self.combined_asks_points = []
+        if not is_buy and not self.raw_ask_points:
+            self.combined_ask_points = []
             return
 
-        points = self.raw_bids_points if is_buy else self.raw_asks_points
+        points = self.raw_bid_points if is_buy else self.raw_ask_points
         point = FloPoint(0, 20) if is_buy else FloPoint(0, 0)
         result = [point]
 
@@ -107,9 +107,9 @@ class FloOrderBook:
         result.append(point)
 
         if is_buy:
-            self.combined_bids_points = result
+            self.combined_bid_points = result
         else:
-            self.combined_asks_points = result
+            self.combined_ask_points = result
         return
 
     def update_intersect_points(self):
@@ -131,7 +131,7 @@ class FloOrderBook:
     # 3. Use those 4 points to get the w
     # 4. Use the w to get the final price and rate
     def get_clearing_price_and_rate(self):
-        if not self.combined_bids_points or not self.combined_asks_points:
+        if not self.combined_bid_points or not self.combined_ask_points:
             return None, None
         lo_in_ticks, hi_in_ticks = 0, 20 * 100 + 1
         while lo_in_ticks < hi_in_ticks - 1:
@@ -165,7 +165,7 @@ class FloOrderBook:
         return final_price, final_rate
 
     def get_rate(self, price_in_ticks, is_buy):
-        points = self.combined_bids_points if is_buy else self.combined_asks_points
+        points = self.combined_bid_points if is_buy else self.combined_ask_points
         i = self.get_index(points, price_in_ticks, is_buy)
         p1, p2 = points[i], points[i + 1]
         if p1.x == p2.x:

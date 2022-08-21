@@ -14,6 +14,7 @@ from .flo.flo_order_book import FloOrderBook
 from .flo.flo_order_graph import FloOrderGraph
 from .config_parser import ConfigParser
 from .flo.flo_logger import FloLogger
+from .cda.cda_logger import CdaLogger
 from ._builtin import Page
 from .models import Player, Group, Subsession
 
@@ -265,24 +266,31 @@ class FloMarketPage(BaseMarketPage):
 
 
 class CdaMarketPage(BaseMarketPage):
+    cda_logger = None
+
     def get_timeout_seconds(self):
         return config.get_round_config(self.round_number)["round_length"]
 
     def is_displayed(self):
-        return config.get_round_config(self.round_number)["treatment"] == "cda"
+        if config.get_round_config(self.round_number)["treatment"] == "cda":
+            CdaMarketPage.cda_logger = CdaLogger(self.round_number)
+            return True
+        else:
+            return False
 
     @staticmethod
-    def log(group: Group):
-        pass
-        # r = group.subsession.round_number
-        # id_in_subsession = group.id_in_subsession
-        # order_book = BaseMarketPage.get_order_book(r, id_in_subsession)
-        # logger.update_market_data_cda(timer.get_time(), order_book)
-        # for player in group.get_players():
-        #     contract_table = contract_tables[r][id_in_subsession][player.id_in_group]
-        #     logger.update_participant_data_cda(
-        #         timer.get_time(), player, order_book, contract_table
-        #     )
+    def log(group: Group, before_transaction):
+        r = group.subsession.round_number
+        id_in_subsession = group.id_in_subsession
+        order_book = BaseMarketPage.get_order_book(r, id_in_subsession)
+        CdaMarketPage.cda_logger.update_market_data(
+            timer.get_time(), before_transaction, order_book
+        )
+        for player in group.get_players():
+            contract_table = contract_tables[r][id_in_subsession][player.id_in_group]
+            CdaMarketPage.cda_logger.update_participant_data(
+                timer.get_time(), before_transaction, player, order_book, contract_table
+            )
 
 
 page_sequence = [FloMarketPage, CdaMarketPage]

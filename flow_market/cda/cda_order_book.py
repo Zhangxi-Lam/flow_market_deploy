@@ -13,6 +13,9 @@ class CdaOrderBook:
         self.combined_bid_points = []  # [CdaPoint, ...], sorted by y desc
         self.combined_ask_points = []  # [CdaPoint, ...], sorted by y asc
 
+        self.clearing_price = None
+        self.clearing_rate = None
+
     def __repr__(self) -> str:
         return self.__dict__.__str__()
 
@@ -32,6 +35,14 @@ class CdaOrderBook:
         group_orders[order.id_in_group] = player_orders
 
         self.update_combined_points(is_buy)
+
+    def find_orders_for_player(self, player: Player):
+        id_in_group = player.id_in_group
+        orders = {
+            **self.bid_orders.get(id_in_group, {}),
+            **self.ask_orders.get(id_in_group, {}),
+        }
+        return orders
 
     def find_order(self, order_id):
         return self.orders[order_id]
@@ -92,6 +103,7 @@ class CdaOrderBook:
         complete_orders = []
         sorted_bid_orders = []
         sorted_ask_orders = []
+        self.clearing_price, self.clearing_rate = None, None
         for d in self.bid_orders.values():
             for _, order in d.items():
                 sorted_bid_orders.append(order)
@@ -112,6 +124,7 @@ class CdaOrderBook:
             bid, ask = sorted_bid_orders[0], sorted_ask_orders[0]
             price = bid.price if bid.timestamp < ask.timestamp else ask.price
             quantity = min(bid.remaining_quantity(), ask.remaining_quantity())
+            self.clearing_price, self.clearing_rate = price, quantity
             self.fill_order(
                 bid,
                 price,
