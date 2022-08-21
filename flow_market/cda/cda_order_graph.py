@@ -40,10 +40,12 @@ class CdaOrderGraph(BaseOrderGraph):
             self.bid = CdaPoint(1, 1)
             if not self.ask:
                 self.ask = CdaPoint(2, 19)
+                self.ask_active = True
         else:
             self.ask = CdaPoint(2, 19)
             if not self.bid:
                 self.bid = CdaPoint(1, 1)
+                self.bid_active = True
         BaseOrderGraph.remove_order(self, order)
 
     def sort_points(self, adjust_buy):
