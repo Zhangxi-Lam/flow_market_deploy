@@ -13,6 +13,7 @@ from .flo.flo_order import FloOrder
 from .flo.flo_order_book import FloOrderBook
 from .flo.flo_order_graph import FloOrderGraph
 from .config_parser import ConfigParser
+from .flo.flo_logger import FloLogger
 from ._builtin import Page
 from .models import Player, Group, Subsession
 
@@ -88,7 +89,10 @@ class BaseMarketPage(Page):
                 # We only let the first player in the group do the update to
                 # avoid duplicate transactions.
                 return
+            timer.tick()
+            BaseMarketPage.log(player.group, before_transaction=True)
             BaseMarketPage.update(player.group)
+            BaseMarketPage.log(player.group, before_transaction=False)
             return BaseMarketPage.respond(player.group)
 
     @staticmethod
@@ -146,7 +150,6 @@ class BaseMarketPage(Page):
 
     @staticmethod
     def update(group: Group):
-        timer.tick()
         r = group.subsession.round_number
         id_in_subsession = group.id_in_subsession
 
@@ -173,6 +176,14 @@ class BaseMarketPage(Page):
                 contract_tables[r][id_in_subsession][id_in_group].active_contracts,
             )
             status_charts[r][id_in_subsession][id_in_group].update(player)
+
+    @staticmethod
+    def log(group: Group, before_transaction):
+        r = group.subsession.round_number
+        if config.get_round_config(r)["treatment"] == "flo":
+            FloMarketPage.log(group, before_transaction)
+        else:
+            CdaMarketPage.log(group, before_transaction)
 
     @staticmethod
     def respond(group: Group):
@@ -226,11 +237,31 @@ class BaseMarketPage(Page):
 
 
 class FloMarketPage(BaseMarketPage):
+    flo_logger = None
+
     def get_timeout_seconds(self):
         return config.get_round_config(self.round_number)["round_length"]
 
     def is_displayed(self):
-        return config.get_round_config(self.round_number)["treatment"] == "flo"
+        if config.get_round_config(self.round_number)["treatment"] == "flo":
+            FloMarketPage.flo_logger = FloLogger(self.round_number)
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def log(group: Group, before_transaction):
+        r = group.subsession.round_number
+        id_in_subsession = group.id_in_subsession
+        order_book = BaseMarketPage.get_order_book(r, id_in_subsession)
+        FloMarketPage.flo_logger.update_market_data(
+            timer.get_time(), before_transaction, order_book
+        )
+        for player in group.get_players():
+            contract_table = contract_tables[r][id_in_subsession][player.id_in_group]
+            FloMarketPage.flo_logger.update_participant_data(
+                timer.get_time(), before_transaction, player, order_book, contract_table
+            )
 
 
 class CdaMarketPage(BaseMarketPage):
@@ -239,6 +270,19 @@ class CdaMarketPage(BaseMarketPage):
 
     def is_displayed(self):
         return config.get_round_config(self.round_number)["treatment"] == "cda"
+
+    @staticmethod
+    def log(group: Group):
+        pass
+        # r = group.subsession.round_number
+        # id_in_subsession = group.id_in_subsession
+        # order_book = BaseMarketPage.get_order_book(r, id_in_subsession)
+        # logger.update_market_data_cda(timer.get_time(), order_book)
+        # for player in group.get_players():
+        #     contract_table = contract_tables[r][id_in_subsession][player.id_in_group]
+        #     logger.update_participant_data_cda(
+        #         timer.get_time(), player, order_book, contract_table
+        #     )
 
 
 page_sequence = [FloMarketPage, CdaMarketPage]

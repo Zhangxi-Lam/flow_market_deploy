@@ -13,7 +13,7 @@ class FloOrderBook:
 
         self.orders = {}  # {order_id: FloOrder}
         self.bids_orders = {}  # {id_in_group: {order_id: FloOrder}}
-        self.asks_orders = {}
+        self.asks_orders = {}  # {id_in_group: {order_id: FloOrder}}
         self.raw_bids_points = []  # [FloPoint, ...], sorted by y desc
         self.raw_asks_points = []  # [FloPoint, ...], sorted by y asc
         self.combined_bids_points = []  # [FloPoint, ...], sorted by y desc
@@ -34,12 +34,6 @@ class FloOrderBook:
             "transact_points": self.intersect_points,
         }
 
-    def get_log(self):
-        return {
-            "clearing_price": self.clearing_price,
-            "clearing_rate": self.clearing_rate,
-        }
-
     def add_order(self, order: FloOrder):
         self.orders[order.order_id] = order
 
@@ -56,6 +50,14 @@ class FloOrderBook:
 
         self.update_combined_points(is_buy)
         self.update_intersect_points()
+
+    def find_orders_for_player(self, player: Player):
+        id_in_group = player.id_in_group
+        orders = {
+            **self.bids_orders.get(id_in_group, {}),
+            **self.asks_orders.get(id_in_group, {}),
+        }
+        return orders
 
     def find_order(self, order_id):
         return self.orders[order_id]
