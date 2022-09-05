@@ -12,6 +12,7 @@ from .cda.cda_order_graph import CdaOrderGraph
 from .flo.flo_order import FloOrder
 from .flo.flo_order_book import FloOrderBook
 from .flo.flo_order_graph import FloOrderGraph
+from .flo.flo_bot import FloBot
 from .config_parser import ConfigParser
 from .flo.flo_logger import FloLogger
 from .cda.cda_logger import CdaLogger
@@ -23,6 +24,7 @@ from .models import Player, Group, Subsession
 config = ConfigParser("flow_market/config/config.csv")
 # Round level
 timer = MyTimer()
+flo_bot = FloBot()
 # Group level
 cda_order_books = {}
 flo_order_books = {}
@@ -78,14 +80,22 @@ class BaseMarketPage(Page):
             order_book.add_order(order)
             order_graph.add_order(order)
             order_table.add_order(order)
-            return BaseMarketPage.respond(player.group)
         elif message_type == "remove_order":
             order = order_book.find_order(data["order_id"])
             order_book.remove_order(order)
             order_graph.remove_order(order)
             order_table.remove_order(order)
-            return BaseMarketPage.respond(player.group)
         else:  # update
+            data = flo_bot.get_action(
+                id_in_subsession, id_in_group, "add_order", timer.get_time()
+            )
+            if data:
+                order = BaseMarketPage.create_order(
+                    r, id_in_group, data, timer.get_time()
+                )
+                order_book.add_order(order)
+                order_graph.add_order(order)
+                order_table.add_order(order)
             if id_in_group != 1:
                 # We only let the first player in the group do the update to
                 # avoid duplicate transactions.
@@ -104,6 +114,7 @@ class BaseMarketPage(Page):
         if c["treatment"] == "flo":
             flo_order_books[r] = {}
             flo_order_graphs[r] = {}
+            flo_bot.load_actions(r)
         else:
             cda_order_books[r] = {}
             cda_order_graphs[r] = {}

@@ -277,10 +277,10 @@
             return {
                 'message_type': 'add_order',
                 'direction': direction,
-                'max_price_x': data[MAX_PRICE_INDEX].x,
-                'max_price_y': data[MAX_PRICE_INDEX].y,
-                'min_price_x': data[MIN_PRICE_INDEX].x,
-                'min_price_y': data[MIN_PRICE_INDEX].y,
+                'max_price': data[MAX_PRICE_INDEX].y,
+                'max_rate': data[MAX_PRICE_INDEX].x,
+                'min_price': data[MIN_PRICE_INDEX].y,
+                'min_rate': data[MIN_PRICE_INDEX].x,
                 'quantity': quantity
             };
         }
