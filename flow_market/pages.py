@@ -9,6 +9,7 @@ from flow_market.common.my_timer import MyTimer
 from .cda.cda_order_book import CdaOrderBook
 from .cda.cda_order import CdaOrder
 from .cda.cda_order_graph import CdaOrderGraph
+from .cda.cda_bot import CdaBot
 from .flo.flo_order import FloOrder
 from .flo.flo_order_book import FloOrderBook
 from .flo.flo_order_graph import FloOrderGraph
@@ -25,6 +26,7 @@ config = ConfigParser("flow_market/config/config.csv")
 # Round level
 timer = MyTimer()
 flo_bot = FloBot()
+cda_bot = CdaBot()
 # Group level
 cda_order_books = {}
 flo_order_books = {}
@@ -86,9 +88,16 @@ class BaseMarketPage(Page):
             order_graph.remove_order(order)
             order_table.remove_order(order)
         else:  # update
-            data = flo_bot.get_action(
-                id_in_subsession, id_in_group, "add_order", timer.get_time()
-            )
+            # Get actions from Bot
+            data = None
+            if config.get_round_config(r)["treatment"] == "flo":
+                data = flo_bot.get_action(
+                    id_in_subsession, id_in_group, "add_order", timer.get_time()
+                )
+            else:
+                data = cda_bot.get_action(
+                    id_in_subsession, id_in_group, "add_order", timer.get_time()
+                )
             if data:
                 order = BaseMarketPage.create_order(
                     r, id_in_group, data, timer.get_time()
@@ -118,6 +127,7 @@ class BaseMarketPage(Page):
         else:
             cda_order_books[r] = {}
             cda_order_graphs[r] = {}
+            cda_bot.load_actions(r)
 
         inventory_charts[r] = {}
         cash_charts[r] = {}

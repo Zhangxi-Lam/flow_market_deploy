@@ -2,7 +2,7 @@ import csv
 from collections import namedtuple
 
 
-class FloBot:
+class CdaBot:
     def __init__(self):
         self.ActionKey = namedtuple(
             "ActionKey", ["id_in_subsession", "id_in_group", "action", "timestamp"]
@@ -15,7 +15,7 @@ class FloBot:
     def load_actions(self, r):
         self.actions = {}
 
-        path = "flow_market/bot/" + str(r) + "_flo.csv"
+        path = "flow_market/bot/" + str(r) + "_cda.csv"
         with open(path) as f:
             rows = list(csv.DictReader(f))
         for r in rows:
@@ -27,10 +27,7 @@ class FloBot:
             )
             v = {
                 "direction": r["direction"],
-                "max_price": float(r["max_price"]),
-                "max_rate": float(r["max_rate"]),
-                "min_price": float(r["min_price"]),
-                "min_rate": float(r["min_rate"]),
+                "price": float(r["price"]),
                 "quantity": float(r["quantity"]),
             }
             self.actions[k] = v
