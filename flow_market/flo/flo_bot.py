@@ -16,8 +16,17 @@ class FloBot:
         self.actions = {}
 
         path = "flow_market/bot/" + str(r) + "_flo.csv"
-        with open(path) as f:
-            rows = list(csv.DictReader(f))
+        try:
+            with open(path) as f:
+                rows = list(csv.DictReader(f))
+        except FileNotFoundError as e:
+            print(
+                "Can not find bot file "
+                + e.filename
+                + "for this round. No bot will be added."
+            )
+            self.actions = {}
+            return
         for r in rows:
             k = self.ActionKey(
                 int(r["id_in_subsession"]),
