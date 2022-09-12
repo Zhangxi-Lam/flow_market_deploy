@@ -11,21 +11,22 @@ Your results for this round
         border: 1px solid black;
     }
 </style>
+Your total profit from all rounds is {{total_profit}}
 <table>
     <tr>
         <th>Round</th>
-        <th>Profit from contract</th>
-        <th>Profit from trading</th>
-        <th>Total</th>
+        <th>End-of-round Profit</th>
     </tr>
     {{ for d in data }}
     <tr>
         <td>{{d.round_number}}</td>
-        <td>{{d.profit_from_contract}}</td>
-        <td>{{d.profit_from_trading}}</td>
         <td>{{d.profit}}</td>
     </tr>
     {{ endfor }}
+    <tr>
+        <th>Total</th>
+        <th>{{total_profit}}</th>
+    </tr>
 </table>
 {%next_button%}
 {% endblock %}

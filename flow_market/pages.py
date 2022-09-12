@@ -19,7 +19,7 @@ from .config_parser import ConfigParser
 from .flo.flo_logger import FloLogger
 from .cda.cda_logger import CdaLogger
 from ._builtin import Page
-from .models import Player, Group, Subsession
+from .models import Player, Group, Subsession, Constants
 
 
 # Global
@@ -342,16 +342,46 @@ class RoundResultPage(Page):
         return 20
 
     def vars_for_template(self):
-        player_info = player_infos[self.round_number][self.group.id_in_subsession][
-            self.player.id_in_group
-        ]
-        return {
-            "round_number": self.round_number,
-            "profit_from_contract": player_info.profit_from_contract,
-            "profit_from_trading": player_info.profit_from_trading,
-            "profit": player_info.profit_from_contract
-            + player_info.profit_from_trading,
-        }
+        data = []
+        for r in range(1, self.round_number + 1):
+            player_info = player_infos[r][self.group.id_in_subsession][
+                self.player.id_in_group
+            ]
+            data.append(
+                {
+                    "round_number": r,
+                    "profit_from_contract": player_info.profit_from_contract,
+                    "profit_from_trading": player_info.profit_from_trading,
+                    "profit": player_info.profit_from_contract
+                    + player_info.profit_from_trading,
+                }
+            )
+        return {"data": data}
 
 
-page_sequence = [FloMarketPage, CdaMarketPage, RoundResultPage]
+class FinalResultPage(Page):
+    def is_displayed(self):
+        return self.round_number == Constants.num_rounds
+
+    def get_timeout_seconds(self):
+        return 20
+
+    def vars_for_template(self):
+        total = 0
+        data = []
+        for r in range(1, self.round_number + 1):
+            player_info = player_infos[r][self.group.id_in_subsession][
+                self.player.id_in_group
+            ]
+            total += player_info.profit_from_contract + player_info.profit_from_trading
+            data.append(
+                {
+                    "round_number": r,
+                    "profit": player_info.profit_from_contract
+                    + player_info.profit_from_trading,
+                }
+            )
+        return {"total_profit": total, "data": data}
+
+
+page_sequence = [FloMarketPage, CdaMarketPage, RoundResultPage, FinalResultPage]
