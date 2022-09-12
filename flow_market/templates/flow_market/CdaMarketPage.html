@@ -71,9 +71,9 @@ CDA Market
 {% include "flow_market/cda/cda_order_graph.html" %}
 {% include "flow_market/cda/cda_order_book.html" %}
 {% include "flow_market/common/inventory_chart.html" %}
+{% include "flow_market/common/cash_chart.html" %}
 {% include "flow_market/common/order_table.html" %}
 {% include "flow_market/common/contract_table.html" %}
-{% include "flow_market/common/cash_chart.html" %}
 {% include "flow_market/common/profit_chart.html" %}
 {% include "flow_market/common/status_chart.html" %}
 
@@ -127,21 +127,15 @@ This is round {{player.round_number}}
         </div>
         <div class="block">
             <div class="sub-chart">
-                <h5>Inventory</h5>
+                <h5 id="inventoryStatus">Inventory</h5>
                 <canvas id="inventoryChart"></canvas>
             </div>
             <div class="sub-chart">
-                <h5>Cash</h5>
+                <h5 id="cashStatus">Cash</h5>
                 <canvas id="cashChart"></canvas>
             </div>
         </div>
     </div>
-</div>
-<div class="row2">
-    <h5>Cash: </h5>
-    <h5 id="cashStatus"></h5>
-    <h5>Inventory: </h5>
-    <h5 id="inventoryStatus"></h5>
 </div>
 
 <script>
