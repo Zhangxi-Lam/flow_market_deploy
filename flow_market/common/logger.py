@@ -2,6 +2,7 @@ import json
 import os
 from flow_market.models import Player
 from flow_market.common.contract_table import ContractTable
+from flow_market.common.player_info import PlayerInfo
 
 
 class Logger:
@@ -19,6 +20,7 @@ class Logger:
         timestamp,
         before_transaction,
         player: Player,
+        player_info: PlayerInfo,
         order_book,
         contract_table: ContractTable,
     ):
@@ -28,8 +30,8 @@ class Logger:
             "before_transaction": before_transaction,
             "orders": self.log_orders(player, order_book),
             "contracts": self.log_contracts(contract_table),
-            "cash": player.get_cash(),
-            "inventory": player.get_inventory(),
+            "cash": player_info.get_cash(),
+            "inventory": player_info.get_inventory(),
         }
         self.participant_data.append(cur_data)
         self.write(self.participant_path, self.participant_data)

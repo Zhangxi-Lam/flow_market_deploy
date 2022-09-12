@@ -1,6 +1,7 @@
 from flow_market.models import Player
 from .flo_point import FloPoint
 from .flo_order import FloOrder
+from flow_market.common.player_info import PlayerInfo
 
 
 class FloOrderBook:
@@ -192,7 +193,7 @@ class FloOrderBook:
                     hi = mid
         return lo
 
-    def transact(self, group):
+    def transact(self, group, player_infos):
         complete_orders = []
         if not self.clearing_price or not self.clearing_rate or not self.orders:
             return complete_orders
@@ -207,7 +208,7 @@ class FloOrderBook:
                 order,
                 transact_price,
                 order.get_rate(transact_price),
-                group.get_player_by_id(order.id_in_group),
+                player_infos[order.id_in_group],
             )
             if order.is_complete():
                 complete_orders.append(order)
@@ -230,13 +231,10 @@ class FloOrderBook:
         order: FloOrder,
         clearing_price,
         transact_rate,
-        player: Player,
+        player_info: PlayerInfo,
     ):
         final_transact_rate = min(order.remaining_quantity(), transact_rate)
         order.fill(final_transact_rate)
-        if order.direction == "buy":
-            player.update_inventory(final_transact_rate)
-            player.update_cash(-final_transact_rate * clearing_price)
-        else:
-            player.update_inventory(-final_transact_rate)
-            player.update_cash(final_transact_rate * clearing_price)
+        player_info.update(
+            order.direction, final_transact_rate, clearing_price, is_trade=True
+        )

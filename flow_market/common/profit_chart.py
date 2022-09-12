@@ -1,5 +1,5 @@
 from flow_market.common.my_timer import MyTimer
-from flow_market.models import Player
+from flow_market.common.player_info import PlayerInfo
 
 
 class ProfitChartPoint(dict):
@@ -15,21 +15,21 @@ class ProfitChart:
     def get_frontend_response(self):
         return self.profit_data
 
-    def update(self, player: Player, contracts):
-        projected_profit = player.get_cash()
+    def update(self, player_info: PlayerInfo, contracts):
+        projected_profit = player_info.get_cash()
         uncovered_inventory = (
-            0 if player.get_inventory() >= 0 else -player.get_inventory()
+            0 if player_info.get_inventory() >= 0 else -player_info.get_inventory()
         )
         for c in contracts:
             if c.direction == "buy":
-                if player.get_inventory() > 0:
+                if player_info.get_inventory() > 0:
                     projected_profit += c.price * min(
-                        player.get_inventory(), c.quantity
+                        player_info.get_inventory(), c.quantity
                     )
             else:
-                if player.get_inventory() < 0:
+                if player_info.get_inventory() < 0:
                     projected_profit -= c.price * min(
-                        -player.get_inventory(), c.quantity
+                        -player_info.get_inventory(), c.quantity
                     )
                 uncovered_inventory -= c.quantity
         if uncovered_inventory > 0:

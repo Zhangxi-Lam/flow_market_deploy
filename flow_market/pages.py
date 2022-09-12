@@ -5,6 +5,7 @@ from flow_market.common.status_chart import StatusChart
 from flow_market.common.contract_table import ContractTable
 from flow_market.common.order_table import OrderTable
 from flow_market.common.my_timer import MyTimer
+from flow_market.common.player_info import PlayerInfo
 
 from .cda.cda_order_book import CdaOrderBook
 from .cda.cda_order import CdaOrder
@@ -39,9 +40,19 @@ inventory_charts = {}
 cash_charts = {}
 profit_charts = {}
 status_charts = {}
+player_infos = {}
 
 
 class BaseMarketPage(Page):
+    def get_timeout_seconds(self):
+        return config.get_round_config(self.round_number)["round_length"]
+
+    def before_next_page(self):
+        player_info = player_infos[self.round_number][self.group.id_in_subsession][
+            self.player.id_in_group
+        ]
+        player_info.cover_position()
+
     @staticmethod
     def get_order_book(r, id_in_subsession):
         if config.get_round_config(r)["treatment"] == "flo":
@@ -135,6 +146,7 @@ class BaseMarketPage(Page):
         contract_tables[r] = {}
         profit_charts[r] = {}
         status_charts[r] = {}
+        player_infos[r] = {}
 
         for g in subsession.get_groups():
             id_in_subsession = g.id_in_subsession
@@ -151,6 +163,7 @@ class BaseMarketPage(Page):
             contract_tables[r][id_in_subsession] = {}
             profit_charts[r][id_in_subsession] = {}
             status_charts[r][id_in_subsession] = {}
+            player_infos[r][id_in_subsession] = {}
             for p in g.get_players():
                 id_in_group = p.id_in_group
                 if c["treatment"] == "flo":
@@ -169,6 +182,7 @@ class BaseMarketPage(Page):
                 )
                 profit_charts[r][id_in_subsession][id_in_group] = ProfitChart(timer)
                 status_charts[r][id_in_subsession][id_in_group] = StatusChart()
+                player_infos[r][id_in_subsession][id_in_group] = PlayerInfo()
 
     @staticmethod
     def update(group: Group):
@@ -177,7 +191,7 @@ class BaseMarketPage(Page):
 
         # Order transaction
         completed_orders = BaseMarketPage.get_order_book(r, id_in_subsession).transact(
-            group
+            group, player_infos[r][id_in_subsession]
         )
         for order in completed_orders:
             BaseMarketPage.get_order_graph(
@@ -187,17 +201,18 @@ class BaseMarketPage(Page):
 
         for player in group.get_players():
             id_in_group = player.id_in_group
+            player_info = player_infos[r][id_in_subsession][id_in_group]
             # Contract transaction
-            contract_tables[r][id_in_subsession][id_in_group].update(player)
+            contract_tables[r][id_in_subsession][id_in_group].update(player_info)
             inventory_charts[r][id_in_subsession][id_in_group].update(
-                player.get_inventory()
+                player_info.get_inventory()
             )
-            cash_charts[r][id_in_subsession][id_in_group].update(player.get_cash())
+            cash_charts[r][id_in_subsession][id_in_group].update(player_info.get_cash())
             profit_charts[r][id_in_subsession][id_in_group].update(
-                player,
+                player_info,
                 contract_tables[r][id_in_subsession][id_in_group].active_contracts,
             )
-            status_charts[r][id_in_subsession][id_in_group].update(player)
+            status_charts[r][id_in_subsession][id_in_group].update(player_info)
 
     @staticmethod
     def log(group: Group, before_transaction):
@@ -261,9 +276,6 @@ class BaseMarketPage(Page):
 class FloMarketPage(BaseMarketPage):
     flo_logger = None
 
-    def get_timeout_seconds(self):
-        return config.get_round_config(self.round_number)["round_length"]
-
     def is_displayed(self):
         if config.get_round_config(self.round_number)["treatment"] == "flo":
             FloMarketPage.flo_logger = FloLogger(self.round_number)
@@ -280,17 +292,21 @@ class FloMarketPage(BaseMarketPage):
             timer.get_time(), before_transaction, order_book
         )
         for player in group.get_players():
-            contract_table = contract_tables[r][id_in_subsession][player.id_in_group]
+            id_in_group = player.id_in_group
+            contract_table = contract_tables[r][id_in_subsession][id_in_group]
+            player_info = player_infos[r][id_in_subsession][id_in_group]
             FloMarketPage.flo_logger.update_participant_data(
-                timer.get_time(), before_transaction, player, order_book, contract_table
+                timer.get_time(),
+                before_transaction,
+                player,
+                player_info,
+                order_book,
+                contract_table,
             )
 
 
 class CdaMarketPage(BaseMarketPage):
     cda_logger = None
-
-    def get_timeout_seconds(self):
-        return config.get_round_config(self.round_number)["round_length"]
 
     def is_displayed(self):
         if config.get_round_config(self.round_number)["treatment"] == "cda":
@@ -308,10 +324,34 @@ class CdaMarketPage(BaseMarketPage):
             timer.get_time(), before_transaction, order_book
         )
         for player in group.get_players():
-            contract_table = contract_tables[r][id_in_subsession][player.id_in_group]
+            id_in_group = player.id_in_group
+            contract_table = contract_tables[r][id_in_subsession][id_in_group]
+            player_info = player_infos[r][id_in_subsession][id_in_group]
             CdaMarketPage.cda_logger.update_participant_data(
-                timer.get_time(), before_transaction, player, order_book, contract_table
+                timer.get_time(),
+                before_transaction,
+                player,
+                player_info,
+                order_book,
+                contract_table,
             )
 
 
-page_sequence = [FloMarketPage, CdaMarketPage]
+class RoundResultPage(Page):
+    def get_timeout_seconds(self):
+        return 20
+
+    def vars_for_template(self):
+        player_info = player_infos[self.round_number][self.group.id_in_subsession][
+            self.player.id_in_group
+        ]
+        return {
+            "round_number": self.round_number,
+            "profit_from_contract": player_info.profit_from_contract,
+            "profit_from_trading": player_info.profit_from_trading,
+            "profit": player_info.profit_from_contract
+            + player_info.profit_from_trading,
+        }
+
+
+page_sequence = [FloMarketPage, CdaMarketPage, RoundResultPage]

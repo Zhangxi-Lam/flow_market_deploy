@@ -2,6 +2,7 @@ import csv
 import time
 from ..models import Player
 from .my_timer import MyTimer
+from flow_market.common.player_info import PlayerInfo
 
 
 class Contract(dict):
@@ -57,38 +58,38 @@ class ContractTable:
             "executed_contracts": self.executed_contracts,
         }
 
-    def update(self, player: Player):
+    def update(self, player_info: PlayerInfo):
         self.active_contracts = []
         t = self.timer.get_time()
         for c in self.contracts:
             if t >= c.deadline:
                 if not c.has_executed:
-                    self.execute(c, player)
+                    self.execute(c, player_info)
                     self.executed_contracts.append(c)
             elif t >= c.showtime:
                 c.update(t)
                 self.active_contracts.append(c)
 
-    def execute(self, contract, player: Player):
+    def execute(self, contract, player_info: PlayerInfo):
         contract.has_executed = True
         is_buy = contract["direction"]
         if is_buy:
             executed_quantity = (
-                min(player.get_inventory(), contract.quantity)
-                if player.get_inventory() > 0
+                min(player_info.get_inventory(), contract.quantity)
+                if player_info.get_inventory() > 0
                 else 0
             )
-            player.update_inventory(-executed_quantity)
-            player.update_cash(executed_quantity * contract["price"])
+            player_info.update("buy", executed_quantity, contract.price, is_trade=False)
             contract.execute(executed_quantity)
         else:
             executed_quantity = (
-                min(-player.get_inventory(), contract.quantity)
-                if player.get_inventory() < 0
+                min(-player_info.get_inventory(), contract.quantity)
+                if player_info.get_inventory() < 0
                 else 0
             )
-            player.update_inventory(executed_quantity)
-            player.update_cash(-executed_quantity * contract["price"])
+            player_info.update(
+                "sell", executed_quantity, contract.price, is_trade=False
+            )
             contract.execute(executed_quantity)
 
     def get_contracts(self):

@@ -1,4 +1,5 @@
 from flow_market.models import Group, Player
+from flow_market.common.player_info import PlayerInfo
 from .cda_point import CdaPoint
 from .cda_order import CdaOrder
 
@@ -99,7 +100,7 @@ class CdaOrderBook:
             self.combined_ask_points = result
         return
 
-    def transact(self, group: Group):
+    def transact(self, group: Group, player_infos):
         complete_orders = []
         sorted_bid_orders = []
         sorted_ask_orders = []
@@ -125,18 +126,8 @@ class CdaOrderBook:
             price = bid.price if bid.timestamp < ask.timestamp else ask.price
             quantity = min(bid.remaining_quantity(), ask.remaining_quantity())
             self.clearing_price, self.clearing_rate = price, quantity
-            self.fill_order(
-                bid,
-                price,
-                quantity,
-                group.get_player_by_id(bid.id_in_group),
-            )
-            self.fill_order(
-                ask,
-                price,
-                quantity,
-                group.get_player_by_id(ask.id_in_group),
-            )
+            self.fill_order(bid, price, quantity, player_infos[bid.id_in_group])
+            self.fill_order(ask, price, quantity, player_infos[ask.id_in_group])
             if bid.is_complete():
                 complete_orders.append(bid)
                 sorted_bid_orders.pop(0)
@@ -149,11 +140,6 @@ class CdaOrderBook:
         self.update_combined_points(is_buy=False)
         return complete_orders
 
-    def fill_order(self, order: CdaOrder, price, quantity, player: Player):
+    def fill_order(self, order: CdaOrder, price, quantity, player_info: PlayerInfo):
         order.fill(quantity)
-        if order.direction == "buy":
-            player.update_inventory(quantity)
-            player.update_cash(-quantity * price)
-        else:
-            player.update_inventory(-quantity)
-            player.update_cash(quantity * price)
+        player_info.update(order.direction, quantity, price, is_trade=True)
