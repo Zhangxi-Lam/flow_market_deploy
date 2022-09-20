@@ -28,8 +28,9 @@ class Logger:
             "timestamp": timestamp,
             "id": player.participant.id,
             "before_transaction": before_transaction,
-            "orders": self.log_orders(player, order_book),
-            "contracts": self.log_contracts(contract_table),
+            "active_orders": self.log_orders(player, order_book),
+            "active_contracts": self.log_contracts(contract_table.active_contracts),
+            "executed_contracts": self.log_contracts(contract_table.executed_contracts),
             "cash": player_info.get_cash(),
             "inventory": player_info.get_inventory(),
             "rate": player_info.get_rate(),
@@ -40,8 +41,7 @@ class Logger:
     def log_orders(self, player: Player, order_book):
         pass
 
-    def log_contracts(self, contract_table: ContractTable):
-        contracts = contract_table.active_contracts
+    def log_contracts(self, contracts):
         data = []
         for c in contracts:
             data.append(
@@ -49,10 +49,12 @@ class Logger:
                     "direction": c.direction,
                     "price": c.price,
                     "quantity": c.quantity,
+                    "fill_quantity": c.fill_quantity,
                     "showtime": c.showtime,
                     "deadline": c.deadline,
                 }
             )
+        return data
 
     def write(self, file_path, data):
         os.makedirs(os.path.dirname(file_path), exist_ok=True)

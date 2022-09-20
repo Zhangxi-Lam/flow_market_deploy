@@ -25,8 +25,10 @@
             price.innerHTML = 'Price';
             quantity = document.createElement('td');
             quantity.innerHTML = 'Quantity';
+            var fill_quantity = document.createElement('td');
+            fill_quantity.innerHTML = 'Fill Quantity';
 
-            newRow.append(direction, price, quantity);
+            newRow.append(direction, price, quantity, fill_quantity);
             table.appendChild(newRow);
         }
 
@@ -45,7 +47,7 @@
                 const quantity = document.createElement('td');
                 quantity.innerHTML = element['quantity'];
                 const deadline = document.createElement('td');
-                deadline.innerHTML = element['remaining'] + ' s';
+                deadline.innerHTML = element['time_remaining'] + ' s';
 
                 newRow.append(direction, price, quantity, deadline);
                 table.appendChild(newRow);
@@ -64,8 +66,10 @@
                 price.innerHTML = element['price'];
                 const quantity = document.createElement('td');
                 quantity.innerHTML = element['quantity'];
+                const fill_quantity = document.createElement('td');
+                fill_quantity.innerHTML = element['fill_quantity'];
 
-                newRow.append(direction, price, quantity);
+                newRow.append(direction, price, quantity, fill_quantity);
                 table.appendChild(newRow);
             });
         }

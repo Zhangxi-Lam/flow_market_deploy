@@ -23,9 +23,10 @@ class Contract(dict):
             direction=direction,
             price=float(price),
             quantity=float(quantity),
+            fill_quantity=0,
             showtime=int(showtime),
             deadline=int(deadline),
-            remaining=0,
+            time_remaining=0,
             has_executed=False,
         )
 
@@ -37,10 +38,10 @@ class Contract(dict):
 
     def update(self, t: int):
         if t < self.deadline:
-            self.remaining = round(self.deadline - t, 0)
+            self.time_remaining = round(self.deadline - t, 0)
 
-    def execute(self, executed_quantity):
-        self.quantity = executed_quantity
+    def execute(self, fill_quantity):
+        self.fill_quantity = fill_quantity
 
 
 class ContractTable:
@@ -72,25 +73,22 @@ class ContractTable:
 
     def execute(self, contract, player_info: PlayerInfo):
         contract.has_executed = True
-        is_buy = contract["direction"]
-        if is_buy:
-            executed_quantity = (
+        if contract["direction"] == "buy":
+            fill_quantity = (
                 min(player_info.get_inventory(), contract.quantity)
                 if player_info.get_inventory() > 0
                 else 0
             )
-            player_info.update("buy", executed_quantity, contract.price, is_trade=False)
-            contract.execute(executed_quantity)
+            player_info.update("sell", fill_quantity, contract.price, is_trade=False)
+            contract.execute(fill_quantity)
         else:
-            executed_quantity = (
+            fill_quantity = (
                 min(-player_info.get_inventory(), contract.quantity)
                 if player_info.get_inventory() < 0
                 else 0
             )
-            player_info.update(
-                "sell", executed_quantity, contract.price, is_trade=False
-            )
-            contract.execute(executed_quantity)
+            player_info.update("buy", fill_quantity, contract.price, is_trade=False)
+            contract.execute(fill_quantity)
 
     def get_contracts(self):
         contracts = []
