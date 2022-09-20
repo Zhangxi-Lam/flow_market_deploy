@@ -18,7 +18,7 @@ from .flo.flo_bot import FloBot
 from .config_parser import ConfigParser
 from .flo.flo_logger import FloLogger
 from .cda.cda_logger import CdaLogger
-from ._builtin import Page
+from ._builtin import Page, WaitPage
 from .models import Player, Group, Subsession, Constants
 
 
@@ -384,4 +384,15 @@ class FinalResultPage(Page):
         return {"total_profit": total, "data": data}
 
 
-page_sequence = [FloMarketPage, CdaMarketPage, RoundResultPage, FinalResultPage]
+class WaitStart(WaitPage):
+    body_text = "Waiting for all players to be ready"
+    wait_for_all_groups = True
+
+
+page_sequence = [
+    WaitStart,
+    FloMarketPage,
+    CdaMarketPage,
+    RoundResultPage,
+    FinalResultPage,
+]
