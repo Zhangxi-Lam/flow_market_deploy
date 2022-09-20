@@ -10,8 +10,11 @@ class PlayerInfo:
         self.cash = 0
         self.profit_from_trading = 0
         self.profit_from_contract = 0
+        # The trading rate of the player
+        self.rate = 0
 
     def update(self, direction, quantity, price, is_trade):
+        self.rate = quantity
         remaining_quantity = quantity
         if direction == "buy":
             while (
@@ -83,3 +86,9 @@ class PlayerInfo:
 
     def get_cash(self):
         return round(self.cash, 2)
+
+    def get_rate(self):
+        rate = self.rate
+        # Reset the rate
+        self.rate = 0
+        return rate

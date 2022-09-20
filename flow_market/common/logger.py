@@ -32,6 +32,7 @@ class Logger:
             "contracts": self.log_contracts(contract_table),
             "cash": player_info.get_cash(),
             "inventory": player_info.get_inventory(),
+            "rate": player_info.get_rate(),
         }
         self.participant_data.append(cur_data)
         self.write(self.participant_path, self.participant_data)
