@@ -397,7 +397,13 @@ class WaitStart(WaitPage):
     wait_for_all_groups = True
 
 
+class IntroPage(Page):
+    def is_displayed(self):
+        return self.round_number == 1
+
+
 page_sequence = [
+    IntroPage,
     WaitStart,
     FloMarketPage,
     CdaMarketPage,
