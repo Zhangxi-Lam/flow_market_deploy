@@ -215,7 +215,6 @@
             let datasets = CdaOrderGraph.myChart.data.datasets[0];
             let button = document.querySelector("#buyButton");
             if (CdaOrderGraph.bidActive) {
-                let quantity = document.querySelector("#buyQuantityInput");
                 liveSend(CdaOrderGraph.parseOrder('buy', datasets["data"]));
             } else {
                 liveSend({
@@ -228,7 +227,6 @@
         static sellButtonClick() {
             let datasets = CdaOrderGraph.myChart.data.datasets[1];
             if (CdaOrderGraph.askActive) {
-                let quantity = document.querySelector("#buyQuantityInput");
                 liveSend(CdaOrderGraph.parseOrder('sell', datasets["data"]));
             } else {
                 liveSend({
@@ -238,7 +236,7 @@
             }
         }
 
-        static parseOrder(direction, data, quantity) {
+        static parseOrder(direction, data) {
             return {
                 'message_type': 'add_order',
                 'direction': direction,

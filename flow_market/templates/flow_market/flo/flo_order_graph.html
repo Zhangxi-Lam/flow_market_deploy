@@ -263,7 +263,7 @@
         static sellButtonClick() {
             let datasets = FloOrderGraph.myChart.data.datasets[ASKS_DATASETS_INDEX];
             if (FloOrderGraph.askActive) {
-                let quantity = document.querySelector("#buyQuantityInput");
+                let quantity = document.querySelector("#sellQuantityInput");
                 liveSend(FloOrderGraph.parseOrder('sell', datasets["data"], parseInt(quantity.value)));
             } else {
                 liveSend({
