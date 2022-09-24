@@ -350,10 +350,13 @@ class RoundResultPage(Page):
             data.append(
                 {
                     "round_number": r,
-                    "profit_from_contract": player_info.profit_from_contract,
-                    "profit_from_trading": player_info.profit_from_trading,
-                    "profit": player_info.profit_from_contract
-                    + player_info.profit_from_trading,
+                    "profit_from_contract": round(player_info.profit_from_contract, 2),
+                    "profit_from_trading": round(player_info.profit_from_trading, 2),
+                    "profit": round(
+                        player_info.profit_from_contract
+                        + player_info.profit_from_trading,
+                        2,
+                    ),
                 }
             )
         return {"data": data}
@@ -373,12 +376,17 @@ class FinalResultPage(Page):
             player_info = player_infos[r][self.group.id_in_subsession][
                 self.player.id_in_group
             ]
-            total += player_info.profit_from_contract + player_info.profit_from_trading
+            total += round(
+                player_info.profit_from_contract + player_info.profit_from_trading, 2
+            )
             data.append(
                 {
                     "round_number": r,
-                    "profit": player_info.profit_from_contract
-                    + player_info.profit_from_trading,
+                    "profit": round(
+                        player_info.profit_from_contract
+                        + player_info.profit_from_trading,
+                        2,
+                    ),
                 }
             )
         return {"total_profit": total, "data": data}
