@@ -5,10 +5,11 @@ from flow_market.common.logger import Logger
 
 class FloLogger(Logger):
     def update_market_data(
-        self, timestamp, before_transaction, order_book: FloOrderBook
+        self, timestamp, id_in_subsession, before_transaction, order_book: FloOrderBook
     ):
         cur_data = {
             "timestamp": timestamp,
+            "id_in_subsession": id_in_subsession,
             "before_transaction": before_transaction,
             "clearing_price": order_book.clearing_price,
             "clearing_rate": order_book.clearing_rate,

@@ -289,7 +289,7 @@ class FloMarketPage(BaseMarketPage):
         id_in_subsession = group.id_in_subsession
         order_book = BaseMarketPage.get_order_book(r, id_in_subsession)
         FloMarketPage.flo_logger.update_market_data(
-            timer.get_time(), before_transaction, order_book
+            timer.get_time(), id_in_subsession, before_transaction, order_book
         )
         for player in group.get_players():
             id_in_group = player.id_in_group
@@ -321,7 +321,7 @@ class CdaMarketPage(BaseMarketPage):
         id_in_subsession = group.id_in_subsession
         order_book = BaseMarketPage.get_order_book(r, id_in_subsession)
         CdaMarketPage.cda_logger.update_market_data(
-            timer.get_time(), before_transaction, order_book
+            timer.get_time(), id_in_subsession, before_transaction, order_book
         )
         for player in group.get_players():
             id_in_group = player.id_in_group

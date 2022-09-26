@@ -12,7 +12,9 @@ class Logger:
         self.market_data = []
         self.participant_data = []
 
-    def update_market_data(self, timestamp, before_transaction, order_book):
+    def update_market_data(
+        self, timestamp, id_in_subsession, before_transaction, order_book
+    ):
         pass
 
     def update_participant_data(
@@ -26,7 +28,9 @@ class Logger:
     ):
         cur_data = {
             "timestamp": timestamp,
-            "id": player.participant.id,
+            "id_in_subsession": player.group.id_in_subsession,
+            "id_in_group": player.id_in_group,
+            "participant_id": player.participant.id,
             "before_transaction": before_transaction,
             "active_orders": self.log_orders(player, order_book),
             "active_contracts": self.log_contracts(contract_table.active_contracts),
