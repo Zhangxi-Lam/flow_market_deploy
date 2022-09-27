@@ -168,6 +168,8 @@ class FloOrderBook:
     def get_rate(self, price_in_ticks, is_buy):
         points = self.combined_bid_points if is_buy else self.combined_ask_points
         i = self.get_index(points, price_in_ticks, is_buy)
+        if i == len(points) - 1:
+            return points[i].x
         p1, p2 = points[i], points[i + 1]
         if p1.x == p2.x:
             return p1.x

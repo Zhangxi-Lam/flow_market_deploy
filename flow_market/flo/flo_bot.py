@@ -37,9 +37,9 @@ class FloBot:
             v = {
                 "direction": r["direction"],
                 "max_price": float(r["max_price"]),
-                "max_rate": float(r["max_rate"]),
+                "max_price_rate": float(r["max_price_rate"]),
                 "min_price": float(r["min_price"]),
-                "min_rate": float(r["min_rate"]),
+                "min_price_rate": float(r["min_price_rate"]),
                 "quantity": float(r["quantity"]),
             }
             self.actions[k] = v
