@@ -9,9 +9,7 @@ class FloOrderBook:
     The OrderBook of the group
     """
 
-    def __init__(self, config) -> None:
-        self.config = config
-
+    def __init__(self) -> None:
         self.orders = {}  # {order_id: FloOrder}
         self.bid_orders = {}  # {id_in_group: {order_id: FloOrder}}
         self.ask_orders = {}  # {id_in_group: {order_id: FloOrder}}
@@ -104,7 +102,7 @@ class FloOrderBook:
             else:
                 inverse -= change
             y = point.y
-        point = FloPoint(x, 0) if is_buy else FloPoint(x, self.config["max_price"])
+        point = FloPoint(x, 0) if is_buy else FloPoint(x, 20)
         result.append(point)
 
         if is_buy:

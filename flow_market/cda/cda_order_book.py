@@ -5,8 +5,7 @@ from .cda_order import CdaOrder
 
 
 class CdaOrderBook:
-    def __init__(self, config):
-        self.config = config
+    def __init__(self):
 
         self.orders = {}  # {order_id: CdaOrder}
         self.bid_orders = {}  # {id_in_group: {order_id: CdaOrder}}

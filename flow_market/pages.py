@@ -151,10 +151,10 @@ class BaseMarketPage(Page):
         for g in subsession.get_groups():
             id_in_subsession = g.id_in_subsession
             if c["treatment"] == "flo":
-                flo_order_books[r][id_in_subsession] = FloOrderBook(c)
+                flo_order_books[r][id_in_subsession] = FloOrderBook()
                 flo_order_graphs[r][id_in_subsession] = {}
             else:
-                cda_order_books[r][id_in_subsession] = CdaOrderBook(c)
+                cda_order_books[r][id_in_subsession] = CdaOrderBook()
                 cda_order_graphs[r][id_in_subsession] = {}
 
             inventory_charts[r][id_in_subsession] = {}
