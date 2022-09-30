@@ -1,4 +1,5 @@
 import csv
+import os
 import time
 from ..models import Player
 from .my_timer import MyTimer
@@ -45,11 +46,13 @@ class Contract(dict):
 
 
 class ContractTable:
-    def __init__(self, id_in_subsession, id_in_group, timer: MyTimer) -> None:
+    def __init__(
+        self, id_in_subsession, id_in_group, round_number, timer: MyTimer
+    ) -> None:
         self.id_in_subsession = id_in_subsession
         self.id_in_group = id_in_group
         self.timer = timer
-        self.contracts = self.get_contracts()
+        self.contracts = self.get_contracts(round_number)
         self.active_contracts = []
         self.executed_contracts = []
 
@@ -90,9 +93,11 @@ class ContractTable:
             player_info.update("buy", fill_quantity, contract.price, is_trade=False)
             contract.execute(fill_quantity)
 
-    def get_contracts(self):
+    def get_contracts(self, round_number):
         contracts = []
-        path = "flow_market/config/contracts.csv"
+        path = "flow_market/config/" + str(round_number) + "_contracts.csv"
+        if not os.path.exists(path):
+            return contracts
         with open(path) as infile:
             rows = list(csv.DictReader(infile))
         for r in rows:

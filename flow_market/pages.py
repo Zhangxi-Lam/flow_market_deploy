@@ -177,7 +177,7 @@ class BaseMarketPage(Page):
                     c["treatment"] == "flo"
                 )
                 contract_tables[r][id_in_subsession][id_in_group] = ContractTable(
-                    id_in_subsession, id_in_group, timer
+                    id_in_subsession, id_in_group, r, timer
                 )
                 profit_charts[r][id_in_subsession][id_in_group] = ProfitChart(timer)
                 status_charts[r][id_in_subsession][id_in_group] = StatusChart()

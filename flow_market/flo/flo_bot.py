@@ -1,5 +1,6 @@
 import csv
 from collections import namedtuple
+import os
 
 
 class FloBot:
@@ -7,26 +8,19 @@ class FloBot:
         self.ActionKey = namedtuple(
             "ActionKey", ["id_in_subsession", "id_in_group", "action", "timestamp"]
         )
+        self.actions = {}
 
     def get_action(self, id_in_subsession, id_in_group, action, timestamp):
         k = self.ActionKey(id_in_subsession, id_in_group, action, timestamp)
         return self.actions.get(k, None)
 
-    def load_actions(self, r):
+    def load_actions(self, round_number):
         self.actions = {}
-
-        path = "flow_market/bot/" + str(r) + "_flo.csv"
-        try:
-            with open(path) as f:
-                rows = list(csv.DictReader(f))
-        except FileNotFoundError as e:
-            print(
-                "Can not find bot file "
-                + e.filename
-                + "for this round. No bot will be added."
-            )
-            self.actions = {}
+        path = "flow_market/bot/" + str(round_number) + "_flo.csv"
+        if not os.path.exists(path):
             return
+        with open(path) as f:
+            rows = list(csv.DictReader(f))
         for r in rows:
             k = self.ActionKey(
                 int(r["id_in_subsession"]),
