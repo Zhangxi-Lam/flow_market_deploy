@@ -44,9 +44,6 @@ player_infos = {}
 
 
 class BaseMarketPage(Page):
-    def get_timeout_seconds(self):
-        return config.get_round_config(self.round_number)["round_length"]
-
     def before_next_page(self):
         player_info = player_infos[self.round_number][self.group.id_in_subsession][
             self.player.id_in_group
@@ -73,8 +70,10 @@ class BaseMarketPage(Page):
 
     @staticmethod
     def live_method(player: Player, data):
-        message_type = data["message_type"]
         r = player.subsession.round_number
+        if timer.get_time() >= config.get_round_config(r)["round_length"]:
+            return
+        message_type = data["message_type"]
         id_in_subsession = player.group.id_in_subsession
         id_in_group = player.id_in_group
 
@@ -268,6 +267,8 @@ class BaseMarketPage(Page):
                 "status_chart_data": status_charts[r][id_in_subsession][
                     id_in_group
                 ].get_frontend_response(),
+                "time_remaining": config.get_round_config(r)["round_length"]
+                - timer.get_time(),
             }
             group_response[id_in_group] = player_response
         return group_response
