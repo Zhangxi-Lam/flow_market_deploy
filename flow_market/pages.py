@@ -71,6 +71,8 @@ class BaseMarketPage(Page):
     @staticmethod
     def live_method(player: Player, data):
         r = player.subsession.round_number
+        if r not in flo_order_books and r not in cda_order_books:
+            BaseMarketPage.init(player.group.subsession)
         if timer.get_time() >= config.get_round_config(r)["round_length"]:
             return
         message_type = data["message_type"]
