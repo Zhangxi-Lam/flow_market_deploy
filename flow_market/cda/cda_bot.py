@@ -8,9 +8,9 @@ class CdaBot:
             "ActionKey", ["id_in_subsession", "id_in_group", "action", "timestamp"]
         )
 
-    def get_action(self, id_in_subsession, id_in_group, action, timestamp):
+    def pop_action(self, id_in_subsession, id_in_group, action, timestamp):
         k = self.ActionKey(id_in_subsession, id_in_group, action, timestamp)
-        return self.actions.get(k, None)
+        return self.actions.pop(k, None)
 
     def load_actions(self, r):
         self.actions = {}

@@ -41,6 +41,7 @@ cash_charts = {}
 profit_charts = {}
 status_charts = {}
 player_infos = {}
+sync_table = {}
 
 
 class BaseMarketPage(Page):
@@ -69,15 +70,27 @@ class BaseMarketPage(Page):
         return CdaOrder(id_in_group, data, timestamp)
 
     @staticmethod
+    def sync(r, id_in_subsession, id_in_group):
+        # Check if all the players in the group have updated (value=True)
+        table = sync_table[r][id_in_subsession]
+        for v in table.values():
+            if not v:
+                return False
+        for k in table.keys():
+            table[k] = False
+        return True
+
+    @staticmethod
     def live_method(player: Player, data):
         r = player.subsession.round_number
-        if r not in flo_order_books and r not in cda_order_books:
-            BaseMarketPage.init(player.group.subsession)
-        if timer.get_time() >= config.get_round_config(r)["round_length"]:
-            return
-        message_type = data["message_type"]
         id_in_subsession = player.group.id_in_subsession
         id_in_group = player.id_in_group
+        print(r, player.id_in_group, timer.get_time())
+        if r not in flo_order_books and r not in cda_order_books:
+            BaseMarketPage.init(player.group.subsession)
+        if timer.get_time() > config.get_round_config(r)["round_length"]:
+            return
+        message_type = data["message_type"]
 
         if r not in flo_order_books and r not in cda_order_books:
             BaseMarketPage.init(player.group.subsession)
@@ -100,14 +113,18 @@ class BaseMarketPage(Page):
             order_graph.remove_order(order)
             order_table.remove_order(order)
         else:  # update
+            if sync_table[r][id_in_subsession][id_in_group]:
+                # This player has updated.
+                return
+            sync_table[r][id_in_subsession][id_in_group] = True
             # Get actions from Bot
             data = None
             if config.get_round_config(r)["treatment"] == "flo":
-                data = flo_bot.get_action(
+                data = flo_bot.pop_action(
                     id_in_subsession, id_in_group, "add_order", timer.get_time()
                 )
             else:
-                data = cda_bot.get_action(
+                data = cda_bot.pop_action(
                     id_in_subsession, id_in_group, "add_order", timer.get_time()
                 )
             if data:
@@ -117,15 +134,16 @@ class BaseMarketPage(Page):
                 order_book.add_order(order)
                 order_graph.add_order(order)
                 order_table.add_order(order)
-            if id_in_group != 1:
-                # We only let the first player in the group do the update to
+            if not BaseMarketPage.sync(r, id_in_subsession, id_in_group):
+                # We only do the update after everyone in the group is synced to
                 # avoid duplicate transactions.
                 return
-            timer.tick()
             BaseMarketPage.log(player.group, before_transaction=True)
             BaseMarketPage.update(player.group)
             BaseMarketPage.log(player.group, before_transaction=False)
-            return BaseMarketPage.respond(player.group)
+            response = BaseMarketPage.respond(player.group)
+            timer.tick()
+            return response
 
     @staticmethod
     def init(subsession: Subsession):
@@ -148,6 +166,7 @@ class BaseMarketPage(Page):
         profit_charts[r] = {}
         status_charts[r] = {}
         player_infos[r] = {}
+        sync_table[r] = {}
 
         for g in subsession.get_groups():
             id_in_subsession = g.id_in_subsession
@@ -165,6 +184,7 @@ class BaseMarketPage(Page):
             profit_charts[r][id_in_subsession] = {}
             status_charts[r][id_in_subsession] = {}
             player_infos[r][id_in_subsession] = {}
+            sync_table[r][id_in_subsession] = {}
             for p in g.get_players():
                 id_in_group = p.id_in_group
                 if c["treatment"] == "flo":
@@ -184,6 +204,7 @@ class BaseMarketPage(Page):
                 profit_charts[r][id_in_subsession][id_in_group] = ProfitChart(timer)
                 status_charts[r][id_in_subsession][id_in_group] = StatusChart()
                 player_infos[r][id_in_subsession][id_in_group] = PlayerInfo()
+                sync_table[r][id_in_subsession][id_in_group] = False
 
     @staticmethod
     def update(group: Group):

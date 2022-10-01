@@ -174,17 +174,9 @@ This is round {{player.round_number}}
     var profitChart = new ProfitChart();
     profitChart.show();
 
-
     var statusChart = new StatusChart();
 
-
-    var timestamp = 0;
     var updateFloMarketPage = window.setInterval(function () {
-        if (timestamp < 120) {
-            timestamp++;
-        } else {
-            clearInterval(updateFloMarketPage);
-        }
         if (orderGraph.shouldRequestUpdate()) {
             liveSend({
                 'message_type': 'order_graph_update_request'
