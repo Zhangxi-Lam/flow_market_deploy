@@ -41,7 +41,6 @@ cash_charts = {}
 profit_charts = {}
 status_charts = {}
 player_infos = {}
-sync_table = {}
 
 
 class BaseMarketPage(Page):
@@ -70,27 +69,15 @@ class BaseMarketPage(Page):
         return CdaOrder(id_in_group, data, timestamp)
 
     @staticmethod
-    def sync(r, id_in_subsession, id_in_group):
-        # Check if all the players in the group have updated (value=True)
-        table = sync_table[r][id_in_subsession]
-        for v in table.values():
-            if not v:
-                return False
-        for k in table.keys():
-            table[k] = False
-        return True
-
-    @staticmethod
     def live_method(player: Player, data):
         r = player.subsession.round_number
         id_in_subsession = player.group.id_in_subsession
         id_in_group = player.id_in_group
-        print(r, player.id_in_group, timer.get_time())
+        message_type = data["message_type"]
         if r not in flo_order_books and r not in cda_order_books:
             BaseMarketPage.init(player.group.subsession)
         if timer.get_time() > config.get_round_config(r)["round_length"]:
-            return
-        message_type = data["message_type"]
+            return {0: {"message_type": "stop"}}
 
         if r not in flo_order_books and r not in cda_order_books:
             BaseMarketPage.init(player.group.subsession)
@@ -100,44 +87,41 @@ class BaseMarketPage(Page):
         order_table = order_tables[r][id_in_subsession][id_in_group]
 
         if message_type == "order_graph_update_request":
+            # Update order graph for the player
             order_graph.send_update_to_frontend = True
             return
         elif message_type == "add_order":
+            # Add order for the player
             order = BaseMarketPage.create_order(r, id_in_group, data, timer.get_time())
             order_book.add_order(order)
             order_graph.add_order(order)
             order_table.add_order(order)
         elif message_type == "remove_order":
+            # Remove order for the player
             order = order_book.find_order(data["order_id"])
             order_book.remove_order(order)
             order_graph.remove_order(order)
             order_table.remove_order(order)
-        else:  # update
-            if sync_table[r][id_in_subsession][id_in_group]:
-                # This player has updated.
-                return
-            sync_table[r][id_in_subsession][id_in_group] = True
+        else:
+            # Update the entire group.
             # Get actions from Bot
-            data = None
             if config.get_round_config(r)["treatment"] == "flo":
-                data = flo_bot.pop_action(
-                    id_in_subsession, id_in_group, "add_order", timer.get_time()
-                )
+                func = flo_bot.pop_action
             else:
-                data = cda_bot.pop_action(
-                    id_in_subsession, id_in_group, "add_order", timer.get_time()
+                func = cda_bot.pop_action
+            for p in player.group.get_players():
+                data = func(
+                    id_in_subsession, p.id_in_group, "add_order", timer.get_time()
                 )
-            if data:
-                order = BaseMarketPage.create_order(
-                    r, id_in_group, data, timer.get_time()
-                )
-                order_book.add_order(order)
-                order_graph.add_order(order)
-                order_table.add_order(order)
-            if not BaseMarketPage.sync(r, id_in_subsession, id_in_group):
-                # We only do the update after everyone in the group is synced to
-                # avoid duplicate transactions.
-                return
+                if data:
+                    order = BaseMarketPage.create_order(
+                        r, p.id_in_group, data, timer.get_time()
+                    )
+                    order_book.add_order(order)
+                    BaseMarketPage.get_order_graph(
+                        r, id_in_subsession, p.id_in_group
+                    ).add_order(order)
+                    order_tables[r][id_in_subsession][p.id_in_group].add_order(order)
             BaseMarketPage.log(player.group, before_transaction=True)
             BaseMarketPage.update(player.group)
             BaseMarketPage.log(player.group, before_transaction=False)
@@ -166,7 +150,6 @@ class BaseMarketPage(Page):
         profit_charts[r] = {}
         status_charts[r] = {}
         player_infos[r] = {}
-        sync_table[r] = {}
 
         for g in subsession.get_groups():
             id_in_subsession = g.id_in_subsession
@@ -184,7 +167,6 @@ class BaseMarketPage(Page):
             profit_charts[r][id_in_subsession] = {}
             status_charts[r][id_in_subsession] = {}
             player_infos[r][id_in_subsession] = {}
-            sync_table[r][id_in_subsession] = {}
             for p in g.get_players():
                 id_in_group = p.id_in_group
                 if c["treatment"] == "flo":
@@ -204,7 +186,6 @@ class BaseMarketPage(Page):
                 profit_charts[r][id_in_subsession][id_in_group] = ProfitChart(timer)
                 status_charts[r][id_in_subsession][id_in_group] = StatusChart()
                 player_infos[r][id_in_subsession][id_in_group] = PlayerInfo()
-                sync_table[r][id_in_subsession][id_in_group] = False
 
     @staticmethod
     def update(group: Group):
@@ -265,7 +246,7 @@ class BaseMarketPage(Page):
         for player in group.get_players():
             id_in_group = player.id_in_group
             player_response = {
-                "message_type": "update",
+                "message_type": "update" if id_in_group == 1 else "stop",
                 "order_book_data": BaseMarketPage.get_order_book(
                     r, id_in_subsession
                 ).get_frontend_response(),

@@ -176,18 +176,24 @@ This is round {{player.round_number}}
 
     var statusChart = new StatusChart();
 
+    var sendUpdateRequest = true;
     var updateFloMarketPage = window.setInterval(function () {
         if (orderGraph.shouldRequestUpdate()) {
             liveSend({
                 'message_type': 'order_graph_update_request'
-            })
+            });
         }
-        liveSend({
-            'message_type': 'update',
-        })
+        if (sendUpdateRequest) {
+            liveSend({
+                'message_type': 'update',
+            });
+        }
     }, 1000);
 
     function liveRecv(data) {
+        if (data['message_type'] == 'stop') {
+            sendUpdateRequest = false;
+        }
         if (data['order_book_data']) {
             orderBook.update(data['order_book_data']);
         }
@@ -212,10 +218,12 @@ This is round {{player.round_number}}
         if (data['contract_table_data']) {
             contractTable.update(data['contract_table_data']);
         }
-        const element = document.getElementById("timeRemaining");
-        element.innerHTML = data['time_remaining'];
-        if (data['time_remaining'] == 0) {
-            document.getElementById("nextButton").style.display = "block";
+        if (data['time_remaining'] != null) {
+            const element = document.getElementById("timeRemaining");
+            element.innerHTML = data['time_remaining'];
+            if (data['time_remaining'] == 0) {
+                document.getElementById("nextButton").style.display = "block";
+            }
         }
     }
 
