@@ -30,7 +30,7 @@ class OrderTable:
                     + str(order.max_price_point.y)
                     if self.is_flo
                     else order.price,
-                    "quantity": order.fill_quantity,
+                    "quantity": round(order.fill_quantity, 2),
                 }
             )
 
