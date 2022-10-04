@@ -74,6 +74,7 @@ class BaseMarketPage(Page):
         id_in_subsession = player.group.id_in_subsession
         id_in_group = player.id_in_group
         message_type = data["message_type"]
+        print(r, id_in_subsession, id_in_group, timer.get_time(), message_type)
         if r not in flo_order_books and r not in cda_order_books:
             BaseMarketPage.init(player.group.subsession)
         if timer.get_time() > config.get_round_config(r)["round_length"]:
