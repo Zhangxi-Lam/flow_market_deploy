@@ -83,6 +83,9 @@ class BaseMarketPage(Page):
             message_type,
             time.time(),
         )
+        if message_type == "update" and player.id_in_group != 1:
+            # Ignore the update request from other players.
+            return {player.id_in_group: {"message_type": "stop"}}
         if r not in flo_order_books and r not in cda_order_books:
             BaseMarketPage.init(player.group.subsession)
         if timer.get_time() > config.get_round_config(r)["round_length"]:
