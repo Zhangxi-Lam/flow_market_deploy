@@ -195,6 +195,7 @@ This is round {{player.round_number}}
         if (data['message_type'] == 'update') {
             // Only let id_in_group=1 to send the update request.
             const sendUpdate = setTimeout(function () {
+                console.log("update: " + Date.now().toString());
                 liveSend({
                     'message_type': 'update'
                 });
