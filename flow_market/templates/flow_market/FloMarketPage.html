@@ -31,7 +31,6 @@ Flo Market
     }
 
     .block {
-        border: 1px solid black;
         margin-top: 20px;
         margin-bottom: 20px;
         margin-left: auto;
@@ -67,6 +66,14 @@ Flo Market
 
     #nextButton {
         display: none;
+    }
+
+    #buyButton {
+        background-color: rgba(54, 162, 235, 1);
+    }
+
+    #sellButton {
+        background-color: rgba(255, 99, 132, 1);
     }
 </style>
 
@@ -121,16 +128,18 @@ This is round {{player.round_number}}
             <h5>Your Input</h5>
             <canvas id="orderGraph"></canvas>
             <div>
-                <input id="buyQuantityInput" type="number" value="10" min="1" max="100" />
-                <button type="button" id="buyButton" onclick="FloOrderGraph.buyButtonClick()">Send Buy</button>
-            </div>
-            <div>
-                <input id="sellQuantityInput" type="number" value="10" min="1" max="100" />
-                <button type="button" id="sellButton" onclick="FloOrderGraph.sellButtonClick()">Send Sell</button>
+                <div style="float:left">
+                    <input id="buyQuantityInput" type="number" value="10" min="1" max="100" />
+                    <button type="button" id="buyButton" onclick="FloOrderGraph.buyButtonClick()">Send Buy</button>
+                </div>
+                <div style="float:right">
+                    <input id="sellQuantityInput" type="number" value="10" min="1" max="100" />
+                    <button type="button" id="sellButton" onclick="FloOrderGraph.sellButtonClick()">Send Sell</button>
+                </div>
             </div>
         </div>
         <div class="block">
-            <h5>Projected Profit</h5>
+            <h5 style="padding-top: 80px;">Projected Profit</h5>
             <canvas id="profitChart"></canvas>
         </div>
     </div>
@@ -225,12 +234,14 @@ This is round {{player.round_number}}
         if (data['contract_table_data']) {
             contractTable.update(data['contract_table_data']);
         }
+        var timeRemaining = 0
         if (data['time_remaining'] != null) {
-            const element = document.getElementById("timeRemaining");
-            element.innerHTML = data['time_remaining'];
-            if (data['time_remaining'] == 0) {
-                document.getElementById("nextButton").style.display = "block";
-            }
+            timeRemaining = data['time_remaining'];
+        }
+        const element = document.getElementById("timeRemaining");
+        element.innerHTML = timeRemaining + "s";
+        if (timeRemaining == 0) {
+            document.getElementById("nextButton").style.display = "block";
         }
     }
 
