@@ -417,6 +417,11 @@ class WaitStart(WaitPage):
 class IntroPage(Page):
     def is_displayed(self):
         return self.round_number == 1
+    
+    def vars_for_template(self):
+        r = self.group.subsession.round_number
+        treatment = config.get_round_config(r)["treatment"]
+        return {'treatment' : treatment}
 
 
 page_sequence = [
