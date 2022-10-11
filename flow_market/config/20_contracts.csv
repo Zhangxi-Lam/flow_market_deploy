@@ -5,3 +5,9 @@ id_in_subsession,id_in_group,direction,price,quantity,showtime,deadline
 1,4,sell,10,60,5,110
 1,5,buy,10,50,5,110
 1,6,sell,6,50,5,110
+2,1,buy,14,50,5,110
+2,1,buy,14,50,5,110
+2,1,buy,14,50,5,110
+2,1,buy,14,50,5,110
+2,1,buy,14,50,5,110
+2,1,buy,14,50,5,110
