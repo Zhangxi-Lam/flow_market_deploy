@@ -110,6 +110,9 @@ class ContractTable:
                 r["showtime"],
                 r["deadline"],
             )
-            if self.id_in_group == contract.id_in_group:
+            if (
+                self.id_in_subsession == contract.id_in_subsession
+                and self.id_in_group == contract.id_in_group
+            ):
                 contracts.append(contract)
         return contracts

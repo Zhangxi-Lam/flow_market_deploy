@@ -230,12 +230,12 @@ This is round {{player.round_number}}
         if (data['contract_table_data']) {
             contractTable.update(data['contract_table_data']);
         }
-        var timeRemaining = 0
+        var timeRemaining = -1
         if (data['time_remaining'] != null) {
             timeRemaining = data['time_remaining'];
+            const element = document.getElementById("timeRemaining");
+            element.innerHTML = timeRemaining + "s";
         }
-        const element = document.getElementById("timeRemaining");
-        element.innerHTML = timeRemaining + 's';
         if (timeRemaining == 0) {
             document.getElementById("nextButton").style.display = "block";
         }
