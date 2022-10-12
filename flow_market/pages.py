@@ -92,7 +92,7 @@ class BaseMarketPage(Page):
             BaseMarketPage.init(player.group.subsession)
         timer = timers[r][id_in_subsession]
         if timer.get_time() > config.get_round_config(r)["round_length"]:
-            return {0: {"message_type": "stop"}}
+            return {0: {"message_type": "stop", "time_remaining": 0}}
 
         if r not in flo_order_books and r not in cda_order_books:
             BaseMarketPage.init(player.group.subsession)

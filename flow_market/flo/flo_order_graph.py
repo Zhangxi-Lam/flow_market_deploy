@@ -5,10 +5,10 @@ from flow_market.common.base_order_graph import BaseOrderGraph
 
 class FloOrderGraph(BaseOrderGraph):
     def __init__(self):
-        self.bid_max = FloPoint(0, 1)
-        self.bid_min = FloPoint(1, 0)
-        self.ask_max = FloPoint(1, 20)
-        self.ask_min = FloPoint(0, 19)
+        self.bid_max = FloPoint(0, 3)
+        self.bid_min = FloPoint(3, 0)
+        self.ask_max = FloPoint(3, 20)
+        self.ask_min = FloPoint(0, 17)
         BaseOrderGraph.__init__(self)
 
     def has_data(self, is_buy):
@@ -42,18 +42,18 @@ class FloOrderGraph(BaseOrderGraph):
 
     def remove_order(self, order: FloOrder):
         if order.direction == "buy":
-            self.bid_max = FloPoint(0, 1)
-            self.bid_min = FloPoint(1, 0)
+            self.bid_max = FloPoint(0, 3)
+            self.bid_min = FloPoint(3, 0)
             if not self.ask_max:
-                self.ask_max = FloPoint(1, 20)
-                self.ask_min = FloPoint(0, 19)
+                self.ask_max = FloPoint(3, 20)
+                self.ask_min = FloPoint(0, 17)
                 self.ask_active = True
         else:
-            self.ask_max = FloPoint(1, 20)
-            self.ask_min = FloPoint(0, 19)
+            self.ask_max = FloPoint(3, 20)
+            self.ask_min = FloPoint(0, 17)
             if not self.bid_max:
-                self.bid_max = FloPoint(0, 1)
-                self.bid_min = FloPoint(1, 0)
+                self.bid_max = FloPoint(0, 3)
+                self.bid_min = FloPoint(3, 0)
                 self.bid_active = True
         BaseOrderGraph.remove_order(self, order)
 
