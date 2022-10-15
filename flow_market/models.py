@@ -13,7 +13,7 @@ from otree.api import (
 class Constants(BaseConstants):
     name_in_url = "flow_market"
     players_per_group = 2
-    num_rounds = 20
+    num_rounds = 22
 
 
 class Subsession(BaseSubsession):

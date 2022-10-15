@@ -372,6 +372,7 @@ class RoundResultPage(Page):
             data.append(
                 {
                     "round_number": r,
+                    "practice": config.get_round_config(r)["practice"],
                     "profit_from_contract": round(player_info.profit_from_contract, 2),
                     "profit_from_trading": round(player_info.profit_from_trading, 2),
                     "profit": round(
@@ -395,6 +396,9 @@ class FinalResultPage(Page):
         total = 0
         data = []
         for r in range(1, self.round_number + 1):
+            if config.get_round_config(r)["practice"]:
+                # Practice rounds don't count
+                continue
             player_info = player_infos[r][self.group.id_in_subsession][
                 self.player.id_in_group
             ]
