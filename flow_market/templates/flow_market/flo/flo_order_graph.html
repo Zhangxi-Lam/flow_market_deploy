@@ -34,6 +34,15 @@
                     backgroundColor: RED,
                     borderColor: RED_TRANSPARENT,
                     data: []
+                },
+                {
+                    label: 'Transact',
+                    pointRadius: 0,
+                    pointHitRadius: 25,
+                    showLine: true,
+                    backgroundColor: GREEN,
+                    borderColor: GREEN,
+                    data: []
                 }]
             }
         }
@@ -173,6 +182,18 @@
         show() {
             FloOrderGraph.myChart = new Chart(
                 document.getElementById("orderGraph"), this.config);
+        }
+
+        update_transact(transact_price) {
+            FloOrderGraph.myChart.data.datasets[2].data = [{
+                'x': 0,
+                'y': transact_price
+            },
+            {
+                'x': 20,
+                'y': transact_price
+            }];
+            FloOrderGraph.myChart.update();
         }
 
         update(data) {

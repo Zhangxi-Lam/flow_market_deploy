@@ -5,3 +5,5 @@ __temp*
 __pycache__/
 .DS_Store
 data/
+flow_market/models.py
+settings.py
