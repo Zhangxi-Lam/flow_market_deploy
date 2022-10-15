@@ -111,10 +111,12 @@ class CdaOrderBook:
             for _, order in d.items():
                 sorted_ask_orders.append(order)
         sorted_bid_orders.sort(
-            reverse=True, key=lambda order: (order.price, order.timestamp)
+            reverse=True,
+            key=lambda order: (order.price, order.timestamp, order.order_id),
         )
         sorted_ask_orders.sort(
-            reverse=False, key=lambda order: (order.price, order.timestamp)
+            reverse=False,
+            key=lambda order: (order.price, order.timestamp, order.order_id),
         )
         while (
             sorted_bid_orders
