@@ -18,7 +18,7 @@ class CdaLogger(Logger):
         self.write(self.market_path, self.market_data)
 
     def log_orders(self, player: Player, order_book: CdaOrderBook):
-        orders = order_book.find_orders_for_player(player)
+        orders = order_book.find_orders_by_id_in_group(player.id_in_group)
         data = []
         for order_id, order in orders.items():
             data.append(

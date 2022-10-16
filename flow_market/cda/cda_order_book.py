@@ -25,6 +25,14 @@ class CdaOrderBook:
             "asks_order_points": self.combined_ask_points,
         }
 
+    # Check if the player has already had a active order of the same direction.
+    def has_order(self, id_in_group, direction):
+        orders = self.find_orders_by_id_in_group(id_in_group)
+        for order in orders.values():
+            if direction == order.direction:
+                return True
+        return False
+
     def add_order(self, order: CdaOrder):
         self.orders[order.order_id] = order
 
@@ -36,8 +44,7 @@ class CdaOrderBook:
 
         self.update_combined_points(is_buy)
 
-    def find_orders_for_player(self, player: Player):
-        id_in_group = player.id_in_group
+    def find_orders_by_id_in_group(self, id_in_group):
         orders = {
             **self.bid_orders.get(id_in_group, {}),
             **self.ask_orders.get(id_in_group, {}),

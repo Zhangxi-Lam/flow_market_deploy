@@ -107,6 +107,9 @@ class BaseMarketPage(Page):
             return
         elif message_type == "add_order":
             # Add order for the player
+            if order_book.has_order(id_in_group, data["direction"]):
+                # Don't add multiple buy/sell orders.
+                return
             order = BaseMarketPage.create_order(r, id_in_group, data, timer.get_time())
             order_book.add_order(order)
             order_graph.add_order(order)
@@ -128,7 +131,7 @@ class BaseMarketPage(Page):
                 data = func(
                     id_in_subsession, p.id_in_group, "add_order", timer.get_time()
                 )
-                if data:
+                if data and not order_book.has_order(p.id_in_group, data["direction"]):
                     order = BaseMarketPage.create_order(
                         r, p.id_in_group, data, timer.get_time()
                     )
