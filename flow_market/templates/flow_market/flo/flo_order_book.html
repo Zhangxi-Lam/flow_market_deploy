@@ -82,8 +82,8 @@
         }
 
         update(data) {
-            FloOrderBook.myChart.data.datasets[BIDS_DATASETS_INDEX].data = data['bids_order_points']
-            FloOrderBook.myChart.data.datasets[ASKS_DATASETS_INDEX].data = data['asks_order_points']
+            FloOrderBook.myChart.data.datasets[0].data = data['bids_order_points']
+            FloOrderBook.myChart.data.datasets[1].data = data['asks_order_points']
             FloOrderBook.myChart.data.datasets[2].data = data['transact_points']
             FloOrderBook.myChart.update();
         }
