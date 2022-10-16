@@ -45,6 +45,7 @@ player_infos = {}
 
 
 class BaseMarketPage(Page):
+    # Cover short positions before next page.
     def before_next_page(self):
         player_info = player_infos[self.round_number][self.group.id_in_subsession][
             self.player.id_in_group
@@ -75,6 +76,7 @@ class BaseMarketPage(Page):
         id_in_subsession = player.group.id_in_subsession
         id_in_group = player.id_in_group
         message_type = data["message_type"]
+        # Print debug message
         if r in timers:
             timer = timers[r][id_in_subsession]
             print(
