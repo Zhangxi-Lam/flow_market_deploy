@@ -185,14 +185,18 @@
         }
 
         update_transact(transact_price) {
-            FloOrderGraph.myChart.data.datasets[2].data = [{
-                'x': 0,
-                'y': transact_price
-            },
-            {
-                'x': 20,
-                'y': transact_price
-            }];
+            if (transact_price == 0) {
+                FloOrderGraph.myChart.data.datasets[2].data = [];
+            } else {
+                FloOrderGraph.myChart.data.datasets[2].data = [{
+                    'x': 0,
+                    'y': transact_price
+                },
+                {
+                    'x': 20,
+                    'y': transact_price
+                }];
+            }
             FloOrderGraph.myChart.update();
         }
 
