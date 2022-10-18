@@ -436,8 +436,8 @@ class IntroPage(Page):
         return {"treatment": treatment}
 
 class E2lab_page(Page):
-    pass
-
+    def is_displayed(self):
+        return self.round_number == 1
 
 
 page_sequence = [
