@@ -439,6 +439,12 @@ class E2lab_page(Page):
     def is_displayed(self):
         return self.round_number == 1
 
+class Final_E2lab(Page):
+    def is_displayed(self):
+        return self.round_number == Constants.num_rounds
+    def vars_for_template(self):
+        return dict(participant_id=self.participant.label)
+
 
 page_sequence = [
     E2lab_page,
@@ -448,4 +454,5 @@ page_sequence = [
     CdaMarketPage,
     RoundResultPage,
     FinalResultPage,
+    Final_E2lab
 ]
