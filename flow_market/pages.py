@@ -438,9 +438,6 @@ class IntroPage(Page):
 class E2lab_page(Page):
     pass
 
-class Final_E2lab(Page):
-    def vars_for_template(self):
-        return dict(participant_id=self.participant.label)
 
 
 page_sequence = [
@@ -451,5 +448,4 @@ page_sequence = [
     CdaMarketPage,
     RoundResultPage,
     FinalResultPage,
-    Final_E2lab
 ]
