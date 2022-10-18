@@ -435,12 +435,21 @@ class IntroPage(Page):
         treatment = config.get_round_config(r)["treatment"]
         return {"treatment": treatment}
 
+class E2lab_page(Page):
+    pass
+
+class Final_E2lab(Page):
+    def vars_for_template(self):
+        return dict(participant_id=self.participant.label)
+
 
 page_sequence = [
+    E2lab_page,
     IntroPage,
     WaitStart,
     FloMarketPage,
     CdaMarketPage,
     RoundResultPage,
     FinalResultPage,
+    Final_E2lab
 ]

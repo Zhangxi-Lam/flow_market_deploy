@@ -1,5 +1,5 @@
 round,treatment,round_length,practice
-1,cda,120,true
+1,flo,120,true
 2,flo,120,true
 3,flo,120,false
 4,flo,120,false
@@ -21,4 +21,4 @@ round,treatment,round_length,practice
 20,flo,120,false
 21,flo,120,false
 22,flo,120,false
->>>>>>> origin/master
+
