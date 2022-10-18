@@ -16,6 +16,15 @@ SESSION_CONFIG_DEFAULTS = dict(
     real_world_currency_per_point=0.001, participation_fee=5.00, doc=""
 )
 
+ROOMS = [
+    dict(
+        name='e2labup',
+        display_name='E2LabUP - Room para sesiones online',
+        participant_label_file='_rooms/e2labup-room.txt',
+    ),
+    dict(name='live_demo', display_name='Room for live demo (no participant labels)'),
+]
+
 # ISO-639 code
 # for example: de, fr, ja, ko, zh-hans
 LANGUAGE_CODE = "en"
