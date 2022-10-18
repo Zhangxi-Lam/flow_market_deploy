@@ -2,7 +2,7 @@ SESSION_CONFIGS = [
     dict(
         name="flow_market",
         display_name="Flow Market",
-        num_demo_participants=2,
+        num_demo_participants=6,
         app_sequence=["flow_market"],
     ),
 ]

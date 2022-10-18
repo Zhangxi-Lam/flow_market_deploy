@@ -93,11 +93,8 @@ class BaseMarketPage(Page):
         if r not in timers:
             BaseMarketPage.init(player.group.subsession)
         timer = timers[r][id_in_subsession]
-        if timer.get_time() > config.get_round_config(r)["round_length"]:
+        if timer.get_time() >= config.get_round_config(r)["round_length"]:
             return {0: {"message_type": "stop", "time_remaining": 0}}
-
-        if r not in flo_order_books and r not in cda_order_books:
-            BaseMarketPage.init(player.group.subsession)
 
         order_book = BaseMarketPage.get_order_book(r, id_in_subsession)
         order_graph = BaseMarketPage.get_order_graph(r, id_in_subsession, id_in_group)
@@ -188,9 +185,10 @@ class BaseMarketPage(Page):
             profit_charts[r][id_in_subsession] = {}
             status_charts[r][id_in_subsession] = {}
             player_infos[r][id_in_subsession] = {}
+
+            timer = timers[r][id_in_subsession]
             for p in g.get_players():
                 id_in_group = p.id_in_group
-                timer = timers[r][id_in_subsession]
                 if c["treatment"] == "flo":
                     flo_order_graphs[r][id_in_subsession][id_in_group] = FloOrderGraph()
                 else:
