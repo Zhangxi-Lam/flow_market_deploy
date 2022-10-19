@@ -25,7 +25,7 @@ class CdaOrderGraph(BaseOrderGraph):
         return [
             {"x": 0, "y": self.ask.y},
             {"x": self.ask.x, "y": self.ask.y},
-            {"x": self.ask.x, "y": 0},
+            {"x": self.ask.x, "y": 20},
         ]
 
     def add_order(self, order: CdaOrder):
