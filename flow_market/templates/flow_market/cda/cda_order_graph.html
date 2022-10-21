@@ -90,6 +90,8 @@
                             if (!CdaOrderGraph.askActive && value.y >= asksPoint.y) {
                                 bidsPoint.y = asksPoint.y - 1;
                             }
+                            bidsPoint.y = Math.max(bidsPoint.y, 1);
+                            bidsPoint.x = Math.max(bidsPoint.x, 1);
                             bids[0].y = bidsPoint.y;
                             bids[2].x = bidsPoint.x;
                         } else {
@@ -97,6 +99,8 @@
                             if (!CdaOrderGraph.bidActive && value.y <= bidsPoint.y) {
                                 asksPoint.y = bidsPoint.y + 1;
                             }
+                            asksPoint.y = Math.max(asksPoint.y, 1);
+                            asksPoint.x = Math.max(asksPoint.x, 1);
                             asks[0].y = asksPoint.y;
                             asks[2].x = asksPoint.x;
                         }
