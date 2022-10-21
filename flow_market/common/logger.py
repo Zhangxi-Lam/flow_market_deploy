@@ -6,9 +6,21 @@ from flow_market.common.player_info import PlayerInfo
 
 
 class Logger:
-    def __init__(self, round):
-        self.market_path = "flow_market/data/" + str(round) + "/market.json"
-        self.participant_path = "flow_market/data/" + str(round) + "/participant.json"
+    def __init__(self, round, id_in_subsession):
+        self.market_path = (
+            "flow_market/data/"
+            + str(round)
+            + "/"
+            + str(id_in_subsession)
+            + "_market.json"
+        )
+        self.participant_path = (
+            "flow_market/data/"
+            + str(round)
+            + "/"
+            + str(id_in_subsession)
+            + "_participant.json"
+        )
         self.market_data = []
         self.participant_data = []
 
@@ -40,7 +52,6 @@ class Logger:
             "rate": player_info.get_rate(),
         }
         self.participant_data.append(cur_data)
-        self.write(self.participant_path, self.participant_data)
 
     def log_orders(self, player: Player, order_book):
         pass
@@ -59,6 +70,10 @@ class Logger:
                 }
             )
         return data
+
+    def write_log(self):
+        self.write(self.market_path, self.market_data)
+        self.write(self.participant_path, self.participant_data)
 
     def write(self, file_path, data):
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
