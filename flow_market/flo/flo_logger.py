@@ -15,7 +15,11 @@ class FloLogger(Logger):
             "clearing_rate": order_book.clearing_rate,
         }
         self.market_data.append(cur_data)
-        self.write(self.market_path, self.market_data)
+        print(
+            str(id_in_subsession)
+            + " market_data "
+            + str(self.market_data[-1]["timestamp"])
+        )
 
     def log_orders(self, player: Player, order_book: FloOrderBook):
         orders = order_book.find_orders_by_id_in_group(player.id_in_group)

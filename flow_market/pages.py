@@ -32,6 +32,7 @@ cda_bot = CdaBot()
 timers = {}
 cda_order_books = {}
 flo_order_books = {}
+loggers = {}
 # Player level
 cda_order_graphs = {}
 flo_order_graphs = {}
@@ -51,6 +52,9 @@ class BaseMarketPage(Page):
             self.player.id_in_group
         ]
         player_info.cover_position()
+        if self.player.id_in_group == 1:
+            # Let the first player update the log
+            BaseMarketPage.write_log(self.group)
 
     @staticmethod
     def get_order_book(r, id_in_subsession):
@@ -93,7 +97,8 @@ class BaseMarketPage(Page):
         if r not in timers:
             BaseMarketPage.init(player.group.subsession)
         timer = timers[r][id_in_subsession]
-        if timer.get_time() >= config.get_round_config(r)["round_length"]:
+        timestamp = timer.get_time()
+        if timestamp >= config.get_round_config(r)["round_length"]:
             return {0: {"message_type": "stop", "time_remaining": 0}}
 
         order_book = BaseMarketPage.get_order_book(r, id_in_subsession)
@@ -109,7 +114,7 @@ class BaseMarketPage(Page):
             if order_book.has_order(id_in_group, data["direction"]):
                 # Don't add multiple buy/sell orders.
                 return
-            order = BaseMarketPage.create_order(r, id_in_group, data, timer.get_time())
+            order = BaseMarketPage.create_order(r, id_in_group, data, timestamp)
             order_book.add_order(order)
             order_graph.add_order(order)
             order_table.add_order(order)
@@ -127,21 +132,19 @@ class BaseMarketPage(Page):
             else:
                 func = cda_bot.pop_action
             for p in player.group.get_players():
-                data = func(
-                    id_in_subsession, p.id_in_group, "add_order", timer.get_time()
-                )
+                data = func(id_in_subsession, p.id_in_group, "add_order", timestamp)
                 if data and not order_book.has_order(p.id_in_group, data["direction"]):
                     order = BaseMarketPage.create_order(
-                        r, p.id_in_group, data, timer.get_time()
+                        r, p.id_in_group, data, timestamp
                     )
                     order_book.add_order(order)
                     BaseMarketPage.get_order_graph(
                         r, id_in_subsession, p.id_in_group
                     ).add_order(order)
                     order_tables[r][id_in_subsession][p.id_in_group].add_order(order)
-            BaseMarketPage.log(timer, player.group, before_transaction=True)
+            BaseMarketPage.add_log(timestamp, player.group, before_transaction=True)
             BaseMarketPage.update(player.group)
-            BaseMarketPage.log(timer, player.group, before_transaction=False)
+            BaseMarketPage.add_log(timestamp, player.group, before_transaction=False)
             response = BaseMarketPage.respond(timer, player.group)
             timer.tick()
             return response
@@ -151,6 +154,7 @@ class BaseMarketPage(Page):
         r = subsession.round_number
         c = config.get_round_config(r)
         timers[r] = {}
+        loggers[r] = {}
         if c["treatment"] == "flo":
             flo_order_books[r] = {}
             flo_order_graphs[r] = {}
@@ -174,9 +178,11 @@ class BaseMarketPage(Page):
             if c["treatment"] == "flo":
                 flo_order_books[r][id_in_subsession] = FloOrderBook()
                 flo_order_graphs[r][id_in_subsession] = {}
+                loggers[r][id_in_subsession] = FloLogger(r, id_in_subsession)
             else:
                 cda_order_books[r][id_in_subsession] = CdaOrderBook()
                 cda_order_graphs[r][id_in_subsession] = {}
+                loggers[r][id_in_subsession] = CdaLogger(r, id_in_subsession)
 
             inventory_charts[r][id_in_subsession] = {}
             cash_charts[r][id_in_subsession] = {}
@@ -238,12 +244,33 @@ class BaseMarketPage(Page):
             status_charts[r][id_in_subsession][id_in_group].update(player_info)
 
     @staticmethod
-    def log(timer: MyTimer, group: Group, before_transaction):
+    def add_log(timestamp, group: Group, before_transaction):
         r = group.subsession.round_number
-        if config.get_round_config(r)["treatment"] == "flo":
-            FloMarketPage.log(timer, group, before_transaction)
-        else:
-            CdaMarketPage.log(timer, group, before_transaction)
+        id_in_subsession = group.id_in_subsession
+        order_book = BaseMarketPage.get_order_book(r, id_in_subsession)
+        logger = loggers[r][id_in_subsession]
+        logger.update_market_data(
+            timestamp, id_in_subsession, before_transaction, order_book
+        )
+        for player in group.get_players():
+            id_in_group = player.id_in_group
+            contract_table = contract_tables[r][id_in_subsession][id_in_group]
+            player_info = player_infos[r][id_in_subsession][id_in_group]
+            logger.update_participant_data(
+                timestamp,
+                before_transaction,
+                player,
+                player_info,
+                order_book,
+                contract_table,
+            )
+
+    @staticmethod
+    def write_log(group):
+        r = group.subsession.round_number
+        id_in_subsession = group.id_in_subsession
+        logger = loggers[r][id_in_subsession]
+        logger.write_log()
 
     @staticmethod
     def respond(timer: MyTimer, group: Group):
@@ -299,67 +326,19 @@ class BaseMarketPage(Page):
 
 
 class FloMarketPage(BaseMarketPage):
-    flo_logger = None
-
     def is_displayed(self):
         if config.get_round_config(self.round_number)["treatment"] == "flo":
-            FloMarketPage.flo_logger = FloLogger(self.round_number)
             return True
         else:
             return False
-
-    @staticmethod
-    def log(timer: MyTimer, group: Group, before_transaction):
-        r = group.subsession.round_number
-        id_in_subsession = group.id_in_subsession
-        order_book = BaseMarketPage.get_order_book(r, id_in_subsession)
-        FloMarketPage.flo_logger.update_market_data(
-            timer.get_time(), id_in_subsession, before_transaction, order_book
-        )
-        for player in group.get_players():
-            id_in_group = player.id_in_group
-            contract_table = contract_tables[r][id_in_subsession][id_in_group]
-            player_info = player_infos[r][id_in_subsession][id_in_group]
-            FloMarketPage.flo_logger.update_participant_data(
-                timer.get_time(),
-                before_transaction,
-                player,
-                player_info,
-                order_book,
-                contract_table,
-            )
 
 
 class CdaMarketPage(BaseMarketPage):
-    cda_logger = None
-
     def is_displayed(self):
         if config.get_round_config(self.round_number)["treatment"] == "cda":
-            CdaMarketPage.cda_logger = CdaLogger(self.round_number)
             return True
         else:
             return False
-
-    @staticmethod
-    def log(timer: MyTimer, group: Group, before_transaction):
-        r = group.subsession.round_number
-        id_in_subsession = group.id_in_subsession
-        order_book = BaseMarketPage.get_order_book(r, id_in_subsession)
-        CdaMarketPage.cda_logger.update_market_data(
-            timer.get_time(), id_in_subsession, before_transaction, order_book
-        )
-        for player in group.get_players():
-            id_in_group = player.id_in_group
-            contract_table = contract_tables[r][id_in_subsession][id_in_group]
-            player_info = player_infos[r][id_in_subsession][id_in_group]
-            CdaMarketPage.cda_logger.update_participant_data(
-                timer.get_time(),
-                before_transaction,
-                player,
-                player_info,
-                order_book,
-                contract_table,
-            )
 
 
 class RoundResultPage(Page):
