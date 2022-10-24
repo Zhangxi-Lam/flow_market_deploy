@@ -491,7 +491,7 @@ page_sequence = [
     Instructions_2,
     Instructions_3,
     Instructions_4,
-    #IntroPage,
+    IntroPage,
     WaitStart,
     FloMarketPage,
     CdaMarketPage,
