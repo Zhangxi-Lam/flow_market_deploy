@@ -1,0 +1,31 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+{% block content %}
+{% if treatment == "flo" %}
+<h1>Experimento Instrucciones</h1>
+<br><br>
+<h3>Contratos</h3>
+<p>
+¿Por qué un negociante quisiera transar? ¿Cuánto vale una acción para usted? La respuesta a ambas preguntas es que la computadora le dará un contrato que le permitirá beneficiarse de la negociación. Usted recibirá su contrato cerca del comienzo del período de negociación y este aparecerá en la tabla "Contratos activos" a la izquierda de la pantalla, como se muestra en la Figura 1. 
+</p>
+<p>
+Por ejemplo, su contrato podría ser que la computadora le compre 50 acciones a un precio de 14 ECU en el segundo 110. Esto significa que en el segundo 110 del periodo, la computadora le comprará hasta 50 acciones (si dispone de ellas) a un precio de 14 ECU. Su beneficio por cada acción es el precio del contrato (aquí 14) menos el precio que pagó cuando compró esa acción. Por supuesto, para este contrato no valdría la pena comprar acciones a un precio superior a 14 ni comprar más de 50 acciones. 
+</p>
+<p>
+Del mismo modo, su contrato podría ser que la computadora le venda 15 acciones a un precio de 13 ECU en el segundo 110. Esto significa que en el segundo 110 del periodo, la computadora le venderá hasta 15 acciones a un precio de 13 ECU por acción. Como se explica en el siguiente párrafo, usted puede vender acciones que no tiene, y así tener una deuda de acciones. Al llegar el momento de la ejecución del contrato, el robot le venderá tantas acciones como usted tenga en deuda, hasta un máximo de 15. Usted obtiene una ganancia vendiendo hasta 15 acciones a precios superiores a 13 ECU por acción. Para este contrato, no valdría la pena vender acciones a un precio inferior a 13 ni vender más de 15 acciones.
+</p>
+<p>
+Como se mencionó previamente, usted puede comprar más acciones de las que alcanzan con su efectivo y así tener un saldo de efectivo negativo, o vender más acciones de las que posee y por lo tanto tener un inventario negativo (esto se llama shorting). Tener un inventario positivo o negativo cuando finaliza la ronda es penalizado. Sin embargo, puede ser rentable para usted mantener inventarios positivos o negativos en el ínterin. Como se explica a continuación, siempre es rentable vender una acción a un precio más alto de lo que pagó por ella.
+</p>
+<h3>Cómo funciona el mercado</h3>
+<p>
+El precio de mercado y la tasa a los que se compran o venden acciones dependen de las órdenes de compra y venta de todos los negociantes, como se ilustra en el gráfico superior de la Figura 2. Aquí, un negociante envió la orden de compra y la orden de venta que se muestran en la Figura 1. Las órdenes de compra y venta enviadas por usted y los otros negociantes dan como resultado la demanda del mercado (suma de órdenes de compra) que se muestra en azul y la oferta de mercado (suma de órdenes de venta) que se muestra en rojo. En el ejemplo de la Figura 2, la oferta y la demanda se cruzan a un precio de 10,48 ECU por acción. Por lo tanto, el negociante de la Figura 1 le está comprando acciones a otro(s) negociante(s) a un precio de 10,48 ECU. Al mismo tiempo, la tasa a la que este negociante está comprando acciones viene determinada por la intersección entre su curva de demanda individual (establecida por su orden de compra) y el precio de mercado (10,48 en este ejemplo), lo cual resulta en una tasa de 3,8 acciones por segundo. Por lo tanto, su posición de caja disminuye a razón de 10,48*3,8 = 19,82 ECU por segundo, mientras que su inventario aumenta a razón de 3,8 acciones por segundo. Esto continuará hasta que ella compre su cantidad total de 500 acciones, o hasta que los demás negociantes cambien sus ofertas o demandas (esto sucede cuando alcanzan la cantidad total deseada a transar o cuando realizan un nuevo pedido).
+</p>
+<img  src="{% static 'flow_market/Figure2.png' %}" width="700" align="center"/>
+
+
+{% elif treatment == "cda" %}
+<iframe src="https://docs.google.com/document/d/e/2PACX-1vQzKSPCsaNTWYlorgP1IPGhnCh9nocpBQOFMvoJV2wDnfNJXNeODUyKYwHmpecDrulOC54v7YJi-O2m/pub" height="1000" width="100%  style="border:none;" ></iframe>
+{% endif %}
+{% next_button %}
+{% endblock %}

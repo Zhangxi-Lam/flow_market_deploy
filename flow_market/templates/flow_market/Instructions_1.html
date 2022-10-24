@@ -1,0 +1,42 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+{% block content %}
+{% if treatment == "flo" %}
+<h1>Experimento Instrucciones</h1>
+<br><br>
+<h3>NOTAS IMPORTANTES</h3>
+<p>
+LA SESIÓN DE HOY ES UNA SESIÓN PILOTO. 
+EN CASO HUBIESE UN PROBLEMA CON EL SOFTWARE, EL ENCARGADO DE ADMINISTRAR LA SESIÓN Y LOS INVESTIGADORES IMPLEMENTARAN 
+UNA REGLA DE PAGO QUE TRATE DE RESPETAR TU DESEMPEÑO EN EL “JUEGO” Y LOS PROMEDIOS DE PAGO TÍPICOS EN NUESTRO LABORATORIO.
+</p>
+<p> 
+POR FAVOR NO TENGAN TEMOR EN PREGUNTAR CLARIFICACIONES POR MEDIO DE LA LLAMADA DE ZOOM
+</p> 
+<p>
+¡MUCHAS GRACIAS POR TU COMPRENSIÓN! 
+</p>    
+
+<p>¡Bienvenido y gracias por participar!</p>
+<p>
+    Desde ahora hasta el final del experimento, no se comunique con otros participantes. Apague su teléfono celular y concéntrese en la tarea. Si tiene alguna pregunta, levante la mano o informe a los experimentadores; responderán a sus preguntas.
+</p> 
+<p>  
+    Preste mucha atención a las instrucciones, ya que hay dinero real en juego. Durante el experimento, obtendrá unidades monetarias experimentales (ECU por sus siglas en inglés). Al final del experimento, convertiremos sus ganancias en soles peruanos (PEN) a una tasa de un sol por cada 1000 ECU. Se le garantiza un pago por participación de PEN 5.00, pero puede ganar considerablemente más. 
+</p>
+
+<h3>Idea básica</h3>
+<p>
+En este experimento, usted y otros 11 participantes serán negociantes en un mercado financiero automatizado donde se compran y venden acci. Utilizando la información que se muestra en su pantalla, usted realizará transacciones para ganar la mayor cantidad posible de ECU. Como se explica a continuación, sus ganancias dependerán de las ofertas que usted y los demás negociantes hagan en su grupo. Habrá 14 periodos de negociación, cada uno con una duración de 2 minutos. 
+</p>
+<p>
+Las dos primeras rondas son rondas de práctica (no cuentan para su pago real).
+Sus ganancias finales para la sesión serán la suma de su pago por participación y las ganancias acumuladas de todos los períodos de negociación, convertidas a soles peruanos.
+</p>
+
+
+{% elif treatment == "cda" %}
+<iframe src="https://docs.google.com/document/d/e/2PACX-1vQzKSPCsaNTWYlorgP1IPGhnCh9nocpBQOFMvoJV2wDnfNJXNeODUyKYwHmpecDrulOC54v7YJi-O2m/pub" height="1000" width="100%  style="border:none;" ></iframe>
+{% endif %}
+{% next_button %}
+{% endblock %}
