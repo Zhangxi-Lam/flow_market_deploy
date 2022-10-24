@@ -424,6 +424,30 @@ class Final_E2lab(Page):
     def vars_for_template(self):
         return dict(participant_id=self.participant.label)
 
+class FinalRound(Page):
+    def is_displayed(self):
+        return self.round_number == Constants.num_rounds
+
+    def vars_for_template(self):
+        data = []
+        for r in range(1, self.round_number + 1):
+            player_info = player_infos[r][self.group.id_in_subsession][
+                self.player.id_in_group
+            ]
+            data.append(
+                {
+                    "round_number": r,
+                    "practice": config.get_round_config(r)["practice"],
+                    "profit_from_contract": round(player_info.profit_from_contract, 2),
+                    "profit_from_trading": round(player_info.profit_from_trading, 2),
+                    "profit": round(
+                        player_info.profit_from_contract
+                        + player_info.profit_from_trading,
+                        2,
+                    ),
+                }
+            )
+        return {"data": data}
 
 page_sequence = [
     E2lab_page,
@@ -433,5 +457,6 @@ page_sequence = [
     CdaMarketPage,
     RoundResultPage,
     FinalResultPage,
-    Final_E2lab
+    Final_E2lab,
+    FinalRound
 ]
