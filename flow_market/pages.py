@@ -485,8 +485,18 @@ class Instructions_4(Page):
         treatment = config.get_round_config(r)["treatment"]
         return {"treatment": treatment}
 
+class Instructions_video(Page):
+    def is_displayed(self):
+        return self.round_number == 1
+
+    def vars_for_template(self):
+        r = self.group.subsession.round_number
+        treatment = config.get_round_config(r)["treatment"]
+        return {"treatment": treatment}
+
 page_sequence = [
     E2lab_page,
+    Instructions_video,
     Instructions_1,
     Instructions_2,
     Instructions_3,
