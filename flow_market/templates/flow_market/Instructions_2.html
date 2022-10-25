@@ -6,27 +6,27 @@
 <br><br>
 <h3>Órdenes de compra y órdenes de venta</h3>
 <p>
-Todos los negociantes pueden enviar o actualizar órdenes de compra y/o venta. En cada orden, los negociantes deben decidir cinco elementos o piezas de información: 
+Todos los negociantes pueden enviar o actualizar <i>órdenes de compra y/o venta</i>. En cada orden, los negociantes deben decidir <u>cinco</u> elementos o piezas de información: 
 </p>
 <ol>
     <li>Indicador de COMPRA/VENTA que indica si el negociante quiere comprar o vender </li>
     <li>La cantidad total que indica el número de acciones que el agente quiere negociar </li>
-    <li>La tasa máxima de acciones a transar por segundo (por ejemplo, la tasa máxima puede ser 5 acciones por segundo).</li>
-    <li>El precio piso de la orden. </li>
-    <li>El precio techo de la orden. </li>
+    <li>La <b><i>tasa máxima de acciones</i></b> a transar por segundo (por ejemplo, la tasa máxima puede ser 5 acciones por segundo).</li>
+    <li>El <b><i>precio piso</i></b> de la orden. </li>
+    <li>El <b><i>precio techo</i></b> de la orden. </li>
 </ol>
 <p>
-En las órdenes de compra, el precio piso indica el precio debajo del cual se ejecuta la orden a la tasa máxima (por ejemplo, a 5 acciones por segundo), y el precio techo indica el precio por encima del cual no se ejecuta la orden. 
+En las órdenes de compra, el <i>precio piso</i> indica el precio debajo del cual se ejecuta la orden a la <i>tasa máxima</i> (por ejemplo, a 5 acciones por segundo), y el <i>precio techo</i> indica el precio por encima del cual no se ejecuta la orden. 
 </p> 
 <p>    
-En las órdenes de venta, el precio piso indica el precio por debajo del cual no se ejecuta la orden, y el precio techo indica el precio por encima del cual se completa la orden a la tasa máxima.
+En las órdenes de venta, el <i>precio piso</i> indica el precio por debajo del cual no se ejecuta la orden, y el <i>precio techo</i> indica el precio por encima del cual se completa la orden a la <i>tasa máxima</i>.
 </p>
 <h4>Ejemplo</h4>
 <p>
-La línea azul y el cuadro azul en la Figura 1 muestran que el negociante envió una orden de compra por un total de 500 acciones a una tasa máxima de 15 acciones por segundo a precios entre 6 (precio piso) y 12 (precio techo). Cuando el precio de mercado sea igual o inferior a 6 ECU por acción, su orden se ejecutará a su tasa máxima. Esto es, el negociante comprará 15 acciones por segundo hasta completar las 500 acciones estipuladas en su orden, siempre que exista oferta suficiente. Su orden de compra no se ejecutará cuando el precio de mercado sea superior a 12 ECU por acción. Cuando el precio de mercado esté entre 6 y 12 ECU por acción, su orden se ejecutará a una tasa entre cero y su tasa máxima. Cuanto mayor sea el precio de mercado, menor será la tasa de ejecución. 
+La línea azul y el cuadro azul en la Figura 1 muestran que el negociante envió una orden de compra por un total de 500 acciones a una tasa máxima de 15 acciones por segundo a precios entre 6 (<i>precio piso</i>) y 12 (<i>precio techo</i>). Cuando el precio de mercado sea igual o inferior a 6 ECU por acción, su orden se ejecutará a su <i>tasa máxima</i>. Esto es, el negociante comprará 15 acciones por segundo hasta completar las 500 acciones estipuladas en su orden, siempre que exista oferta suficiente. Su orden de compra no se ejecutará cuando el <i>precio de mercado</i> sea superior a 12 ECU por acción. Cuando el precio de mercado esté entre 6 y 12 ECU por acción, su orden se ejecutará a una tasa entre cero y su <i>tasa máxima</i>. Cuanto mayor sea el precio de mercado, menor será la tasa de ejecución. 
 </p>
 <p>
-La Figura 1 también muestra (en rojo) que el negociante envió una orden de venta de 50 acciones. Su tasa máxima es de 19 acciones por segundo, su precio piso es de 14 y su precio techo es de 18. Cuando el precio de mercado es igual o superior a 18 ECU por acción, su orden se ejecutará a su tasa máxima de 19 acciones por segundo. Esto es, el negociante venderá 19 acciones por segundo hasta completar las 50 acciones estipuladas en su orden, siempre que exista demanda suficiente. Su orden de venta no se ejecutará cuando el precio de mercado sea igual o inferior a 14 ECU por acción. Cuando el precio de mercado esté entre 14 y 18 ECU por acción, su orden se ejecutará a una tasa entre cero y su tasa máxima. Cuanto mayor sea el precio de mercado, mayor será la tasa de ejecución.
+La Figura 1 también muestra (en rojo) que el negociante envió una orden de venta de 50 acciones. Su <i>tasa máxima</i> es de 19 acciones por segundo, su <i>precio piso</i> es de 14 y su <i>precio techo</i> es de 18. Cuando el precio de mercado es igual o superior a 18 ECU por acción, su orden se ejecutará a su <i>tasa máxima</i> de 19 acciones por segundo. Esto es, el negociante venderá 19 acciones por segundo hasta completar las 50 acciones estipuladas en su orden, siempre que exista demanda suficiente. Su orden de venta no se ejecutará cuando el precio de mercado sea igual o inferior a 14 ECU por acción. Cuando el precio de mercado esté entre 14 y 18 ECU por acción, su orden se ejecutará a una tasa entre cero y su <i>tasa máxima</i>. Cuanto mayor sea el precio de mercado, mayor será la tasa de ejecución.
 </p>
 <br>
 <img  src="{% static 'flow_market/Figure1.png' %}" width="700" align="center"/>
@@ -36,10 +36,10 @@ La Figura 1 también muestra (en rojo) que el negociante envió una orden de ven
 El negociante ingresa sus órdenes en la caja titulada “Your Input”. El eje vertical indica los precios piso y techo por acción, y el eje horizontal indica la tasa máxima. 
 </p>
 <p>
-Para establecer una orden de venta, mueva el punto rojo a lo largo del eje vertical para establecer el precio piso y arrastre el cuadrado rojo a cualquier lugar dentro de la cuadrícula para establecer el precio techo y la tasa máxima. Ingrese el número total de acciones que desea vender en el cuadro junto al botón rojo "Send Sell". Cuando haya terminado de configurar la orden, envíela haciendo clic en el botón "Send Sell". 
+Para establecer una <u>orden de venta</u>, mueva el punto rojo a lo largo del eje vertical para establecer el <i>precio piso</i> y arrastre el cuadrado rojo a cualquier lugar dentro de la cuadrícula para establecer el <i>precio techo</i> y <i>la tasa máxima</i>. Ingrese el <b>número total de acciones</b> que desea vender en el cuadro junto al botón rojo "Send Sell". Cuando haya terminado de configurar la orden, envíela haciendo clic en el botón "Send Sell". 
 </p>
 <p>  
-De manera similar, para establecer una orden de compra, mueva el punto azul a lo largo del eje vertical para establecer el precio techo y arrastre el cuadrado azul a cualquier lugar dentro de la cuadrícula para establecer el precio piso y la tasa máxima. Introduzca el número total de acciones que desea comprar en el cuadro junto al botón azul "Send Buy". Cuando haya terminado de configurar la orden, envíela haciendo clic en el botón "Send Buy".
+De manera similar, para establecer una <u>orden de compra</u>, mueva el punto azul a lo largo del eje vertical para establecer el <i>precio techo</i> y arrastre el cuadrado azul a cualquier lugar dentro de la cuadrícula para establecer el <i>precio piso</i> y la <i>tasa máxima</i>. Introduzca el <b>número total de acciones</b> que desea comprar en el cuadro junto al botón azul "Send Buy". Cuando haya terminado de configurar la orden, envíela haciendo clic en el botón "Send Buy".
 </p>  
 <p>    
 Si ya tiene una orden de compra activa y desea crear una nueva orden de compra, primero debe cancelar la que ya está activa. Puede hacer esto sea cual sea el progreso en la ejecución de dicha orden. Para cancelar la orden de compra activa, debe presionar el botón azul que había presionado para establecer la orden, solo que ahora dicho botón mostrará la frase “Cancel Buy”. Lo mismo aplica para las órdenes de venta.
@@ -54,4 +54,12 @@ La curva roja en el gráfico de “Your Input” conforma la oferta individual d
 <iframe src="https://docs.google.com/document/d/e/2PACX-1vQzKSPCsaNTWYlorgP1IPGhnCh9nocpBQOFMvoJV2wDnfNJXNeODUyKYwHmpecDrulOC54v7YJi-O2m/pub" height="1000" width="100%  style="border:none;" ></iframe>
 {% endif %}
 {% next_button %}
+<br><br>
+<b>Contáctenos:</b>
+<br>
+<img height="2%" width="2%" src="{% static 'whatsapp.png'%}"/> <a href="https://wa.me/0051985730063" target="_blank">+51 985730063</a>
+<br>
+<img height="2%" width="2%" src="{% static 'gmail.png'%}"/> <a href="https://mail.google.com/mail/?view=cm&fs=1&to=e2lab@up.edu.pe" target="_blank">e2lab@up.edu.pe</a> 
+<br>
+<img height=10% width=20% src="{% static 'logoup.png'%}"/>
 {% endblock %}

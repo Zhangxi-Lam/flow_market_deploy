@@ -15,23 +15,30 @@ Sin embargo, tenga en cuenta que no necesita comprar una acción para venderla. 
 Además, tenga en cuenta que puede comprar y vender acciones tanto a la computadora como a otros negociantes. Sus ganancias de las transacciones con otros participantes aparecerán inmediatamente en su cuenta de efectivo, mientras que sus ganancias de los contratos con la computadora se agregarán a la cuenta de efectivo cuando expire el contrato. 
 </p>
 <p>
-Ejemplos: pierde dinero cuando compra a un precio más alto del que vendió, o vende a un precio más bajo del que compró. Por ejemplo, suponga que paga 23 ECU por una acción que luego vende a la computadora a un precio de 17 ECU. Entonces su ganancia es de 17-23 = -6 ECU. Es decir, incurrió en una pérdida de 6 ECU en esa acción. Si, en cambio, hubiera comprado esa acción al precio de 14 ECU, obtendría una ganancia de 17-14 = 3 sobre esa acción.
+<b>Ejemplos</b>: pierde dinero cuando compra a un precio más alto del que vendió, o vende a un precio más bajo del que compró. Por ejemplo, suponga que paga 23 ECU por una acción que luego vende a la computadora a un precio de 17 ECU. Entonces su ganancia es de 17-23 = -6 ECU. Es decir, incurrió en una pérdida de 6 ECU en esa acción. Si, en cambio, hubiera comprado esa acción al precio de 14 ECU, obtendría una ganancia de 17-14 = 3 sobre esa acción.
 </p>
 <p>
-Liquidación de Fin de Periodo: Se penaliza terminar la ronda de negociación con inventario distinto de cero (positivo o negativo). Cuando finaliza una ronda, su inventario positivo se liquidará a un precio de 0. Es decir, cualquier acción que aún posea valdrá cero. Del mismo modo, si tiene un inventario negativo, la computadora le hará comprar las unidades que debe al alto costo de 20 ECU por acción, que se restarán de su saldo de efectivo. Durante cada ronda, puede ver su saldo de efectivo, inventario y ganancias proyectadas como en la Figura 3. Su cuenta de efectivo después de las multas por inventarios distintos de cero se convertirán en sus ganancias del período. 
-</p>
-
-<h3>Ganancias proyectadas</h3>
-<p>
-El cuadro inferior central muestra sus ganancias proyectadas. Es decir, indica a cuánto ascenderían las ganancias del período si el contrato fuera a vencer inmediatamente y el período finalizara de inmediato. Esto proporciona un resumen de su estado actual.
+<b>Liquidación de Fin de Periodo</b>: Se penaliza terminar la ronda de negociación con inventario distinto de cero (positivo o negativo). Cuando finaliza una ronda, su inventario positivo se liquidará a un precio de 0. Es decir, cualquier acción que aún posea valdrá cero. Del mismo modo, si tiene un inventario negativo, la computadora le hará comprar las unidades que debe al alto costo de 20 ECU por acción, que se restarán de su saldo de efectivo. Durante cada ronda, puede ver su saldo de efectivo, inventario y ganancias proyectadas como en la Figura 3. Su cuenta de efectivo después de las multas por inventarios distintos de cero se convertirán en sus ganancias del período. 
 </p>
 <p>
-Ganancias de la sesión: después del último periodo, la computadora sumará sus ganancias en todos los periodos jugados (excepto los dos de prueba) para determinar su compensación real. Estas ganancias serán convertidas a Soles Peruanos a razón de un Sol Peruano por cada 1000 ECU. 
+<b>Ganancias proyectadas</b>: El cuadro inferior central muestra sus ganancias proyectadas. Es decir, indica a cuánto ascenderían las ganancias del período si el contrato fuera a vencer inmediatamente y el período finalizara de inmediato. Esto proporciona un resumen de su estado actual.
 </p>
-<img  src="{% static 'flow_market/Figure3.png' %}" width="700" align="center"/>
+<p>
+<b>Ganancias de la sesión</b>: después del último periodo, la computadora sumará sus ganancias en todos los periodos jugados (excepto los dos de prueba) para determinar su compensación real. Estas ganancias serán convertidas a Soles Peruanos a razón de un Sol Peruano por cada 1000 ECU. 
+</p>
+<br>
+<img  src="{% static 'flow_market/Figure3.png' %}" width="1000" align="center"/>
 
 {% elif treatment == "cda" %}
 <iframe src="https://docs.google.com/document/d/e/2PACX-1vQzKSPCsaNTWYlorgP1IPGhnCh9nocpBQOFMvoJV2wDnfNJXNeODUyKYwHmpecDrulOC54v7YJi-O2m/pub" height="1000" width="100%  style="border:none;" ></iframe>
 {% endif %}
 {% next_button %}
+<br><br>
+<b>Contáctenos:</b>
+<br>
+<img height="2%" width="2%" src="{% static 'whatsapp.png'%}"/> <a href="https://wa.me/0051985730063" target="_blank">+51 985730063</a>
+<br>
+<img height="2%" width="2%" src="{% static 'gmail.png'%}"/> <a href="https://mail.google.com/mail/?view=cm&fs=1&to=e2lab@up.edu.pe" target="_blank">e2lab@up.edu.pe</a> 
+<br>
+<img height=10% width=20% src="{% static 'logoup.png'%}"/>
 {% endblock %}
