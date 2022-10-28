@@ -1,7 +1,6 @@
 {% extends "global/Page.html" %}
 {% load otree %}
 {% block content %}
-{% if treatment == "flo" %}
 <h1>Experimento Instrucciones</h1>
 <br><br>
 <h3>Sus ganancias</h3>
@@ -25,12 +24,11 @@ Además, tenga en cuenta que puede comprar y vender acciones tanto a la computad
 </p>
 <p>
 <b>Ganancias de la sesión</b>: después del último periodo, la computadora sumará sus ganancias en todos los periodos jugados (excepto los dos de prueba) para determinar su compensación real. Estas ganancias serán convertidas a Soles Peruanos a razón de un Sol Peruano por cada 1000 ECU. 
-</p>
 <br>
+{% if treatment == "flo" %}
 <img  src="{% static 'flow_market/Figure3.png' %}" width="1000" align="center"/>
-
 {% elif treatment == "cda" %}
-<iframe src="https://docs.google.com/document/d/e/2PACX-1vQzKSPCsaNTWYlorgP1IPGhnCh9nocpBQOFMvoJV2wDnfNJXNeODUyKYwHmpecDrulOC54v7YJi-O2m/pub" height="1000" width="100%  style="border:none;" ></iframe>
+<img  src="{% static 'flow_market/Figure33.png' %}" width="1000" align="center"/>
 {% endif %}
 {% next_button %}
 <br><br>

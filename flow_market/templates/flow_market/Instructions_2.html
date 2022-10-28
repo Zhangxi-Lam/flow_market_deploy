@@ -1,9 +1,9 @@
 {% extends "global/Page.html" %}
 {% load otree %}
 {% block content %}
-{% if treatment == "flo" %}
 <h1>Experimento Instrucciones</h1>
 <br><br>
+{% if treatment == "flo" %}
 <h3>Órdenes de compra y órdenes de venta</h3>
 <p>
 Todos los negociantes pueden enviar o actualizar <i>órdenes de compra y/o venta</i>. En cada orden, los negociantes deben decidir <u>cinco</u> elementos o piezas de información: 
@@ -51,9 +51,38 @@ La curva roja en el gráfico de “Your Input” conforma la oferta individual d
 
 
 {% elif treatment == "cda" %}
-<iframe src="https://docs.google.com/document/d/e/2PACX-1vQzKSPCsaNTWYlorgP1IPGhnCh9nocpBQOFMvoJV2wDnfNJXNeODUyKYwHmpecDrulOC54v7YJi-O2m/pub" height="1000" width="100%  style="border:none;" ></iframe>
-{% endif %}
-{% next_button %}
+<h3>Órdenes de compra y órdenes de venta</h3>
+<p>
+Todos los negociantes pueden enviar o actualizar <i>órdenes de compra y/o venta</i>. En cada orden, los negociantes deben decidir <u>tres</u> elementos o piezas de información: 
+</p>
+<ol>
+    <li>Indicador de COMPRA/VENTA que indica si el negociante quiere comprar o vender </li>
+    <li>La cantidad total que indica el número de acciones que el agente quiere negociar </li>
+    <li>El <b><i>precio límite</i></b> de la orden. En órdenes de compra, el precio límite indica el máximo precio que el negociante está dispuesto a pagar por acción. En órdenes de venta, el precio límite indica el precio mínimo que el negociante está dispuesto a aceptar por acción.</li>
+</ol>
+<h4>Ejemplo</h4>
+<p>
+    La línea azul y el cuadrado azul en la Figura 1 muestran que el negociante vió una orden de compra por un total de 50 acciones a un precio límite de 8 ECU. Si alguien está dispuesto a venderle acciones a un precio de 8 ECU por acción o menos, la orden de compra de dicho negociante será ejecutada. Si el número de acciones que la contraparte quiere vender es menor a 50, la orden de compra será ejecutada solo parcialmente.
+</p>
+<p>
+    La Figura 1 también muestra (en rojo) que el negociante envió una orden de venta por 70 acciones a un precio límite de 12 ECU. Si alguien está dispuesto a comprarle acciones a un precio de 12 ECU por acción o más, la orden de venta de dicho negociante será ejecutada. Si el número de acciones que la contraparte quiere comprar es menor a 70, la orden de venta será ejecutada solo parcialmente.
+</p>
+<br>
+<img  src="{% static 'flow_market/Figure11.png' %}" width="700" align="center"/>
+<br>
+<h3>Envío de pedidos en la interfaz gráfica</h3>
+<p>
+    Para establecer una orden de <u>venta</u>, arrastre el cuadrado rojo a cualquier lugar dentro de la cuadrícula titulada “Your Input” para indicar el precio límite y la cantidad total (volumen). Cuando haya terminado de configurar la orden, envíela haciendo clic en el botón rojo "Send Sell". </p>
+<p>
+    De manera similar, para establecer una orden de <u>compra</u>, arrastre el cuadrado azul a cualquier lugar dentro de la cuadrícula titulada “Your Input” para indicar el precio límite y la cantidad total (volumen). Cuando haya terminado de configurar la orden, envíela haciendo clic en el botón azul"Send Buy". </p>
+<p>  
+    En caso su orden no sea ejecutada por completo, su orden permanecerá activa con la cantidad restante. por ejemplo, si emite una orden de compra por 20 acciones y obtiene solo 15 al intercambiar con otro participante, dicha orden luego permanece activa pero solo para 5 unidades.</p>  
+<p>    
+    Si ya tiene una orden de compra activa y desea crear una nueva orden de compra, primero debe cancelar la que ya está activa. Puede hacer esto sea cual sea el progreso en la ejecución de dicha orden. Para cancelar la orden de compra activa, debe presionar el botón azul que había presionado para establecer la orden, solo que ahora dicho botón mostrará la frase “Cancel Buy”. Lo mismo aplica para las órdenes de venta.</p>
+
+
+    {% endif %}
+    {% next_button %}
 <br><br>
 <b>Contáctenos:</b>
 <br>

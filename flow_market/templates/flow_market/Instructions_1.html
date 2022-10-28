@@ -1,7 +1,6 @@
 {% extends "global/Page.html" %}
 {% load otree %}
 {% block content %}
-{% if treatment == "flo" %}
 <h1>Experimento Instrucciones</h1>
 <br><br>
 <h3>NOTAS IMPORTANTES</h3>
@@ -33,11 +32,6 @@ En este experimento, usted y otros <b>11</b> participantes serán negociantes en
 <b>Las dos primeras rondas son rondas de práctica (no cuentan para su pago real).</b>
 Sus ganancias finales para la sesión serán la suma de su pago por participación y las ganancias acumuladas de todos los períodos de negociación, convertidas a soles peruanos.
 </p>
-
-
-{% elif treatment == "cda" %}
-<iframe src="https://docs.google.com/document/d/e/2PACX-1vQzKSPCsaNTWYlorgP1IPGhnCh9nocpBQOFMvoJV2wDnfNJXNeODUyKYwHmpecDrulOC54v7YJi-O2m/pub" height="1000" width="100%  style="border:none;" ></iframe>
-{% endif %}
 {% next_button %}
 <br><br>
 <b>Contáctenos:</b>
