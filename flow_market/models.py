@@ -25,4 +25,8 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
-    pass
+    quiz1 = models.IntegerField(label="What is 2 + 2?")
+    quiz2 = models.StringField(
+        label="What is the capital of Canada?",
+        choices=["Ottawa", "Toronto", "Vancouver"],
+    )

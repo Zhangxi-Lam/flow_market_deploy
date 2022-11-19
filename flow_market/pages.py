@@ -145,7 +145,7 @@ class BaseMarketPage(Page):
             BaseMarketPage.add_log(timestamp, player.group, before_transaction=True)
             BaseMarketPage.update(player.group)
             BaseMarketPage.add_log(timestamp, player.group, before_transaction=False)
-            response = BaseMarketPage.respond(timer, player.group)
+            response = BaseMarketPage.respond(timestamp, player.group)
             timer.tick()
             return response
 
@@ -273,7 +273,7 @@ class BaseMarketPage(Page):
         logger.write_log()
 
     @staticmethod
-    def respond(timer: MyTimer, group: Group):
+    def respond(timestamp, group: Group):
         """
         Response: {
             id_in_group: {
@@ -319,7 +319,7 @@ class BaseMarketPage(Page):
                     id_in_group
                 ].get_frontend_response(),
                 "time_remaining": config.get_round_config(r)["round_length"]
-                - timer.get_time(),
+                - timestamp,
             }
             group_response[id_in_group] = player_response
         return group_response
@@ -415,8 +415,22 @@ class IntroPage(Page):
         return {"treatment": treatment}
 
 
+class QuizPage(Page):
+    form_model = "player"
+    form_fields = ["quiz1", "quiz2"]
+
+    @staticmethod
+    def error_message(values):
+        solutions = dict(quiz1=4, quiz2="Ottawa")
+        errors = {
+            name: "Wrong" for name in solutions if values[name] != solutions[name]
+        }
+        return errors
+
+
 page_sequence = [
     IntroPage,
+    QuizPage,
     WaitStart,
     FloMarketPage,
     CdaMarketPage,
