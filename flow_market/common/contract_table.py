@@ -62,6 +62,12 @@ class ContractTable:
             "executed_contracts": self.executed_contracts,
         }
 
+    def has_buy_contract(self):
+        for c in self.contracts:
+            if c.direction == "buy":
+                return True
+        return False
+
     def update(self, player_info: PlayerInfo):
         self.active_contracts = []
         t = self.timer.get_time()

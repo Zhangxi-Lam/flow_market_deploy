@@ -94,8 +94,6 @@ class BaseMarketPage(Page):
         if message_type == "update" and player.id_in_group != 1:
             # Ignore the update request from other players.
             return {player.id_in_group: {"message_type": "stop"}}
-        if r not in timers:
-            BaseMarketPage.init(player.group.subsession)
         timer = timers[r][id_in_subsession]
         timestamp = timer.get_time()
         if timestamp >= config.get_round_config(r)["round_length"]:
@@ -148,70 +146,6 @@ class BaseMarketPage(Page):
             response = BaseMarketPage.respond(timestamp, player.group)
             timer.tick()
             return response
-
-    @staticmethod
-    def init(subsession: Subsession):
-        r = subsession.round_number
-        c = config.get_round_config(r)
-        timers[r] = {}
-        loggers[r] = {}
-        if c["treatment"] == "flo":
-            flo_order_books[r] = {}
-            flo_order_graphs[r] = {}
-            flo_bot.load_actions(r)
-        else:
-            cda_order_books[r] = {}
-            cda_order_graphs[r] = {}
-            cda_bot.load_actions(r)
-
-        inventory_charts[r] = {}
-        cash_charts[r] = {}
-        order_tables[r] = {}
-        contract_tables[r] = {}
-        profit_charts[r] = {}
-        status_charts[r] = {}
-        player_infos[r] = {}
-
-        for g in subsession.get_groups():
-            id_in_subsession = g.id_in_subsession
-            timers[r][id_in_subsession] = MyTimer()
-            if c["treatment"] == "flo":
-                flo_order_books[r][id_in_subsession] = FloOrderBook()
-                flo_order_graphs[r][id_in_subsession] = {}
-                loggers[r][id_in_subsession] = FloLogger(r, id_in_subsession)
-            else:
-                cda_order_books[r][id_in_subsession] = CdaOrderBook()
-                cda_order_graphs[r][id_in_subsession] = {}
-                loggers[r][id_in_subsession] = CdaLogger(r, id_in_subsession)
-
-            inventory_charts[r][id_in_subsession] = {}
-            cash_charts[r][id_in_subsession] = {}
-            order_tables[r][id_in_subsession] = {}
-            contract_tables[r][id_in_subsession] = {}
-            profit_charts[r][id_in_subsession] = {}
-            status_charts[r][id_in_subsession] = {}
-            player_infos[r][id_in_subsession] = {}
-
-            timer = timers[r][id_in_subsession]
-            for p in g.get_players():
-                id_in_group = p.id_in_group
-                if c["treatment"] == "flo":
-                    flo_order_graphs[r][id_in_subsession][id_in_group] = FloOrderGraph()
-                else:
-                    cda_order_graphs[r][id_in_subsession][id_in_group] = CdaOrderGraph()
-                inventory_charts[r][id_in_subsession][id_in_group] = InventoryChart(
-                    timer
-                )
-                cash_charts[r][id_in_subsession][id_in_group] = CashChart(timer)
-                order_tables[r][id_in_subsession][id_in_group] = OrderTable(
-                    c["treatment"] == "flo"
-                )
-                contract_tables[r][id_in_subsession][id_in_group] = ContractTable(
-                    id_in_subsession, id_in_group, r, timer
-                )
-                profit_charts[r][id_in_subsession][id_in_group] = ProfitChart(timer)
-                status_charts[r][id_in_subsession][id_in_group] = StatusChart()
-                player_infos[r][id_in_subsession][id_in_group] = PlayerInfo()
 
     @staticmethod
     def update(group: Group):
@@ -407,6 +341,8 @@ class WaitStart(WaitPage):
 
 class IntroPage(Page):
     def is_displayed(self):
+        if self.subsession.round_number not in timers:
+            self.init()
         return self.round_number == 1
 
     def vars_for_template(self):
@@ -414,14 +350,129 @@ class IntroPage(Page):
         treatment = config.get_round_config(r)["treatment"]
         return {"treatment": treatment}
 
+    def init(self):
+        subsession = self.subsession
+        r = subsession.round_number
+        c = config.get_round_config(r)
+        timers[r] = {}
+        loggers[r] = {}
+        if c["treatment"] == "flo":
+            flo_order_books[r] = {}
+            flo_order_graphs[r] = {}
+            flo_bot.load_actions(r)
+        else:
+            cda_order_books[r] = {}
+            cda_order_graphs[r] = {}
+            cda_bot.load_actions(r)
 
-class QuizPage(Page):
+        inventory_charts[r] = {}
+        cash_charts[r] = {}
+        order_tables[r] = {}
+        contract_tables[r] = {}
+        profit_charts[r] = {}
+        status_charts[r] = {}
+        player_infos[r] = {}
+
+        for g in subsession.get_groups():
+            id_in_subsession = g.id_in_subsession
+            timers[r][id_in_subsession] = MyTimer()
+            if c["treatment"] == "flo":
+                flo_order_books[r][id_in_subsession] = FloOrderBook()
+                flo_order_graphs[r][id_in_subsession] = {}
+                loggers[r][id_in_subsession] = FloLogger(r, id_in_subsession)
+            else:
+                cda_order_books[r][id_in_subsession] = CdaOrderBook()
+                cda_order_graphs[r][id_in_subsession] = {}
+                loggers[r][id_in_subsession] = CdaLogger(r, id_in_subsession)
+
+            inventory_charts[r][id_in_subsession] = {}
+            cash_charts[r][id_in_subsession] = {}
+            order_tables[r][id_in_subsession] = {}
+            contract_tables[r][id_in_subsession] = {}
+            profit_charts[r][id_in_subsession] = {}
+            status_charts[r][id_in_subsession] = {}
+            player_infos[r][id_in_subsession] = {}
+
+            timer = timers[r][id_in_subsession]
+            for p in g.get_players():
+                id_in_group = p.id_in_group
+                if c["treatment"] == "flo":
+                    flo_order_graphs[r][id_in_subsession][id_in_group] = FloOrderGraph()
+                else:
+                    cda_order_graphs[r][id_in_subsession][id_in_group] = CdaOrderGraph()
+                inventory_charts[r][id_in_subsession][id_in_group] = InventoryChart(
+                    timer
+                )
+                cash_charts[r][id_in_subsession][id_in_group] = CashChart(timer)
+                order_tables[r][id_in_subsession][id_in_group] = OrderTable(
+                    c["treatment"] == "flo"
+                )
+                contract_tables[r][id_in_subsession][id_in_group] = ContractTable(
+                    id_in_subsession, id_in_group, r, timer
+                )
+                profit_charts[r][id_in_subsession][id_in_group] = ProfitChart(timer)
+                status_charts[r][id_in_subsession][id_in_group] = StatusChart()
+                player_infos[r][id_in_subsession][id_in_group] = PlayerInfo()
+
+
+class BuyerQuizPage(Page):
     form_model = "player"
-    form_fields = ["quiz1", "quiz2"]
+    form_fields = [
+        "buyer_quiz1",
+        "buyer_quiz2",
+        "buyer_quiz3",
+        "buyer_quiz4",
+        "buyer_quiz5",
+        "buyer_quiz6",
+    ]
+
+    def is_displayed(self):
+        return contract_tables[self.round_number][self.group.id_in_subsession][
+            self.player.id_in_group
+        ].has_buy_contract()
 
     @staticmethod
     def error_message(values):
-        solutions = dict(quiz1=4, quiz2="Ottawa")
+        solutions = dict(
+            buyer_quiz1="No",
+            buyer_quiz2="0 unit per second",
+            buyer_quiz3="5 units per second",
+            buyer_quiz4="(12 - 10) * 300 = 600",
+            buyer_quiz5="(12 - 10) * 500 = 1000",
+            buyer_quiz6="(12 - 10) * 500 + (0 - 10) * 100 = 0",
+        )
+        errors = {
+            name: "Wrong" for name in solutions if values[name] != solutions[name]
+        }
+        return errors
+
+
+class SellerQuizPage(Page):
+    form_model = "player"
+    form_fields = [
+        "seller_quiz1",
+        "seller_quiz2",
+        "seller_quiz3",
+        "seller_quiz4",
+        "seller_quiz5",
+        "seller_quiz6",
+    ]
+
+    def is_displayed(self):
+        return not contract_tables[self.round_number][self.group.id_in_subsession][
+            self.player.id_in_group
+        ].has_buy_contract()
+
+    @staticmethod
+    def error_message(values):
+        solutions = dict(
+            seller_quiz1="Yes",
+            seller_quiz2="0 unit per second",
+            seller_quiz3="6 units per second",
+            seller_quiz4="(10 - 8) * 300 = 600",
+            seller_quiz5="(10 - 8) * 500 = 1000",
+            seller_quiz6="(10 - 8) * 500 + (10 - 20) * 100 = 0",
+        )
         errors = {
             name: "Wrong" for name in solutions if values[name] != solutions[name]
         }
@@ -430,7 +481,8 @@ class QuizPage(Page):
 
 page_sequence = [
     IntroPage,
-    QuizPage,
+    BuyerQuizPage,
+    SellerQuizPage,
     WaitStart,
     FloMarketPage,
     CdaMarketPage,
