@@ -507,10 +507,88 @@ class FloSellerQuizPage(Page):
         return errors
 
 
+class CdaBuyerQuizPage(Page):
+    form_model = "player"
+    form_fields = [
+        "cda_buyer_quiz1",
+        "cda_buyer_quiz2",
+        "cda_buyer_quiz3",
+        "cda_buyer_quiz4",
+        "cda_buyer_quiz5",
+        "cda_buyer_quiz6",
+        "cda_buyer_quiz7",
+    ]
+
+    def is_displayed(self):
+        return (
+            self.round_number == 1
+            and config.get_round_config(self.round_number)["treatment"] == "cda"
+            and contract_tables[self.round_number][self.group.id_in_subsession][
+                self.player.id_in_group
+            ].has_buy_contract()
+        )
+
+    @staticmethod
+    def error_message(values):
+        solutions = dict(
+            cda_buyer_quiz1="Buy order",
+            cda_buyer_quiz2=18,
+            cda_buyer_quiz3=14,
+            cda_buyer_quiz4=20,
+            cda_buyer_quiz5="(12 - 10) * 300 = 600",
+            cda_buyer_quiz6="(12 - 10) * 500 = 1000",
+            cda_buyer_quiz7="(12 - 10) * 500 + (0 - 10) * 100 = 0",
+        )
+        errors = {
+            name: "Wrong" for name in solutions if values[name] != solutions[name]
+        }
+        return errors
+
+
+class CdaSellerQuizPage(Page):
+    form_model = "player"
+    form_fields = [
+        "cda_seller_quiz1",
+        "cda_seller_quiz2",
+        "cda_seller_quiz3",
+        "cda_seller_quiz4",
+        "cda_seller_quiz5",
+        "cda_seller_quiz6",
+        "cda_seller_quiz7",
+    ]
+
+    def is_displayed(self):
+        return (
+            self.round_number == 1
+            and config.get_round_config(self.round_number)["treatment"] == "cda"
+            and not contract_tables[self.round_number][self.group.id_in_subsession][
+                self.player.id_in_group
+            ].has_buy_contract()
+        )
+
+    @staticmethod
+    def error_message(values):
+        solutions = dict(
+            cda_seller_quiz1="Sell order",
+            cda_seller_quiz2=15,
+            cda_seller_quiz3=12,
+            cda_seller_quiz4=20,
+            cda_seller_quiz5="(10 - 8) * 300 = 600",
+            cda_seller_quiz6="(10 - 8) * 500 = 1000",
+            cda_seller_quiz7="(10 - 8) * 500 + (10 - 20) * 100 = 0",
+        )
+        errors = {
+            name: "Wrong" for name in solutions if values[name] != solutions[name]
+        }
+        return errors
+
+
 page_sequence = [
     IntroPage,
     FloBuyerQuizPage,
     FloSellerQuizPage,
+    CdaBuyerQuizPage,
+    CdaSellerQuizPage,
     WaitStart,
     FloMarketPage,
     CdaMarketPage,

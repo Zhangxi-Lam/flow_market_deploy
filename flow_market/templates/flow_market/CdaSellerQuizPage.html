@@ -1,0 +1,23 @@
+{{ block title }}
+CDA Seller Quiz
+{{ endblock }}
+{{ block content }}
+
+<h5>Please use the information shown in the figure below to answer the next 4 questions:</h5>
+<img src="{{ static 'cda_seller.png'}}" height="500" width="800" />
+
+{{ formfield 'cda_seller_quiz1' }}
+{{ formfield 'cda_seller_quiz2' }}
+{{ formfield 'cda_seller_quiz3' }}
+{{ formfield 'cda_seller_quiz4' }}
+
+<h5>This context applies to the next three questions:</h5>
+<b>Suppose you have a SELL contract for 500 units for $8 per unit that expires at the second 110 (10 seconds before the
+    end of the trading period). That is, the computer is going to SELL to you up to 500 units and pay you $8 per each of
+    those units if you have sold by the moment in which the contract expires.</b>
+{{ formfield 'cda_seller_quiz5' }}
+{{ formfield 'cda_seller_quiz6' }}
+{{ formfield 'cda_seller_quiz7' }}
+{{ next_button }}
+
+{{ endblock }}

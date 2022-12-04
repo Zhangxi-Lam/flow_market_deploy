@@ -133,3 +133,83 @@ class Player(BasePlayer):
             "(0 - 8) * 500 + (10 - 0) * 600 = 2000",
         ],
     )
+    cda_buyer_quiz1 = models.StringField(
+        label="Which order is active in the market?",
+        widget=widgets.RadioSelect,
+        choices=["Buy order", "Sell order"],
+    )
+    cda_buyer_quiz2 = models.IntegerField(label="What is the quantity of the order?")
+    cda_buyer_quiz3 = models.IntegerField(label="What is the price of the order?")
+    cda_buyer_quiz4 = models.IntegerField(
+        label="Suppose you want to buy 360 units in total and you only want to place the order shown in the plot, how many times do you need to place the order?"
+    )
+    cda_buyer_quiz5 = models.StringField(
+        label="Let us say you have bought 300 units up to the second 110, and you paid, on average, $10 per unit. Suppose you do not have any other transaction in the trading round. What is your profit for the round?",
+        widget=widgets.RadioSelect,
+        choices=[
+            "(12 - 10) * 500 = 1000",
+            "(12 - 10) * 300 = 600",
+            "(10 - 0) * 300 = 3000",
+            "(12 - 0) * 500 = 6000",
+        ],
+    )
+    cda_buyer_quiz6 = models.StringField(
+        label="Suppose you bought 500 units up to the second 110, and you paid, on average, $10 per unit. Suppose you do not have any other transaction in the trading round. What is your profit for the round?",
+        widget=widgets.RadioSelect,
+        choices=[
+            "(12 - 10) * 500 = 1000",
+            "(12 - 10) * 300 = 600",
+            "(10 - 0) * 300 = 3000",
+            "(12 - 0) * 500 = 6000",
+        ],
+    )
+    cda_buyer_quiz7 = models.StringField(
+        label="Suppose you bought 600 units up to the second 110, and you paid, on average, $10 per unit. Suppose you do not have any other transaction in the trading round. What is your profit for the round?",
+        widget=widgets.RadioSelect,
+        choices=[
+            "(12 - 10) * 600 + (0 - 10) * 100 = 200",
+            "(12 - 10) * 500 + (0 - 10) * 100 = 0",
+            "(12 - 0) * 600 + (0 - 10) * 600 = 1200",
+            "(12 - 0) * 500 + (0 - 10) * 100 = 5000 ",
+        ],
+    )
+    cda_seller_quiz1 = models.StringField(
+        label="Which order is active in the market?",
+        widget=widgets.RadioSelect,
+        choices=["Buy order", "Sell order"],
+    )
+    cda_seller_quiz2 = models.IntegerField(label="What is the quantity of the order?")
+    cda_seller_quiz3 = models.IntegerField(label="What is the price of the order?")
+    cda_seller_quiz4 = models.IntegerField(
+        label="Suppose you want to sell 300 units in total and you only want to place the order shown in the plot, how many times do you need to place the order?"
+    )
+    cda_seller_quiz5 = models.StringField(
+        label="Let us say you have sold 300 units up to the second 110 at an average price of $10 per unit. Suppose you do not have any other transaction in the trading round. What is your profit for the round?",
+        widget=widgets.RadioSelect,
+        choices=[
+            "(10 - 8) * 500 = 1000",
+            "(10 - 8) * 300 = 600",
+            "(10 - 0) * 300 = 3000",
+            "(8 - 0) * 500 = 4000",
+        ],
+    )
+    cda_seller_quiz6 = models.StringField(
+        label="Suppose you have sold 500 units up to the second 110 at an average price of $10 per unit. Suppose you do not have any other transaction in the trading round. What is your profit for the round?",
+        widget=widgets.RadioSelect,
+        choices=[
+            "(10 - 8) * 500 = 1000",
+            "(10 - 8) * 300 = 600",
+            "(10 - 0) * 300 = 3000",
+            "(8 - 0) * 500 = 4000",
+        ],
+    )
+    cda_seller_quiz7 = models.StringField(
+        label="Suppose you have sold 600 units up to the second 110 at an average price of $10 per unit. Suppose you do not have any other transaction in the trading round. What is your profit for the round?",
+        widget=widgets.RadioSelect,
+        choices=[
+            "(10 - 8) * 600 + (10 - 20) * 100 = 200",
+            "(10 - 8) * 500 + (10 - 20) * 100 = 0",
+            "(0 - 8) * 600 + (10 - 0) * 600 = 1200",
+            "(0 - 8) * 500 + (10 - 0) * 600 = 2000 ",
+        ],
+    )
