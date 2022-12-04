@@ -1,0 +1,28 @@
+{{ block title }}
+Flow Buyer Quiz
+{{ endblock }}
+{{ block content }}
+
+<h5>Please use the information shown in the figure below to answer the next 5 questions:</h5>
+<img src="{{ static 'flow_buyer.png'}}" height="500" width="800" />
+
+{{ formfield 'flo_buyer_quiz1' }}
+{{ formfield 'flo_buyer_quiz2' }}
+{{ formfield 'flo_buyer_quiz3' }}
+{{ formfield 'flo_buyer_quiz4' }}
+{{ formfield 'flo_buyer_quiz5' }}
+<hr style="height:5px">
+{{ formfield 'flo_buyer_quiz6' }}
+{{ formfield 'flo_buyer_quiz7' }}
+{{ formfield 'flo_buyer_quiz8' }}
+
+<h5>This context applies to the next three questions:</h5>
+<b>Suppose you have a BUY contract for 500 units for $12 per unit that expires at the second 110 (10 seconds before the
+    end of the trading period). That is, the computer is going to BUY from you up to 500 units and pay you $12 per each
+    of those units if you own them at the moment in which the contract expires.</b>
+{{ formfield 'flo_buyer_quiz9' }}
+{{ formfield 'flo_buyer_quiz10' }}
+{{ formfield 'flo_buyer_quiz11' }}
+{{ next_button }}
+
+{{ endblock }}

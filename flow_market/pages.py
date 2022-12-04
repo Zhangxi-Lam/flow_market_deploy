@@ -415,31 +415,45 @@ class IntroPage(Page):
                 player_infos[r][id_in_subsession][id_in_group] = PlayerInfo()
 
 
-class BuyerQuizPage(Page):
+class FloBuyerQuizPage(Page):
     form_model = "player"
     form_fields = [
-        "buyer_quiz1",
-        "buyer_quiz2",
-        "buyer_quiz3",
-        "buyer_quiz4",
-        "buyer_quiz5",
-        "buyer_quiz6",
+        "flo_buyer_quiz1",
+        "flo_buyer_quiz2",
+        "flo_buyer_quiz3",
+        "flo_buyer_quiz4",
+        "flo_buyer_quiz5",
+        "flo_buyer_quiz6",
+        "flo_buyer_quiz7",
+        "flo_buyer_quiz8",
+        "flo_buyer_quiz9",
+        "flo_buyer_quiz10",
+        "flo_buyer_quiz11",
     ]
 
     def is_displayed(self):
-        return contract_tables[self.round_number][self.group.id_in_subsession][
-            self.player.id_in_group
-        ].has_buy_contract()
+        return (
+            self.round_number == 1
+            and config.get_round_config(self.round_number)["treatment"] == "flo"
+            and contract_tables[self.round_number][self.group.id_in_subsession][
+                self.player.id_in_group
+            ].has_buy_contract()
+        )
 
     @staticmethod
     def error_message(values):
         solutions = dict(
-            buyer_quiz1="No",
-            buyer_quiz2="0 unit per second",
-            buyer_quiz3="5 units per second",
-            buyer_quiz4="(12 - 10) * 300 = 600",
-            buyer_quiz5="(12 - 10) * 500 = 1000",
-            buyer_quiz6="(12 - 10) * 500 + (0 - 10) * 100 = 0",
+            flo_buyer_quiz1="Buy order",
+            flo_buyer_quiz2=15,
+            flo_buyer_quiz3=10,
+            flo_buyer_quiz4=5,
+            flo_buyer_quiz5=400,
+            flo_buyer_quiz6="No",
+            flo_buyer_quiz7="0 unit per second",
+            flo_buyer_quiz8="5 units per second",
+            flo_buyer_quiz9="(12 - 10) * 300 = 600",
+            flo_buyer_quiz10="(12 - 10) * 500 = 1000",
+            flo_buyer_quiz11="(12 - 10) * 500 + (0 - 10) * 100 = 0",
         )
         errors = {
             name: "Wrong" for name in solutions if values[name] != solutions[name]
@@ -447,31 +461,45 @@ class BuyerQuizPage(Page):
         return errors
 
 
-class SellerQuizPage(Page):
+class FloSellerQuizPage(Page):
     form_model = "player"
     form_fields = [
-        "seller_quiz1",
-        "seller_quiz2",
-        "seller_quiz3",
-        "seller_quiz4",
-        "seller_quiz5",
-        "seller_quiz6",
+        "flo_seller_quiz1",
+        "flo_seller_quiz2",
+        "flo_seller_quiz3",
+        "flo_seller_quiz4",
+        "flo_seller_quiz5",
+        "flo_seller_quiz6",
+        "flo_seller_quiz7",
+        "flo_seller_quiz8",
+        "flo_seller_quiz9",
+        "flo_seller_quiz10",
+        "flo_seller_quiz11",
     ]
 
     def is_displayed(self):
-        return not contract_tables[self.round_number][self.group.id_in_subsession][
-            self.player.id_in_group
-        ].has_buy_contract()
+        return (
+            self.round_number == 1
+            and config.get_round_config(self.round_number)["treatment"] == "flo"
+            and not contract_tables[self.round_number][self.group.id_in_subsession][
+                self.player.id_in_group
+            ].has_buy_contract()
+        )
 
     @staticmethod
     def error_message(values):
         solutions = dict(
-            seller_quiz1="Yes",
-            seller_quiz2="0 unit per second",
-            seller_quiz3="6 units per second",
-            seller_quiz4="(10 - 8) * 300 = 600",
-            seller_quiz5="(10 - 8) * 500 = 1000",
-            seller_quiz6="(10 - 8) * 500 + (10 - 20) * 100 = 0",
+            flo_seller_quiz1="Sell order",
+            flo_seller_quiz2=14,
+            flo_seller_quiz3=10,
+            flo_seller_quiz4=6,
+            flo_seller_quiz5=600,
+            flo_seller_quiz6="Yes",
+            flo_seller_quiz7="0 unit per second",
+            flo_seller_quiz8="6 units per second",
+            flo_seller_quiz9="(10 - 8) * 300 = 600",
+            flo_seller_quiz10="(10 - 8) * 500 = 1000",
+            flo_seller_quiz11="(10 - 8) * 500 + (10 - 20) * 100 = 0",
         )
         errors = {
             name: "Wrong" for name in solutions if values[name] != solutions[name]
@@ -481,8 +509,8 @@ class SellerQuizPage(Page):
 
 page_sequence = [
     IntroPage,
-    BuyerQuizPage,
-    SellerQuizPage,
+    FloBuyerQuizPage,
+    FloSellerQuizPage,
     WaitStart,
     FloMarketPage,
     CdaMarketPage,
