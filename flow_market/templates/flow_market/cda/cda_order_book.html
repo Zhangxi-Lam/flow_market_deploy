@@ -29,9 +29,7 @@
                 },
                 {
                     label: 'Transact',
-                    pointRadius: 0,
-                    pointHitRadius: 25,
-                    showLine: true,
+                    pointRadius: [4, 8, 12],
                     backgroundColor: GREEN,
                     borderColor: GREEN,
                     data: []
@@ -83,7 +81,7 @@
         update(data) {
             CdaOrderBook.myChart.data.datasets[0].data = data['bids_order_points']
             CdaOrderBook.myChart.data.datasets[1].data = data['asks_order_points']
-            CdaOrderBook.myChart.data.datasets[2].data = data['transact_points']
+            CdaOrderBook.myChart.data.datasets[2].data = data['latest_completed_orders']
             CdaOrderBook.myChart.update();
         }
 

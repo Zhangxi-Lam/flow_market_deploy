@@ -12,6 +12,7 @@ class CdaOrderBook:
         self.ask_orders = {}  # {id_in_group: {order_id: CdaOrder}}
         self.combined_bid_points = []  # [CdaPoint, ...], sorted by y desc
         self.combined_ask_points = []  # [CdaPoint, ...], sorted by y asc
+        self.latest_completed_orders = []
 
         self.clearing_price = None
         self.clearing_rate = None
@@ -23,6 +24,7 @@ class CdaOrderBook:
         return {
             "bids_order_points": self.combined_bid_points,
             "asks_order_points": self.combined_ask_points,
+            "latest_completed_orders": self.latest_completed_orders,
         }
 
     # Check if the player has already had a active order of the same direction.
@@ -137,10 +139,16 @@ class CdaOrderBook:
             self.fill_order(bid, price, quantity, player_infos[bid.id_in_group])
             self.fill_order(ask, price, quantity, player_infos[ask.id_in_group])
             if bid.is_complete():
+                if len(self.latest_completed_orders) >= 3:
+                    self.latest_completed_orders.pop(0)
+                self.latest_completed_orders.append(CdaPoint(quantity, price))
                 complete_orders.append(bid)
                 sorted_bid_orders.pop(0)
                 self.remove_order(bid)
             if ask.is_complete():
+                if len(self.latest_completed_orders) >= 3:
+                    self.latest_completed_orders.pop(0)
+                    self.latest_completed_orders.append(CdaPoint(quantity, price))
                 complete_orders.append(ask)
                 sorted_ask_orders.pop(0)
                 self.remove_order(ask)
