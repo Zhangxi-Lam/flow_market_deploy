@@ -66,6 +66,10 @@ Flo Market
         text-align: center;
     }
 
+    input {
+        width: 60px;
+    }
+
     #nextButton {
         display: none;
     }
@@ -133,11 +137,13 @@ This is round {{player.round_number}}
                 <div style="float:left">
                     <input id="buyQuantityInput" type="number" value="100"
                         oninput="this.value= Math.max(1, Math.min(1000, parseInt(this.value)))" />
+                    shares
                     <button type="button" id="buyButton" onclick="FloOrderGraph.buyButtonClick()">Send Buy</button>
                 </div>
                 <div style="float:right">
                     <input id="sellQuantityInput" type="number" value="100"
                         oninput="this.value= Math.max(1, Math.min(1000, parseInt(this.value)))" />
+                    shares
                     <button type="button" id="sellButton" onclick="FloOrderGraph.sellButtonClick()">Send Sell</button>
                 </div>
             </div>
