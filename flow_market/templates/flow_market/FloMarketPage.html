@@ -27,7 +27,7 @@ Flo Market
     }
 
     .column {
-        margin: 0px auto auto auto;
+        margin: 0px 10px;
     }
 
     .block {
@@ -37,8 +37,9 @@ Flo Market
         margin-right: auto;
     }
 
-    .block canvas {
-        height: 300px !important
+    canvas {
+        height: 300px;
+        width: 600px;
     }
 
     .sub-table table {
@@ -47,7 +48,8 @@ Flo Market
     }
 
     .sub-chart canvas {
-        height: 150px !important;
+        height: 180px !important;
+        width: 600px !important;
     }
 
     h5 {
@@ -141,7 +143,7 @@ This is round {{player.round_number}}
             </div>
         </div>
         <div class="block">
-            <h5 style="padding-top: 80px;">Projected Profit</h5>
+            <h5 style="padding-top: 20px;">Projected Profit</h5>
             <canvas id="profitChart"></canvas>
         </div>
     </div>
@@ -152,7 +154,7 @@ This is round {{player.round_number}}
         </div>
         <div class="block">
             <div class="sub-chart">
-                <h5 id="inventoryStatus">Inventory</h5>
+                <h5 style="padding-top: 20px;" id="inventoryStatus">Inventory</h5>
                 <canvas id="inventoryChart"></canvas>
             </div>
             <div class="sub-chart">
