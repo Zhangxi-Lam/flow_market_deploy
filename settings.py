@@ -26,6 +26,12 @@ ROOMS = [
         participant_label_file='_rooms/participant_label.txt',
         # use_secure_urls=True
     ),
+    dict(
+        name='leeps',
+        display_name='LEEPS',
+        participant_label_file='_rooms/participant_label.txt',
+        # use_secure_urls=True
+    ),
 ]
 
 # ISO-639 code
