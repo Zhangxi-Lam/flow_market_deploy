@@ -29,7 +29,7 @@ ROOMS = [
     dict(
         name='leeps',
         display_name='LEEPS',
-        participant_label_file='_rooms/participant_label.txt',
+        # participant_label_file='_rooms/participant_label.txt',
         # use_secure_urls=True
     ),
 ]
