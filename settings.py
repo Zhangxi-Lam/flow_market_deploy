@@ -1,3 +1,5 @@
+from os import environ
+
 SESSION_CONFIGS = [
     dict(
         name="flow_market",
