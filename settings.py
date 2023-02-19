@@ -1,3 +1,5 @@
+from os import environ
+
 SESSION_CONFIGS = [
     dict(
         name="flow_market",
@@ -15,6 +17,24 @@ SESSION_CONFIGS = [
 SESSION_CONFIG_DEFAULTS = dict(
     real_world_currency_per_point=1.00, participation_fee=0.00, doc=""
 )
+
+ROOMS = [
+    dict(name='live_demo', 
+        display_name='Room for live demo (no participant labels)'
+    ),
+    dict(
+        name='sequential_search',
+        display_name='Sequential Search',
+        participant_label_file='_rooms/participant_label.txt',
+        # use_secure_urls=True
+    ),
+    dict(
+        name='leeps',
+        display_name='LEEPS',
+        # participant_label_file='_rooms/participant_label.txt',
+        # use_secure_urls=True
+    ),
+]
 
 # ISO-639 code
 # for example: de, fr, ja, ko, zh-hans

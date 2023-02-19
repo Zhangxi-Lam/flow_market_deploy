@@ -1,7 +1,7 @@
 round,treatment,round_length,practice
 1,cda,120,TRUE
-2,flo,120,TRUE
-3,flo,120,FALSE
+2,cda,120,TRUE
+3,cda,120,FALSE
 4,flo,120,FALSE
 5,flo,120,FALSE
 6,flo,120,FALSE
