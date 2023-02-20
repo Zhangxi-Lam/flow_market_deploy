@@ -14,7 +14,14 @@ class ConfigParser:
                     tmp = {}
                     for i in range(len(row)):
                         value = row[i]
-                        tmp[keys[i]] = int(value) if value.isdigit() else value
+                        if value.isdigit():
+                            tmp[keys[i]] = int(value)
+                        elif value.upper() == "TRUE":
+                            tmp[keys[i]] = True
+                        elif value.upper() == "FALSE":
+                            tmp[keys[i]] = False
+                        else:
+                            tmp[keys[i]] = value
                     res.append(tmp)
 
         return res
