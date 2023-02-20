@@ -4,7 +4,7 @@ SESSION_CONFIGS = [
     dict(
         name="flow_market",
         display_name="Flow Market",
-        num_demo_participants=6,
+        num_demo_participants=12,
         app_sequence=["flow_market"],
     ),
 ]
@@ -19,18 +19,16 @@ SESSION_CONFIG_DEFAULTS = dict(
 )
 
 ROOMS = [
-    dict(name='live_demo', 
-        display_name='Room for live demo (no participant labels)'
-    ),
+    dict(name="live_demo", display_name="Room for live demo (no participant labels)"),
     dict(
-        name='sequential_search',
-        display_name='Sequential Search',
-        participant_label_file='_rooms/participant_label.txt',
+        name="sequential_search",
+        display_name="Sequential Search",
+        participant_label_file="_rooms/participant_label.txt",
         # use_secure_urls=True
     ),
     dict(
-        name='leeps',
-        display_name='LEEPS',
+        name="leeps",
+        display_name="LEEPS",
         # participant_label_file='_rooms/participant_label.txt',
         # use_secure_urls=True
     ),

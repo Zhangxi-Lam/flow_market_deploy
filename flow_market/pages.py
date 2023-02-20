@@ -276,9 +276,6 @@ class CdaMarketPage(BaseMarketPage):
 
 
 class RoundResultPage(Page):
-    def get_timeout_seconds(self):
-        return 20
-
     def vars_for_template(self):
         data = []
         for r in range(1, self.round_number + 1):
