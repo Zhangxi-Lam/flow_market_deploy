@@ -302,9 +302,6 @@ class FinalResultPage(Page):
     def is_displayed(self):
         return self.round_number == Constants.num_rounds
 
-    def get_timeout_seconds(self):
-        return 20
-
     def vars_for_template(self):
         total = 0
         data = []
