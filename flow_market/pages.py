@@ -69,6 +69,32 @@ class BaseMarketPage(Page):
         return cda_order_graphs[r][id_in_subsession][id_in_group]
 
     @staticmethod
+    def can_add_order(r, id_in_subsession, id_in_group, order):
+        contract_table = contract_tables[r][id_in_subsession][id_in_group]
+        active_contracts = contract_table.active_contracts
+        if not active_contracts:
+            return True
+        if len(active_contracts) > 1:
+            raise ValueError("Player has more than 1 active contracts.")
+            return False
+        contract_direction, contract_quantity = (
+            active_contracts[0].direction,
+            active_contracts[0].quantity,
+        )
+        order_direction, order_quantity = order.direction, order.quantity
+        inventory = player_infos[r][id_in_subsession][id_in_group].get_inventory()
+        if contract_direction == "buy":
+            if order_direction == "buy":
+                return inventory + order.quantity <= contract_quantity
+            else:
+                return order_quantity <= inventory
+        else:
+            if order_quantity == "buy":
+                return order_quantity <= abs(inventory)
+            else:
+                return abs(inventory) + order_quantity <= contract_quantity
+
+    @staticmethod
     def create_order(r, id_in_group, data, timestamp):
         if config.get_round_config(r)["treatment"] == "flo":
             return FloOrder(id_in_group, data, timestamp)
@@ -113,6 +139,12 @@ class BaseMarketPage(Page):
                 # Don't add multiple buy/sell orders.
                 return
             order = BaseMarketPage.create_order(r, id_in_group, data, timestamp)
+            if not config.get_round_config(r)[
+                "free_trade"
+            ] and not BaseMarketPage.can_add_order(
+                r, id_in_subsession, id_in_group, order
+            ):
+                return {id_in_group: {"message_type": "invalid_order"}}
             order_book.add_order(order)
             order_graph.add_order(order)
             order_table.add_order(order)
