@@ -14,17 +14,21 @@ Your results for this round
 <table>
     <tr>
         <th>Round</th>
-        <th>Practice</th>
-        <th>Profit from contract</th>
-        <th>Profit from trading</th>
+        <th>Practice or Paid</th>
+        <!-- <th>Profit from contract</th> -->
+        <!-- <th>Profit from trading</th> -->
         <th>Total</th>
     </tr>
     {{ for d in data }}
     <tr>
         <td>{{d.round_number}}</td>
-        <td>{{d.practice}}</td>
-        <td>{{d.profit_from_contract}}</td>
-        <td>{{d.profit_from_trading}}</td>
+        {{ if d.practice == True }}
+        <td>Practice</td>
+        {{ else }}
+        <td>Paid</td>
+        {{ endif }}
+        <!-- <td>{{d.profit_from_contract}}</td> -->
+        <!-- <td>{{d.profit_from_trading}}</td> -->
         <td>{{d.profit}}</td>
     </tr>
     {{ endfor }}
