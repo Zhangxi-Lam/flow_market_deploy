@@ -97,7 +97,12 @@ CDA Market
 {% include "flow_market/common/status_chart.html" %}
 
 
-This is round {{player.round_number}}
+This is period {{player.round_number}}. 
+<!-- {{ if player.practice == True }}
+    This is a practice period.
+{{ else }}
+    This is a paid period. 
+{{ endif }} -->
 <div>
     Time remaining: <span id="timeRemaining"></span>
 </div>
