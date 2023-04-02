@@ -4,7 +4,7 @@
 
 
 {% block title %}
-Flo Market
+Flow Market
 {% endblock %}
 
 
@@ -95,12 +95,12 @@ Flo Market
 {% include "flow_market/common/status_chart.html" %}
 
 
-This is period {{player.round_number}}. 
-<!-- {{ if player.practice == True }}
-    This is a practice period.
+This is <b>period {{player.round_number}}</b>.
+{{ if practice == True }}
+This is a <b>PRACTICE</b> period.
 {{ else }}
-    This is a paid period. 
-{{ endif }} -->
+This is a <b>PAID</b> period.
+{{ endif }}
 <div>
     Time remaining: <span id="timeRemaining"></span>
 </div>

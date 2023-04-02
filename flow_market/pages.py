@@ -293,18 +293,18 @@ class BaseMarketPage(Page):
 
 class FloMarketPage(BaseMarketPage):
     def is_displayed(self):
-        if config.get_round_config(self.round_number)["treatment"] == "flo":
-            return True
-        else:
-            return False
+        return config.get_round_config(self.round_number)["treatment"] == "flo"
+
+    def vars_for_template(self):
+        return {"practice": config.get_round_config(self.round_number)["practice"]}
 
 
 class CdaMarketPage(BaseMarketPage):
     def is_displayed(self):
-        if config.get_round_config(self.round_number)["treatment"] == "cda":
-            return True
-        else:
-            return False
+        return config.get_round_config(self.round_number)["treatment"] == "cda"
+
+    def vars_for_template(self):
+        return {"practice": config.get_round_config(self.round_number)["practice"]}
 
 
 class RoundResultPage(Page):
