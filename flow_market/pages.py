@@ -89,7 +89,7 @@ class BaseMarketPage(Page):
             else:
                 return order_quantity <= inventory
         else:
-            if order_quantity == "buy":
+            if order_direction == "buy":
                 return order_quantity <= abs(inventory)
             else:
                 return abs(inventory) + order_quantity <= contract_quantity
