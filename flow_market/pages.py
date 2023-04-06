@@ -83,16 +83,23 @@ class BaseMarketPage(Page):
         )
         order_direction, order_quantity = order.direction, order.quantity
         inventory = player_infos[r][id_in_subsession][id_in_group].get_inventory()
+        status = {
+            "contract_direction": contract_direction,
+            "contract_quantity": contract_quantity,
+            "order_direction": order_direction,
+            "order_quantity": order_quantity,
+            "inventory": inventory,
+        }
         if contract_direction == "buy":
             if order_direction == "buy":
-                return inventory + order.quantity <= contract_quantity
+                return inventory + order.quantity <= contract_quantity, status
             else:
-                return order_quantity <= inventory
+                return order_quantity <= inventory, status
         else:
             if order_direction == "buy":
-                return order_quantity <= abs(inventory)
+                return order_quantity <= abs(inventory), status
             else:
-                return abs(inventory) + order_quantity <= contract_quantity
+                return abs(inventory) + order_quantity <= contract_quantity, status
 
     @staticmethod
     def create_order(r, id_in_group, data, timestamp):
@@ -139,12 +146,17 @@ class BaseMarketPage(Page):
                 # Don't add multiple buy/sell orders.
                 return
             order = BaseMarketPage.create_order(r, id_in_group, data, timestamp)
-            if not config.get_round_config(r)[
-                "free_trade"
-            ] and not BaseMarketPage.can_add_order(
-                r, id_in_subsession, id_in_group, order
-            ):
-                return {id_in_group: {"message_type": "invalid_order"}}
+            if not config.get_round_config(r)["free_trade"]:
+                can_add, status = BaseMarketPage.can_add_order(
+                    r, id_in_subsession, id_in_group, order
+                )
+                if not can_add:
+                    return {
+                        id_in_group: {
+                            "message_type": "invalid_order",
+                            "status": status,
+                        }
+                    }
             order_book.add_order(order)
             order_graph.add_order(order)
             order_table.add_order(order)
