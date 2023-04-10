@@ -222,21 +222,21 @@ This is a <b>PAID</b> period.
             var htmlContent = "";
             if (contract_direction == 'buy') {
                 if (inventory == 0) {
-                    htmlContent = "<h1>Invalid Order</h1><p>You have a buy contract, so you should send a buy order before sending in any sell order.</p>";
+                    htmlContent = "<h1>Invalid Order</h1><p>You have a buy contract, so you should send a buy order before sending in any sell order. Your inventory should be between zero and your contract quantity, " + contract_quantity + ". </p>";
                 }
                 else if (order_direction == 'sell') {
-                    htmlContent = "<h1>Invalid Order</h1><p>You have a buy contract and you have only bought " + Math.abs(inventory) + " shares, so you can only send in sell orders with quantity up to " + Math.abs(inventory) + " shares.</p>";
+                    htmlContent = "<h1>Invalid Order</h1><p>At this point, you only have " + Math.abs(inventory) + " shares to sell. Therefore, you can only send sell orders for up to " + Math.abs(inventory) + " shares. Remember, your inventory can only be between zero and your contract quantity, " + contract_quantity + ". </p>";
                 } else {
-                    htmlContent = "<h1>Invalid Order</h1><p>You have a buy contract with quantity " + contract_quantity + " shares and you have already bought " + Math.abs(inventory) + " shares, so you can only send in buy orders with quantity no more than " + (contract_quantity - Math.abs(inventory)) + " shares.</p>";
+                    htmlContent = "<h1>Invalid Order</h1><p>You have a buy contract for " + contract_quantity + " shares, and you have already bought " + Math.abs(inventory) + ". Therefore, you can only send buy orders for up to " + (contract_quantity - Math.abs(inventory)) + " shares. Remember, your inventory can only be between zero and your contract quantity, " + contract_quantity + ". </p>";
                 }
             } else {
                 if (inventory == 0) {
-                    htmlContent = "<h1>Invalid Order</h1><p>You have a sell contract, so you should send a sell order before sending in any buy order.</p>";
+                    htmlContent = "<h1>Invalid Order</h1><p>You have a sell contract, so you should send a sell order before sending in any buy order. Your inventory should be between minus your contract quantity," + -contract_quantity + ", and zero. </p>";
                 }
                 else if (order_direction == 'buy') {
-                    htmlContent = "<h1>Invalid Order</h1><p>You have a sell contract and you have only sold " + Math.abs(inventory) + " shares, so you can only send in buy orders with quantity up to " + Math.abs(inventory) + " shares.</p>";
+                    htmlContent = "<h1>Invalid Order</h1><p>At this point, you only have " + Math.abs(inventory) + " shares to buy back. Therefore, you can only send buy orders for up to " + Math.abs(inventory) + " shares. Remember, your inventory can only be between minus your contract quantity," + -contract_quantity + ", and zero.</p>";
                 } else {
-                    htmlContent = "<h1>Invalid Order</h1><p>You have a sell contract with quantity " + contract_quantity + " shares and you have already sold " + Math.abs(inventory) + " shares, so you can only send in sell orders with quantity no more than " + (contract_quantity - Math.abs(inventory)) + " shares.</p>";
+                    htmlContent = "<h1>Invalid Order</h1><p>You have a sell contract for " + contract_quantity + " shares, and you have already sold " + Math.abs(inventory) + ". Therefore, you can only send sell orders for up to " + (contract_quantity - Math.abs(inventory)) + " shares. Remember, your inventory can only be between minus your contract quantity," + -contract_quantity + ", and zero.</p>";
                 }
             }
             popupWindow = window.open("", "popupWindow", "width=600,height=400");

@@ -466,7 +466,7 @@ class FloBuyerQuizPage(Page):
         "flo_buyer_quiz8",
         "flo_buyer_quiz9",
         "flo_buyer_quiz10",
-        "flo_buyer_quiz11",
+        # "flo_buyer_quiz11",
     ]
 
     def is_displayed(self):
@@ -491,7 +491,7 @@ class FloBuyerQuizPage(Page):
             flo_buyer_quiz8="5 units per second",
             flo_buyer_quiz9="(12 - 10) * 300 = 600",
             flo_buyer_quiz10="(12 - 10) * 500 = 1000",
-            flo_buyer_quiz11="(12 - 10) * 500 + (0 - 10) * 100 = 0",
+            # flo_buyer_quiz11="(12 - 10) * 500 + (0 - 10) * 100 = 0",
         )
         errors = {
             name: "Wrong" for name in solutions if values[name] != solutions[name]
@@ -512,7 +512,7 @@ class FloSellerQuizPage(Page):
         "flo_seller_quiz8",
         "flo_seller_quiz9",
         "flo_seller_quiz10",
-        "flo_seller_quiz11",
+        # "flo_seller_quiz11",
     ]
 
     def is_displayed(self):
@@ -537,7 +537,7 @@ class FloSellerQuizPage(Page):
             flo_seller_quiz8="6 units per second",
             flo_seller_quiz9="(10 - 8) * 300 = 600",
             flo_seller_quiz10="(10 - 8) * 500 = 1000",
-            flo_seller_quiz11="(10 - 8) * 500 + (10 - 20) * 100 = 0",
+            # flo_seller_quiz11="(10 - 8) * 500 + (10 - 20) * 100 = 0",
         )
         errors = {
             name: "Wrong" for name in solutions if values[name] != solutions[name]
@@ -554,7 +554,7 @@ class CdaBuyerQuizPage(Page):
         "cda_buyer_quiz4",
         "cda_buyer_quiz5",
         "cda_buyer_quiz6",
-        "cda_buyer_quiz7",
+        # "cda_buyer_quiz7",
     ]
 
     def is_displayed(self):
@@ -575,7 +575,7 @@ class CdaBuyerQuizPage(Page):
             cda_buyer_quiz4=20,
             cda_buyer_quiz5="(12 - 10) * 300 = 600",
             cda_buyer_quiz6="(12 - 10) * 500 = 1000",
-            cda_buyer_quiz7="(12 - 10) * 500 + (0 - 10) * 100 = 0",
+            # cda_buyer_quiz7="(12 - 10) * 500 + (0 - 10) * 100 = 0",
         )
         errors = {
             name: "Wrong" for name in solutions if values[name] != solutions[name]
@@ -592,7 +592,7 @@ class CdaSellerQuizPage(Page):
         "cda_seller_quiz4",
         "cda_seller_quiz5",
         "cda_seller_quiz6",
-        "cda_seller_quiz7",
+        # "cda_seller_quiz7",
     ]
 
     def is_displayed(self):
@@ -613,7 +613,7 @@ class CdaSellerQuizPage(Page):
             cda_seller_quiz4=20,
             cda_seller_quiz5="(10 - 8) * 300 = 600",
             cda_seller_quiz6="(10 - 8) * 500 = 1000",
-            cda_seller_quiz7="(10 - 8) * 500 + (10 - 20) * 100 = 0",
+            # cda_seller_quiz7="(10 - 8) * 500 + (10 - 20) * 100 = 0",
         )
         errors = {
             name: "Wrong" for name in solutions if values[name] != solutions[name]
