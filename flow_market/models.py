@@ -35,22 +35,22 @@ class Player(BasePlayer):
     flo_buyer_quiz4 = models.IntegerField(label="What is the max rate of the order?")
     flo_buyer_quiz5 = models.IntegerField(label="What is the quantity of the order?")
     flo_buyer_quiz6 = models.StringField(
-        label="Suppose you want to buy 400 units in 100 seconds. Suppose you set up your low price, high price, and max rate so that you are executing your buy order at a rate of 2 units per second. If nothing else changes in the market, are you going to acquire the 400 units that you want?",
+        label="Suppose you want to buy 400 shares in 100 seconds. Suppose you set up your low price, high price, and max rate so that you are executing your buy order at a rate of 2 shares per second. If nothing else changes in the market, are you going to acquire the 400 shares that you want?",
         widget=widgets.RadioSelect,
         choices=["Yes", "No"],
     )
     flo_buyer_quiz7 = models.StringField(
-        label="If you send a buy order with a high price of $15 per unit and a max rate of 5 units per second. If the current price is $16 per unit, what is the rate at which you would execute your order?",
+        label="If you send a buy order with a high price of 15 ECUs per share and a max rate of 5 shares per second. If the current price is 16 ECUs per share, what is the rate at which you would execute your order?",
         widget=widgets.RadioSelect,
-        choices=["0 unit per second", "5 units per second"],
+        choices=["0 share per second", "5 shares per second"],
     )
     flo_buyer_quiz8 = models.StringField(
-        label="Suppose you send a buy order with a low price of $10 per unit and a max rate of 5 units per second. If the current price is $9 per unit, what is the rate at which you would execute your order?",
+        label="Suppose you send a buy order with a low price of 10 ECUs per share and a max rate of 5 shares per second. If the current price is 9 ECUs per share, what is the rate at which you would execute your order?",
         widget=widgets.RadioSelect,
-        choices=["0 unit per second", "5 units per second"],
+        choices=["0 share per second", "5 shares per second"],
     )
     flo_buyer_quiz9 = models.StringField(
-        label="Let us say you have bought 300 units up to the second 110, and you paid, on average, $10 per unit. Suppose you do not have any other transaction in the trading round. What is your profit for the round?",
+        label="Let us say you have bought 300 shares up to the second 110, and you paid, on average, 10 ECUs per shares. Suppose you do not have any other transaction in the trading round. What is your profit for the round?",
         widget=widgets.RadioSelect,
         choices=[
             "(12 - 10) * 500 = 1000",
@@ -60,7 +60,7 @@ class Player(BasePlayer):
         ],
     )
     flo_buyer_quiz10 = models.StringField(
-        label="Suppose you bought 500 units up to the second 110, and you paid, on average, $10 per unit. Suppose you do not have any other transaction in the trading round. What is your profit for the round?",
+        label="Suppose you bought 500 shares up to the second 110, and you paid, on average, 10 ECUs per share. Suppose you do not have any other transaction in the trading round. What is your profit for the round?",
         widget=widgets.RadioSelect,
         choices=[
             "(12 - 10) * 500 = 1000",
@@ -89,22 +89,22 @@ class Player(BasePlayer):
     flo_seller_quiz4 = models.IntegerField(label="What is the max rate of the order?")
     flo_seller_quiz5 = models.IntegerField(label="What is the quantity of the order?")
     flo_seller_quiz6 = models.StringField(
-        label="Suppose you want to sell 600 units in 100 seconds. Suppose you set up your low price, high price, and max rate so that you are executing your sell order at a rate of 6 units per second. If nothing else changes in the market, are you going to sell the 600 units that you want?",
+        label="Suppose you want to sell 600 shares in 100 seconds. Suppose you set up your low price, high price, and max rate so that you are executing your sell order at a rate of 6 shares per second. If nothing else changes in the market, are you going to sell the 600 shares that you want?",
         widget=widgets.RadioSelect,
         choices=["Yes", "No"],
     )
     flo_seller_quiz7 = models.StringField(
-        label="If you send a sell order with a low price equal to $10 per unit and a max rate of 6 units per second. If the current price is $8 per unit, what is the rate at which you would execute your order?",
+        label="If you send a sell order with a low price equal to 10 ECUs per share and a max rate of 6 shares per second. If the current price is 8 ECUs per share, what is the rate at which you would execute your order?",
         widget=widgets.RadioSelect,
-        choices=["0 unit per second", "6 units per second"],
+        choices=["0 share per second", "6 shares per second"],
     )
     flo_seller_quiz8 = models.StringField(
-        label="Suppose you send a sell order with a high price of $14 per unit and a max rate of 6 units per second. If the current price is $17 per unit, what is the rate at which you would execute your order?",
+        label="Suppose you send a sell order with a high price of 14 ECUs per share and a max rate of 6 shares per second. If the current price is $17 per share, what is the rate at which you would execute your order?",
         widget=widgets.RadioSelect,
-        choices=["0 unit per second", "6 units per second"],
+        choices=["0 share per second", "6 shares per second"],
     )
     flo_seller_quiz9 = models.StringField(
-        label="Let us say you have sold 300 units up to the second 110 at an average price of $10 per unit. Suppose you do not have any other transaction in the trading round. What is your profit for the round?",
+        label="Let us say you have sold 300 shares up to the second 110 at an average price of 10 ECUs per share. Suppose you do not have any other transaction in the trading round. What is your profit for the round?",
         widget=widgets.RadioSelect,
         choices=[
             "(10 - 8) * 500 = 1000",
@@ -114,7 +114,7 @@ class Player(BasePlayer):
         ],
     )
     flo_seller_quiz10 = models.StringField(
-        label="Suppose you have sold 500 units up to the second 110 at an average price of $10 per unit. Suppose you do not have any other transaction in the trading round. What is your profit for the round?",
+        label="Suppose you have sold 500 shares up to the second 110 at an average price of 10 ECUs per share. Suppose you do not have any other transaction in the trading round. What is your profit for the round?",
         widget=widgets.RadioSelect,
         choices=[
             "(10 - 8) * 500 = 1000",
@@ -141,10 +141,10 @@ class Player(BasePlayer):
     cda_buyer_quiz2 = models.IntegerField(label="What is the quantity of the order?")
     cda_buyer_quiz3 = models.IntegerField(label="What is the price of the order?")
     cda_buyer_quiz4 = models.IntegerField(
-        label="Suppose you want to buy 360 units in total and you only want to place the order shown in the plot, how many times do you need to place the order?"
+        label="Suppose you want to buy 200 shares in total and you only want to place the order shown in the plot, how many times do you need to place the order?"
     )
     cda_buyer_quiz5 = models.StringField(
-        label="Let us say you have bought 300 units up to the second 110, and you paid, on average, $10 per unit. Suppose you do not have any other transaction in the trading round. What is your profit for the round?",
+        label="Let us say you have bought 300 shares up to the second 110, and you paid, on average, 10 ECUs per share. Suppose you do not have any other transaction in the trading round. What is your profit for the period?",
         widget=widgets.RadioSelect,
         choices=[
             "(12 - 10) * 500 = 1000",
@@ -154,7 +154,7 @@ class Player(BasePlayer):
         ],
     )
     cda_buyer_quiz6 = models.StringField(
-        label="Suppose you bought 500 units up to the second 110, and you paid, on average, $10 per unit. Suppose you do not have any other transaction in the trading round. What is your profit for the round?",
+        label="Suppose you bought 500 shares up to the second 110, and you paid, on average, 10 ECUs per share. Suppose you do not have any other transaction in the trading round. What is your profit for the period?",
         widget=widgets.RadioSelect,
         choices=[
             "(12 - 10) * 500 = 1000",
@@ -181,10 +181,10 @@ class Player(BasePlayer):
     cda_seller_quiz2 = models.IntegerField(label="What is the quantity of the order?")
     cda_seller_quiz3 = models.IntegerField(label="What is the price of the order?")
     cda_seller_quiz4 = models.IntegerField(
-        label="Suppose you want to sell 300 units in total and you only want to place the order shown in the plot, how many times do you need to place the order?"
+        label="Suppose you want to sell 300 shares in total and you only want to place the order shown in the plot, how many times do you need to place the order?"
     )
     cda_seller_quiz5 = models.StringField(
-        label="Let us say you have sold 300 units up to the second 110 at an average price of $10 per unit. Suppose you do not have any other transaction in the trading round. What is your profit for the round?",
+        label="Let us say you have sold 300 shares up to the second 110 at an average price of 10 ECUs per share. Suppose you do not have any other transaction in the trading round. What is your profit for the period?",
         widget=widgets.RadioSelect,
         choices=[
             "(10 - 8) * 500 = 1000",
@@ -194,7 +194,7 @@ class Player(BasePlayer):
         ],
     )
     cda_seller_quiz6 = models.StringField(
-        label="Suppose you have sold 500 units up to the second 110 at an average price of $10 per unit. Suppose you do not have any other transaction in the trading round. What is your profit for the round?",
+        label="Suppose you have sold 500 shares up to the second 110 at an average price of 10 ECUs per share. Suppose you do not have any other transaction in the trading round. What is your profit for the period?",
         widget=widgets.RadioSelect,
         choices=[
             "(10 - 8) * 500 = 1000",
