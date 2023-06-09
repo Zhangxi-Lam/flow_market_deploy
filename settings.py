@@ -32,6 +32,11 @@ ROOMS = [
         # participant_label_file='_rooms/participant_label.txt',
         # use_secure_urls=True
     ),
+    dict(
+        name='e2labup',
+        display_name='E2LabUP - Room para sesiones online',
+        participant_label_file='_rooms/e2labup-room.txt',
+    ),
 ]
 
 # ISO-639 code
