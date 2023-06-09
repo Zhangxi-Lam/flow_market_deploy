@@ -1,5 +1,5 @@
 round,treatment,round_length,practice,free_trade
-1,cda,120,TRUE,FALSE
+1,flo,120,TRUE,FALSE
 2,flo,120,TRUE,FALSE
 3,flo,120,FALSE,FALSE
 4,flo,120,FALSE,FALSE
