@@ -7,3 +7,4 @@ __pycache__/
 data/
 flow_market/models.py
 settings.py
+.vscode

@@ -232,6 +232,7 @@ class BaseMarketPage(Page):
         )
         for player in group.get_players():
             id_in_group = player.id_in_group
+            order_table = order_tables[r][id_in_subsession][id_in_group]
             contract_table = contract_tables[r][id_in_subsession][id_in_group]
             player_info = player_infos[r][id_in_subsession][id_in_group]
             logger.update_participant_data(
@@ -240,6 +241,7 @@ class BaseMarketPage(Page):
                 player,
                 player_info,
                 order_book,
+                order_table,
                 contract_table,
             )
 
